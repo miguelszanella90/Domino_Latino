@@ -1,0 +1,1 @@
+{"rewrites":[{"source":"/","destination":"/public/index.html"},{"source":"/game","destination":"/public/index.html"},{"source":"/api/:path*","destination":"/api/:path*"}]}
