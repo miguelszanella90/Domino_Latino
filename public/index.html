@@ -2475,29 +2475,38 @@ function renderBoard(){
   const boardH = board.clientHeight;
 
   /*
-    V4
-    1. El tablero usa coordenadas FIJAS. Ya no se recentra después
-       de cada jugada, así que la mesa no "salta".
-    2. Los giros tienen un espacio reservado propio.
-    3. Un doble que cae en una curva se coloca dentro del giro sin
-       superponerse con la ficha anterior o la siguiente.
+    V5
+
+    - La partida nace en el CENTRO de la mesa.
+    - La mesa NO se recentra después de cada jugada.
+    - Una ficha normal NUNCA se gira solo porque llegó al borde.
+    - Los dobles siguen viéndose verticales.
+    - El cambio de fila ocurre ENTRE fichas, no usando una ficha
+      normal como "bisagra". Así no cambia visualmente 6|1 a 1|6
+      ni se voltea una ficha de valor por culpa de la curva.
   */
 
   const SIDE = mobile ? 22 : 54;
-  const TOP = mobile ? 48 : 76;
+  const TOP = mobile ? 44 : 70;
 
   const LEFT = SIDE;
   const RIGHT = Math.max(LEFT + W * 5, boardW - SIDE);
 
-  /*
-    Distancia fija entre filas. Es suficientemente grande para que
-    una ficha vertical complete la curva sin tocar la fila siguiente.
-  */
-  const LANE = W + H + GAP * 4;
+  // Primera ficha exactamente en el centro horizontal del tablero.
+  const START_X = boardW / 2;
+  const START_Y = Math.max(TOP, boardH * (mobile ? 0.28 : 0.30));
 
-  let dir = 1;                  // 1 = derecha, -1 = izquierda
-  let y = TOP;
-  let cursor = LEFT;
+  // Espacio entre líneas de la serpiente.
+  const LANE = mobile ? 62 : 78;
+
+  let dir = 1; // derecha
+  let y = START_Y;
+
+  /*
+    cursor representa el borde desde donde se colocará la próxima ficha.
+    Para que la PRIMERA quede centrada, inicializamos según su longitud.
+  */
+  let cursor = null;
 
   const pos = [];
 
@@ -2505,16 +2514,20 @@ function renderBoard(){
     return tile[0] === tile[1];
   }
 
-  /*
-    Longitud que una ficha ocupa SOBRE una línea horizontal.
-    Un doble vertical ocupa H, no W.
-  */
-  function horizontalLength(tile){
+  function visualLength(tile){
+    // Un doble vertical ocupa H sobre el eje horizontal.
     return isDouble(tile) ? H : W;
   }
 
-  function fitsStraight(tile){
-    const len = horizontalLength(tile);
+  function initializeCursor(tile){
+    if(cursor !== null) return;
+
+    const len = visualLength(tile);
+    cursor = START_X - len / 2;
+  }
+
+  function fits(tile){
+    const len = visualLength(tile);
 
     if(dir === 1){
       return cursor + len <= RIGHT;
@@ -2523,10 +2536,10 @@ function renderBoard(){
     return cursor - len >= LEFT;
   }
 
-  function straight(tile){
+  function placeStraight(tile){
 
     const dbl = isDouble(tile);
-    const len = horizontalLength(tile);
+    const len = visualLength(tile);
 
     const cx =
       dir === 1
@@ -2539,105 +2552,78 @@ function renderBoard(){
       rot:dbl ? 90 : 0
     });
 
-    /*
-      El próximo borde empieza exactamente después de esta ficha,
-      con solo GAP px de separación.
-    */
     cursor += dir * (len + GAP);
   }
 
-  function turn(tile){
+  /*
+    CAMBIO DE FILA SIN VOLTEAR UNA FICHA NORMAL.
 
-    /*
-      Punto donde termina la fila actual.
-      Se mantiene dentro del tablero y NO se recalcula el centro
-      de toda la cadena.
-    */
-    const cornerX =
+    Cuando ya no cabe la próxima ficha:
+    1. Bajamos a la línea siguiente.
+    2. Invertimos el sentido.
+    3. Colocamos ESA MISMA ficha horizontal si es normal.
+       Solo un doble permanece vertical por ser doble.
+
+    El pequeño tramo de unión se dibuja aparte como un conector visual,
+    no consume ni altera ninguna ficha del juego.
+  */
+  function changeLane(){
+
+    const oldY = y;
+
+    const edgeX =
       dir === 1
-        ? Math.min(cursor - GAP, RIGHT)
-        : Math.max(cursor + GAP, LEFT);
+        ? RIGHT - H / 2
+        : LEFT + H / 2;
 
-    /*
-      La ficha de giro siempre se ve vertical.
-      Su borde superior comienza justo debajo de la línea actual.
-      Si la ficha es doble, NO se vuelve a rotar de forma especial:
-      la curva manda sobre la orientación visual. Esto evita que un
-      doble se monte encima de otras fichas.
-    */
-    const turnTop = y + H / 2 + GAP;
-    const turnCenterY = turnTop + W / 2;
+    y += LANE;
 
-    pos.push({
-      cx:cornerX,
-      cy:turnCenterY,
-      rot:90
-    });
+    // Conector visual discreto entre ambas filas.
+    const connector = document.createElement('div');
+    connector.className = 'board-turn-connector';
 
-    /*
-      La fila nueva empieza justo debajo de la ficha vertical.
-      No usamos la posición de la ficha siguiente para crear otro giro.
-    */
-    const bottom = turnTop + W;
+    connector.style.position = 'absolute';
+    connector.style.left = (edgeX - 1) + 'px';
+    connector.style.top = (oldY + H / 2) + 'px';
+    connector.style.width = '2px';
+    connector.style.height = Math.max(4, LANE - H) + 'px';
+    connector.style.background = '#f4f0e6';
+    connector.style.border = '1px solid rgba(0,0,0,.45)';
+    connector.style.borderRadius = '2px';
+    connector.style.zIndex = '1';
 
-    y = bottom + H / 2 + GAP;
+    board.appendChild(connector);
 
     dir *= -1;
 
     /*
-      La siguiente ficha horizontal toca visualmente la curva,
-      pero conserva GAP px para que los bordes negros no se monten.
+      La nueva fila comienza cerca del mismo borde, pero deja espacio
+      suficiente para que la primera ficha no choque con el lateral.
     */
     cursor =
       dir === -1
-        ? cornerX - H / 2 - GAP
-        : cornerX + H / 2 + GAP;
+        ? RIGHT - H - GAP
+        : LEFT + H + GAP;
   }
 
   for(let i=0;i<pieces.length;i++){
 
     const tile = pieces[i];
 
-    if(fitsStraight(tile)){
-      straight(tile);
-    }else{
-      turn(tile);
+    initializeCursor(tile);
+
+    if(!fits(tile)){
+      changeLane();
     }
+
+    placeStraight(tile);
   }
 
   /*
-    Escala FIJA basada solamente en el tamaño disponible de la mesa,
-    no en cuántas fichas haya en ese momento. Por eso una jugada nueva
-    no cambia el centro ni el tamaño de las fichas anteriores.
+    Coordenadas FIJAS.
+    No calculamos min/max del contenido y no recentramos la cadena.
+    Por eso las fichas ya jugadas permanecen en su sitio visual.
   */
-  const naturalRows =
-    Math.max(
-      1,
-      Math.ceil(
-        pieces.length /
-        Math.max(5, Math.floor((RIGHT - LEFT) / (W + GAP)))
-      )
-    );
-
-  const expectedHeight =
-    TOP + naturalRows * LANE + W;
-
-  const scale = Math.min(
-    1,
-    Math.max(
-      mobile ? 0.62 : 0.72,
-      (boardH - (mobile ? 18 : 28)) /
-      Math.max(boardH - (mobile ? 18 : 28), expectedHeight)
-    )
-  );
-
-  /*
-    Origen fijo. Importante: NO usamos minX/maxX del contenido para
-    recentrar después de cada jugada.
-  */
-  const originX = 0;
-  const originY = 0;
-
   pieces.forEach((tile,i)=>{
 
     const p = pos[i];
@@ -2648,15 +2634,11 @@ function renderBoard(){
     wrapper.style.width = W + 'px';
     wrapper.style.height = H + 'px';
 
-    wrapper.style.left =
-      (originX + p.cx * scale - W / 2) + 'px';
-
-    wrapper.style.top =
-      (originY + p.cy * scale - H / 2) + 'px';
+    wrapper.style.left = (p.cx - W / 2) + 'px';
+    wrapper.style.top = (p.cy - H / 2) + 'px';
 
     wrapper.style.transformOrigin = 'center center';
-    wrapper.style.transform =
-      `scale(${scale}) rotate(${p.rot}deg)`;
+    wrapper.style.transform = `rotate(${p.rot}deg)`;
 
     const domino = document.createElement('div');
     domino.className = 'board-domino';
