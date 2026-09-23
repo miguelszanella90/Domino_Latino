@@ -21,7 +21,11 @@ function createSet() {
 }
 
 async function save(g) {
-  await kv.set(`domino:${g.code}`, g, { ex: 86400 });
+  await kv.set(
+    `domino:${g.code}`,
+    g,
+    { ex: 86400 }
+  );
 }
 
 function pipTotal(hand = []) {
@@ -35,12 +39,31 @@ function teamOf(index) {
   return index % 2 === 0 ? 'A' : 'B';
 }
 
+function addHistory(g, text) {
+  if (!g.history) {
+    g.history = [];
+  }
+
+  g.history.push({
+    text,
+    time: Date.now()
+  });
+
+  if (g.history.length > 40) {
+    g.history =
+      g.history.slice(-40);
+  }
+}
+
 function canPlayTile(tile, board) {
   if (!tile) return false;
   if (!board.length) return true;
 
-  const left = board[0][0];
-  const right = board[board.length - 1][1];
+  const left =
+    board[0][0];
+
+  const right =
+    board[board.length - 1][1];
 
   return (
     tile[0] === left ||
@@ -52,70 +75,87 @@ function canPlayTile(tile, board) {
 
 function getValidMoves(player, board) {
   if (!board.length) {
-    return player.hand.map((tile, index) => ({
-      index,
-      side: 'right',
-      tile
-    }));
-  }
-
-  const left = board[0][0];
-  const right = board[board.length - 1][1];
-
-  const moves = [];
-
-  player.hand.forEach((tile, index) => {
-    if (
-      tile[0] === left ||
-      tile[1] === left
-    ) {
-      moves.push({
-        index,
-        side: 'left',
-        tile
-      });
-    }
-
-    if (
-      tile[0] === right ||
-      tile[1] === right
-    ) {
-      moves.push({
+    return player.hand.map(
+      (tile, index) => ({
         index,
         side: 'right',
         tile
-      });
+      })
+    );
+  }
+
+  const left =
+    board[0][0];
+
+  const right =
+    board[board.length - 1][1];
+
+  const moves = [];
+
+  player.hand.forEach(
+    (tile, index) => {
+
+      if (
+        tile[0] === left ||
+        tile[1] === left
+      ) {
+        moves.push({
+          index,
+          side: 'left',
+          tile
+        });
+      }
+
+      if (
+        tile[0] === right ||
+        tile[1] === right
+      ) {
+        moves.push({
+          index,
+          side: 'right',
+          tile
+        });
+      }
     }
-  });
+  );
 
   return moves;
 }
 
 function hasPlayableTile(player, board) {
-  return getValidMoves(player, board).length > 0;
+  return getValidMoves(
+    player,
+    board
+  ).length > 0;
 }
 
 function findOpeningTile(g) {
   let bestDouble = null;
 
-  g.players.forEach((player, playerIndex) => {
-    player.hand.forEach((tile, tileIndex) => {
-      if (
-        tile[0] === tile[1] &&
-        (
-          !bestDouble ||
-          tile[0] > bestDouble.value
-        )
-      ) {
-        bestDouble = {
-          playerIndex,
-          tileIndex,
-          value: tile[0],
-          tile
-        };
-      }
-    });
-  });
+  g.players.forEach(
+    (player, playerIndex) => {
+
+      player.hand.forEach(
+        (tile, tileIndex) => {
+
+          if (
+            tile[0] === tile[1] &&
+            (
+              !bestDouble ||
+              tile[0] > bestDouble.value
+            )
+          ) {
+            bestDouble = {
+              playerIndex,
+              tileIndex,
+              value: tile[0],
+              tile
+            };
+          }
+        }
+      );
+    }
+  );
 
   if (bestDouble) {
     return bestDouble;
@@ -123,29 +163,41 @@ function findOpeningTile(g) {
 
   let bestTile = null;
 
-  g.players.forEach((player, playerIndex) => {
-    player.hand.forEach((tile, tileIndex) => {
-      const total = tile[0] + tile[1];
-      const high = Math.max(tile[0], tile[1]);
+  g.players.forEach(
+    (player, playerIndex) => {
 
-      if (
-        !bestTile ||
-        total > bestTile.total ||
-        (
-          total === bestTile.total &&
-          high > bestTile.high
-        )
-      ) {
-        bestTile = {
-          playerIndex,
-          tileIndex,
-          total,
-          high,
-          tile
-        };
-      }
-    });
-  });
+      player.hand.forEach(
+        (tile, tileIndex) => {
+
+          const total =
+            tile[0] + tile[1];
+
+          const high =
+            Math.max(
+              tile[0],
+              tile[1]
+            );
+
+          if (
+            !bestTile ||
+            total > bestTile.total ||
+            (
+              total === bestTile.total &&
+              high > bestTile.high
+            )
+          ) {
+            bestTile = {
+              playerIndex,
+              tileIndex,
+              total,
+              high,
+              tile
+            };
+          }
+        }
+      );
+    }
+  );
 
   return bestTile;
 }
@@ -164,10 +216,103 @@ function nextTurn(g) {
     `Turno de ${g.players[g.turn].name}`;
 }
 
+function finishDominoRound(
+  g,
+  winnerIndex
+) {
+  const winner =
+    g.players[winnerIndex];
+
+  if (g.players.length === 4) {
+    const winnerTeam =
+      teamOf(winnerIndex);
+
+    const loserTeam =
+      winnerTeam === 'A'
+        ? 'B'
+        : 'A';
+
+    let points = 0;
+
+    g.players.forEach(
+      (player, index) => {
+
+        if (
+          teamOf(index) ===
+          loserTeam
+        ) {
+          points +=
+            pipTotal(
+              player.hand
+            );
+        }
+      }
+    );
+
+    g.teamScores[winnerTeam] +=
+      points;
+
+    const done =
+      g.teamScores[winnerTeam] >=
+      g.target;
+
+    g.status =
+      done
+        ? 'match_finished'
+        : 'finished';
+
+    g.message =
+      `¡Dominó! ${winner.name} gana la ronda.`;
+
+    addHistory(
+      g,
+      `🏆 ${winner.name} hizo dominó. Equipo ${winnerTeam} +${points} puntos`
+    );
+
+    return;
+  }
+
+  let points = 0;
+
+  g.players.forEach(
+    (player, index) => {
+
+      if (index !== winnerIndex) {
+        points +=
+          pipTotal(
+            player.hand
+          );
+      }
+    }
+  );
+
+  g.scores[winner.id] =
+    (g.scores[winner.id] || 0) +
+    points;
+
+  const done =
+    g.scores[winner.id] >=
+    g.target;
+
+  g.status =
+    done
+      ? 'match_finished'
+      : 'finished';
+
+  g.message =
+    `¡Dominó! ${winner.name} gana la ronda.`;
+
+  addHistory(
+    g,
+    `🏆 ${winner.name} hizo dominó y sumó ${points} puntos`
+  );
+}
+
 function finishBlockedRound(g) {
   const totals =
-    g.players.map(player =>
-      pipTotal(player.hand)
+    g.players.map(
+      player =>
+        pipTotal(player.hand)
     );
 
   if (g.players.length === 4) {
@@ -178,42 +323,49 @@ function finishBlockedRound(g) {
       totals[1] + totals[3];
 
     if (totalA === totalB) {
-      g.status = 'finished';
+      g.status =
+        'finished';
 
       g.message =
-        `Cierre empatado. Equipo A ${totalA} - ` +
-        `Equipo B ${totalB}. Sin puntos.`;
+        'Cierre empatado.';
+
+      addHistory(
+        g,
+        '🔒 Cierre empatado. Sin puntos.'
+      );
 
       return;
     }
 
     const winnerTeam =
-      totalA < totalB ? 'A' : 'B';
+      totalA < totalB
+        ? 'A'
+        : 'B';
 
     const points =
       winnerTeam === 'A'
         ? totalB
         : totalA;
 
-    g.teamScores[winnerTeam] += points;
+    g.teamScores[winnerTeam] +=
+      points;
 
-    const matchFinished =
-      g.teamScores[winnerTeam] >= g.target;
+    const done =
+      g.teamScores[winnerTeam] >=
+      g.target;
 
     g.status =
-      matchFinished
+      done
         ? 'match_finished'
         : 'finished';
 
     g.message =
-      `Cierre. Equipo ${winnerTeam} gana ` +
-      `(+${points}). Marcador: ` +
-      `A ${g.teamScores.A} - B ${g.teamScores.B}` +
-      (
-        matchFinished
-          ? `. ¡Equipo ${winnerTeam} gana la partida!`
-          : ''
-      );
+      `Cierre. Equipo ${winnerTeam} gana.`;
+
+    addHistory(
+      g,
+      `🔒 Cierre. Equipo ${winnerTeam} +${points} puntos`
+    );
 
     return;
   }
@@ -223,16 +375,29 @@ function finishBlockedRound(g) {
 
   const winners =
     totals
-      .map((total, index) => ({
-        total,
-        index
-      }))
-      .filter(x => x.total === minimum);
+      .map(
+        (total, index) => ({
+          total,
+          index
+        })
+      )
+      .filter(
+        x =>
+          x.total === minimum
+      );
 
   if (winners.length !== 1) {
-    g.status = 'finished';
+    g.status =
+      'finished';
+
     g.message =
-      `Cierre empatado con ${minimum} puntos.`;
+      'Cierre empatado.';
+
+    addHistory(
+      g,
+      '🔒 Cierre empatado. Sin puntos.'
+    );
+
     return;
   }
 
@@ -255,99 +420,30 @@ function finishBlockedRound(g) {
     (g.scores[winner.id] || 0) +
     points;
 
-  const matchFinished =
-    g.scores[winner.id] >= g.target;
+  const done =
+    g.scores[winner.id] >=
+    g.target;
 
   g.status =
-    matchFinished
+    done
       ? 'match_finished'
       : 'finished';
 
   g.message =
-    `${winner.name} gana el cierre (+${points}). ` +
-    `Total: ${g.scores[winner.id]} pts` +
-    (
-      matchFinished
-        ? `. ¡${winner.name} gana la partida!`
-        : ''
-    );
+    `${winner.name} gana el cierre.`;
+
+  addHistory(
+    g,
+    `🔒 ${winner.name} gana el cierre y suma ${points} puntos`
+  );
 }
 
-function finishDominoRound(g, winnerIndex) {
-  const winner =
-    g.players[winnerIndex];
-
-  if (g.players.length === 4) {
-    const winnerTeam =
-      teamOf(winnerIndex);
-
-    const loserTeam =
-      winnerTeam === 'A'
-        ? 'B'
-        : 'A';
-
-    let points = 0;
-
-    g.players.forEach((player, index) => {
-      if (teamOf(index) === loserTeam) {
-        points += pipTotal(player.hand);
-      }
-    });
-
-    g.teamScores[winnerTeam] += points;
-
-    const matchFinished =
-      g.teamScores[winnerTeam] >= g.target;
-
-    g.status =
-      matchFinished
-        ? 'match_finished'
-        : 'finished';
-
-    g.message =
-      `¡Dominó! ${winner.name}, Equipo ${winnerTeam}, ` +
-      `gana (+${points}). Marcador: ` +
-      `A ${g.teamScores.A} - B ${g.teamScores.B}` +
-      (
-        matchFinished
-          ? `. ¡Equipo ${winnerTeam} gana la partida!`
-          : ''
-      );
-
-    return;
-  }
-
-  let points = 0;
-
-  g.players.forEach((player, index) => {
-    if (index !== winnerIndex) {
-      points += pipTotal(player.hand);
-    }
-  });
-
-  g.scores[winner.id] =
-    (g.scores[winner.id] || 0) +
-    points;
-
-  const matchFinished =
-    g.scores[winner.id] >= g.target;
-
-  g.status =
-    matchFinished
-      ? 'match_finished'
-      : 'finished';
-
-  g.message =
-    `¡Dominó! ${winner.name} gana (+${points}). ` +
-    `Total: ${g.scores[winner.id]} pts` +
-    (
-      matchFinished
-        ? `. ¡${winner.name} gana la partida!`
-        : ''
-    );
-}
-
-function placeTile(g, playerIndex, tileIndex, side) {
+function placeTile(
+  g,
+  playerIndex,
+  tileIndex,
+  side
+) {
   const player =
     g.players[playerIndex];
 
@@ -358,7 +454,9 @@ function placeTile(g, playerIndex, tileIndex, side) {
     g.board[0][0];
 
   const right =
-    g.board[g.board.length - 1][1];
+    g.board[
+      g.board.length - 1
+    ][1];
 
   let placed;
 
@@ -366,7 +464,10 @@ function placeTile(g, playerIndex, tileIndex, side) {
     if (tile[1] === left) {
       placed = tile;
     } else {
-      placed = [tile[1], tile[0]];
+      placed = [
+        tile[1],
+        tile[0]
+      ];
     }
 
     g.board.unshift(placed);
@@ -374,76 +475,117 @@ function placeTile(g, playerIndex, tileIndex, side) {
     if (tile[0] === right) {
       placed = tile;
     } else {
-      placed = [tile[1], tile[0]];
+      placed = [
+        tile[1],
+        tile[0]
+      ];
     }
 
     g.board.push(placed);
   }
 
-  player.hand.splice(tileIndex, 1);
+  player.hand.splice(
+    tileIndex,
+    1
+  );
 
   g.consecutivePasses = 0;
+
+  return placed;
 }
 
-function chooseBotMove(g, playerIndex) {
+function chooseBotMove(
+  g,
+  playerIndex
+) {
   const player =
     g.players[playerIndex];
 
   const moves =
-    getValidMoves(player, g.board);
+    getValidMoves(
+      player,
+      g.board
+    );
 
   if (!moves.length) {
     return null;
   }
 
-  if (g.botDifficulty === 'easy') {
+  if (
+    g.botDifficulty ===
+    'easy'
+  ) {
     return moves[
-      Math.floor(Math.random() * moves.length)
+      Math.floor(
+        Math.random() *
+        moves.length
+      )
     ];
   }
 
-  if (g.botDifficulty === 'normal') {
+  if (
+    g.botDifficulty ===
+    'normal'
+  ) {
     return moves
       .sort(
         (a, b) =>
-          (b.tile[0] + b.tile[1]) -
-          (a.tile[0] + a.tile[1])
+          (
+            b.tile[0] +
+            b.tile[1]
+          ) -
+          (
+            a.tile[0] +
+            a.tile[1]
+          )
       )[0];
   }
 
-  /*
-    DIFÍCIL
-
-    Prefiere:
-    1. Soltar fichas con muchos puntos.
-    2. Dobles.
-    3. Números que conserva varias veces
-       en su propia mano.
-  */
-
   const frequencies = {};
 
-  player.hand.forEach(tile => {
-    frequencies[tile[0]] =
-      (frequencies[tile[0]] || 0) + 1;
+  player.hand.forEach(
+    tile => {
 
-    frequencies[tile[1]] =
-      (frequencies[tile[1]] || 0) + 1;
-  });
+      frequencies[tile[0]] =
+        (
+          frequencies[tile[0]] ||
+          0
+        ) + 1;
 
-  function score(move) {
-    const tile = move.tile;
+      frequencies[tile[1]] =
+        (
+          frequencies[tile[1]] ||
+          0
+        ) + 1;
+    }
+  );
+
+  function moveScore(move) {
+    const tile =
+      move.tile;
 
     let value =
-      (tile[0] + tile[1]) * 3;
+      (
+        tile[0] +
+        tile[1]
+      ) * 3;
 
-    if (tile[0] === tile[1]) {
+    if (
+      tile[0] ===
+      tile[1]
+    ) {
       value += 5;
     }
 
     value +=
-      (frequencies[tile[0]] || 0) +
-      (frequencies[tile[1]] || 0);
+      (
+        frequencies[tile[0]] ||
+        0
+      ) +
+      (
+        frequencies[tile[1]] ||
+        0
+      );
 
     return value;
   }
@@ -451,108 +593,38 @@ function chooseBotMove(g, playerIndex) {
   return moves
     .sort(
       (a, b) =>
-        score(b) - score(a)
+        moveScore(b) -
+        moveScore(a)
     )[0];
-}
-
-function runBots(g) {
-  let safety = 0;
-
-  while (
-    g.status === 'playing' &&
-    g.players[g.turn]?.isBot &&
-    safety < 100
-  ) {
-    safety++;
-
-    const botIndex =
-      g.turn;
-
-    const bot =
-      g.players[botIndex];
-
-    let move =
-      chooseBotMove(g, botIndex);
-
-    /*
-      Si no puede jugar,
-      roba hasta conseguir una válida
-      o hasta vaciar el pozo.
-    */
-
-    while (
-      !move &&
-      g.boneyard.length
-    ) {
-      const drawn =
-        g.boneyard.pop();
-
-      bot.hand.push(drawn);
-
-      move =
-        chooseBotMove(g, botIndex);
-    }
-
-    if (move) {
-      placeTile(
-        g,
-        botIndex,
-        move.index,
-        move.side
-      );
-
-      if (!bot.hand.length) {
-        finishDominoRound(
-          g,
-          botIndex
-        );
-
-        break;
-      }
-
-      nextTurn(g);
-      continue;
-    }
-
-    /*
-      No puede jugar y
-      el pozo está vacío.
-    */
-
-    g.consecutivePasses =
-      (g.consecutivePasses || 0) + 1;
-
-    if (
-      g.consecutivePasses >=
-      g.players.length
-    ) {
-      finishBlockedRound(g);
-      break;
-    }
-
-    nextTurn(g);
-  }
 }
 
 function prepareRound(g) {
   const tiles =
     createSet();
 
-  g.players.forEach(player => {
-    player.hand = [];
-  });
+  g.players.forEach(
+    player => {
+      player.hand = [];
+    }
+  );
 
   g.board = [];
   g.boneyard = tiles;
   g.consecutivePasses = 0;
+  g.history = [];
 
   g.roundNumber =
     (g.roundNumber || 0) + 1;
 
-  g.players.forEach(player => {
-    player.hand =
-      g.boneyard.splice(0, 7);
-  });
+  g.players.forEach(
+    player => {
+      player.hand =
+        g.boneyard.splice(
+          0,
+          7
+        );
+    }
+  );
 
   const opening =
     findOpeningTile(g);
@@ -567,23 +639,30 @@ function prepareRound(g) {
         1
       )[0];
 
-  g.board.push(openingTile);
+  g.board.push(
+    openingTile
+  );
 
   g.turn =
     (starter + 1) %
     g.players.length;
 
-  g.status = 'playing';
+  g.status =
+    'playing';
 
   g.message =
-    `${g.players[starter].name} abre con ` +
-    `${openingTile[0]}-${openingTile[1]}. ` +
-    `Turno de ${g.players[g.turn].name}`;
+    `${g.players[starter].name} abre con ${openingTile[0]}-${openingTile[1]}`;
 
-  runBots(g);
+  addHistory(
+    g,
+    `🎲 ${g.players[starter].name} abrió con ${openingTile[0]}|${openingTile[1]}`
+  );
 }
 
-function publicGame(g, playerId) {
+function publicGame(
+  g,
+  playerId
+) {
   const myIndex =
     g.players.findIndex(
       player =>
@@ -596,47 +675,65 @@ function publicGame(g, playerId) {
       : null;
 
   return {
-    code: g.code,
-    maxPlayers: g.maxPlayers,
+    code:
+      g.code,
+
+    maxPlayers:
+      g.maxPlayers,
 
     botCount:
       g.botCount || 0,
 
     botDifficulty:
-      g.botDifficulty || 'normal',
+      g.botDifficulty ||
+      'normal',
 
     humanSlots:
       g.maxPlayers -
       (g.botCount || 0),
 
-    target: g.target,
+    target:
+      g.target,
 
-    board: g.board,
+    board:
+      g.board,
 
     boneyardCount:
       g.boneyard.length,
 
-    turn: g.turn,
+    turn:
+      g.turn,
 
-    status: g.status,
+    status:
+      g.status,
 
-    message: g.message,
+    message:
+      g.message,
 
     roundNumber:
       g.roundNumber || 0,
 
+    history:
+      g.history || [],
+
     myIndex,
 
     myHand:
-      me ? me.hand : [],
+      me
+        ? me.hand
+        : [],
 
     isHost:
       g.host === playerId,
 
+    currentPlayerIsBot:
+      !!g.players[g.turn]?.isBot,
+
     players:
       g.players.map(
         (player, index) => ({
-          name: player.name,
+          name:
+            player.name,
 
           handCount:
             player.hand.length,
@@ -675,11 +772,10 @@ async (req, res) => {
     const action =
       b.action;
 
-    /*
-      REFRESH
-    */
-
-    if (req.method === 'GET') {
+    if (
+      req.method ===
+      'GET'
+    ) {
       const g =
         await kv.get(
           `domino:${req.query.code}`
@@ -702,20 +798,24 @@ async (req, res) => {
       );
     }
 
-    /*
-      CREAR SALA
-    */
+    if (
+      action ===
+      'create'
+    ) {
+      const code =
+        id();
 
-    if (action === 'create') {
-      const code = id();
-      const pid = id();
+      const pid =
+        id();
 
       const maxPlayers =
         Math.min(
           4,
           Math.max(
             2,
-            Number(b.maxPlayers) || 4
+            Number(
+              b.maxPlayers
+            ) || 4
           )
         );
 
@@ -724,26 +824,36 @@ async (req, res) => {
           maxPlayers - 1,
           Math.max(
             0,
-            Number(b.botCount) || 0
+            Number(
+              b.botCount
+            ) || 0
           )
         );
 
       const difficulty =
-        ['easy', 'normal', 'hard']
-          .includes(b.botDifficulty)
+        [
+          'easy',
+          'normal',
+          'hard'
+        ].includes(
+          b.botDifficulty
+        )
           ? b.botDifficulty
           : 'normal';
 
       const g = {
         code,
         host: pid,
+
         maxPlayers,
         botCount,
+
         botDifficulty:
           difficulty,
 
         target:
-          Number(b.target) || 100,
+          Number(b.target) ||
+          100,
 
         turnDirection:
           'clockwise',
@@ -753,13 +863,16 @@ async (req, res) => {
             id: pid,
 
             name:
-              (b.name || '')
-                .trim() ||
+              (
+                b.name ||
+                ''
+              ).trim() ||
               'Jugador 1',
 
             hand: [],
 
-            isBot: false
+            isBot:
+              false
           }
         ],
 
@@ -783,6 +896,8 @@ async (req, res) => {
         message:
           'Sala creada',
 
+        history: [],
+
         consecutivePasses: 0,
 
         roundNumber: 0
@@ -792,7 +907,10 @@ async (req, res) => {
 
       return res.json({
         game:
-          publicGame(g, pid),
+          publicGame(
+            g,
+            pid
+          ),
 
         playerId:
           pid
@@ -813,12 +931,14 @@ async (req, res) => {
         });
     }
 
-    /*
-      UNIRSE
-    */
-
-    if (action === 'join') {
-      if (g.status !== 'lobby') {
+    if (
+      action ===
+      'join'
+    ) {
+      if (
+        g.status !==
+        'lobby'
+      ) {
         return res
           .status(400)
           .json({
@@ -833,11 +953,13 @@ async (req, res) => {
 
       const humanPlayers =
         g.players.filter(
-          player => !player.isBot
+          player =>
+            !player.isBot
         ).length;
 
       if (
-        humanPlayers >= humanSlots
+        humanPlayers >=
+        humanSlots
       ) {
         return res
           .status(400)
@@ -854,37 +976,42 @@ async (req, res) => {
         id: pid,
 
         name:
-          (b.name || '')
-            .trim() ||
+          (
+            b.name ||
+            ''
+          ).trim() ||
           `Jugador ${g.players.length + 1}`,
 
         hand: [],
 
-        isBot: false
+        isBot:
+          false
       });
 
       g.message =
-        `${humanPlayers + 1}/${humanSlots} ` +
-        `jugadores humanos conectados`;
+        `${humanPlayers + 1}/${humanSlots} jugadores humanos conectados`;
 
       await save(g);
 
       return res.json({
         game:
-          publicGame(g, pid),
+          publicGame(
+            g,
+            pid
+          ),
 
         playerId:
           pid
       });
     }
 
-    /*
-      INICIAR
-    */
-
-    if (action === 'start') {
+    if (
+      action ===
+      'start'
+    ) {
       if (
-        b.playerId !== g.host
+        b.playerId !==
+        g.host
       ) {
         return res
           .status(403)
@@ -894,42 +1021,27 @@ async (req, res) => {
           });
       }
 
-      if (
-        g.status !== 'lobby'
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              'La partida ya comenzó'
-          });
-      }
-
       const humanSlots =
         g.maxPlayers -
         (g.botCount || 0);
 
       const humanPlayers =
         g.players.filter(
-          player => !player.isBot
+          player =>
+            !player.isBot
         ).length;
 
       if (
-        humanPlayers !== humanSlots
+        humanPlayers !==
+        humanSlots
       ) {
         return res
           .status(400)
           .json({
             error:
-              `Faltan jugadores humanos. ` +
-              `${humanPlayers}/${humanSlots} conectados.`
+              `Faltan jugadores humanos. ${humanPlayers}/${humanSlots} conectados.`
           });
       }
-
-      /*
-        Agregar bots a los
-        puestos restantes.
-      */
 
       while (
         g.players.length <
@@ -937,7 +1049,8 @@ async (req, res) => {
       ) {
         const botNumber =
           g.players.filter(
-            player => player.isBot
+            player =>
+              player.isBot
           ).length + 1;
 
         g.players.push({
@@ -945,11 +1058,12 @@ async (req, res) => {
             `BOT-${id()}`,
 
           name:
-            `Bot ${botNumber} 🤖`,
+            `Bot ${botNumber}`,
 
           hand: [],
 
-          isBot: true
+          isBot:
+            true
         });
       }
 
@@ -965,15 +1079,13 @@ async (req, res) => {
       );
     }
 
-    /*
-      NUEVA RONDA
-    */
-
     if (
-      action === 'newRound'
+      action ===
+      'newRound'
     ) {
       if (
-        b.playerId !== g.host
+        b.playerId !==
+        g.host
       ) {
         return res
           .status(403)
@@ -984,7 +1096,8 @@ async (req, res) => {
       }
 
       if (
-        g.status !== 'finished'
+        g.status !==
+        'finished'
       ) {
         return res
           .status(400)
@@ -995,6 +1108,154 @@ async (req, res) => {
       }
 
       prepareRound(g);
+
+      await save(g);
+
+      return res.json(
+        publicGame(
+          g,
+          b.playerId
+        )
+      );
+    }
+
+    if (
+      action ===
+      'botStep'
+    ) {
+      if (
+        g.status !==
+        'playing'
+      ) {
+        return res.json(
+          publicGame(
+            g,
+            b.playerId
+          )
+        );
+      }
+
+      const botIndex =
+        g.turn;
+
+      const bot =
+        g.players[
+          botIndex
+        ];
+
+      if (
+        !bot ||
+        !bot.isBot
+      ) {
+        return res.json(
+          publicGame(
+            g,
+            b.playerId
+          )
+        );
+      }
+
+      let move =
+        chooseBotMove(
+          g,
+          botIndex
+        );
+
+      if (move) {
+        const played =
+          placeTile(
+            g,
+            botIndex,
+            move.index,
+            move.side
+          );
+
+        addHistory(
+          g,
+          `🤖 ${bot.name} jugó ${played[0]}|${played[1]} ${move.side === 'left' ? '←' : '→'}`
+        );
+
+        if (
+          !bot.hand.length
+        ) {
+          finishDominoRound(
+            g,
+            botIndex
+          );
+
+          await save(g);
+
+          return res.json(
+            publicGame(
+              g,
+              b.playerId
+            )
+          );
+        }
+
+        nextTurn(g);
+
+        await save(g);
+
+        return res.json(
+          publicGame(
+            g,
+            b.playerId
+          )
+        );
+      }
+
+      if (
+        g.boneyard.length
+      ) {
+        bot.hand.push(
+          g.boneyard.pop()
+        );
+
+        g.message =
+          `${bot.name} roba del pozo`;
+
+        addHistory(
+          g,
+          `🤖 ${bot.name} robó del pozo`
+        );
+
+        await save(g);
+
+        return res.json(
+          publicGame(
+            g,
+            b.playerId
+          )
+        );
+      }
+
+      g.consecutivePasses =
+        (g.consecutivePasses || 0) +
+        1;
+
+      addHistory(
+        g,
+        `🤖 ${bot.name} pasó`
+      );
+
+      if (
+        g.consecutivePasses >=
+        g.players.length
+      ) {
+        finishBlockedRound(g);
+
+        await save(g);
+
+        return res.json(
+          publicGame(
+            g,
+            b.playerId
+          )
+        );
+      }
+
+      nextTurn(g);
 
       await save(g);
 
@@ -1023,7 +1284,8 @@ async (req, res) => {
     }
 
     if (
-      g.status !== 'playing'
+      g.status !==
+      'playing'
     ) {
       return res
         .status(400)
@@ -1047,11 +1309,10 @@ async (req, res) => {
     const player =
       g.players[pi];
 
-    /*
-      ROBAR
-    */
-
-    if (action === 'draw') {
+    if (
+      action ===
+      'draw'
+    ) {
       if (
         hasPlayableTile(
           player,
@@ -1084,11 +1345,10 @@ async (req, res) => {
       g.message =
         `${player.name} roba una ficha`;
 
-      /*
-        Si después de robar
-        sigue sin poder jugar,
-        mantiene el turno.
-      */
+      addHistory(
+        g,
+        `🁣 ${player.name} robó del pozo`
+      );
 
       await save(g);
 
@@ -1100,11 +1360,10 @@ async (req, res) => {
       );
     }
 
-    /*
-      PASAR
-    */
-
-    if (action === 'pass') {
+    if (
+      action ===
+      'pass'
+    ) {
       if (
         hasPlayableTile(
           player,
@@ -1131,7 +1390,13 @@ async (req, res) => {
       }
 
       g.consecutivePasses =
-        (g.consecutivePasses || 0) + 1;
+        (g.consecutivePasses || 0) +
+        1;
+
+      addHistory(
+        g,
+        `⏭ ${player.name} pasó`
+      );
 
       if (
         g.consecutivePasses >=
@@ -1151,8 +1416,6 @@ async (req, res) => {
 
       nextTurn(g);
 
-      runBots(g);
-
       await save(g);
 
       return res.json(
@@ -1163,16 +1426,19 @@ async (req, res) => {
       );
     }
 
-    /*
-      JUGAR FICHA
-    */
-
-    if (action === 'play') {
+    if (
+      action ===
+      'play'
+    ) {
       const tileIndex =
-        Number(b.tileIndex);
+        Number(
+          b.tileIndex
+        );
 
       const tile =
-        player.hand[tileIndex];
+        player.hand[
+          tileIndex
+        ];
 
       if (!tile) {
         return res
@@ -1203,16 +1469,21 @@ async (req, res) => {
           .status(400)
           .json({
             error:
-              `La ficha no puede colocarse ` +
-              `en ese extremo`
+              'La ficha no puede colocarse en ese extremo'
           });
       }
 
-      placeTile(
+      const played =
+        placeTile(
+          g,
+          pi,
+          tileIndex,
+          b.side
+        );
+
+      addHistory(
         g,
-        pi,
-        tileIndex,
-        b.side
+        `🁣 ${player.name} jugó ${played[0]}|${played[1]} ${b.side === 'left' ? '←' : '→'}`
       );
 
       if (
@@ -1234,14 +1505,6 @@ async (req, res) => {
       }
 
       nextTurn(g);
-
-      /*
-        Si después del humano
-        viene uno o varios bots,
-        juegan automáticamente.
-      */
-
-      runBots(g);
 
       await save(g);
 
