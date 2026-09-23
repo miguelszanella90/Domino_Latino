@@ -2569,7 +2569,7 @@ function renderBoard(){
   const CENTER_Y = boardH / 2;
 
   // Límites seguros. Dejamos libres las zonas de los jugadores laterales.
-  const SIDE_GAP = mobile ? 46 : 125;
+  const SIDE_GAP = mobile ? 72 : 220;
   const SAFE_LEFT  = SIDE_GAP;
   const SAFE_RIGHT = boardW - SIDE_GAP;
 
@@ -2622,7 +2622,7 @@ function renderBoard(){
       : CENTER_X - openingLen / 2;
 
     // Distancia entre filas. Suficiente para una ficha vertical completa.
-    const ROW_STEP = mobile ? 70 : 100;
+    const ROW_STEP = W + H;
 
     for(const index of indices){
 
@@ -2659,7 +2659,7 @@ function renderBoard(){
         La ficha que provoca el giro se convierte en la pieza vertical
         de la esquina. La siguiente fila comienza después de ella.
       */
-      // V19: reservamos la esquina antes del atril lateral.
+      // V20: ampliamos mucho la zona de seguridad antes de los atriles laterales.
       // Una ficha normal que dobla se coloca vertical. Si la ficha que llega
       // a la curva es doble, permanece horizontal y actúa como la pieza
       // cuadrada de la esquina; la bajada/subida comienza inmediatamente
@@ -2696,9 +2696,15 @@ function renderBoard(){
       let cornerRot;
 
       if(dbl){
-        // El doble de esquina queda horizontal. No lo cruzamos con la fila.
-        cornerCy = y;
-        cornerRot = dir === branchSign ? 0 : 180;
+        /*
+          En una curva la continuidad manda: un doble horizontal no puede
+          unir geométricamente dos filas distintas sin dejar un hueco.
+          Por eso, SOLO cuando el doble es exactamente la pieza de esquina,
+          se muestra vertical como conector. Así ambos extremos tocan las
+          fichas vecinas borde con borde.
+        */
+        cornerCy = y + verticalSign * (H / 2 + W / 2);
+        cornerRot = branchSign === -1 ? 270 : 90;
 
         positions[index] = {
           cx: edgeX,
@@ -2706,15 +2712,12 @@ function renderBoard(){
           rot: cornerRot
         };
 
-        // La nueva fila se desplaza una altura de ficha más el ancho de la
-        // ficha vertical que realizará la subida/bajada en la jugada siguiente.
-        y = y + verticalSign * (W + H);
+        y = cornerCy + verticalSign * (W / 2 + H / 2);
         dir *= -1;
 
-        // Salimos desde el borde interior del doble, sin hueco ni solape.
         cursor = dir === -1
-          ? edgeX - W / 2
-          : edgeX + W / 2;
+          ? edgeX - H / 2
+          : edgeX + H / 2;
       }else{
         cornerCy = y + verticalSign * (H / 2 + W / 2);
 
