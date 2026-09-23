@@ -2603,9 +2603,11 @@ function renderBoard(){
         const verticalSign = nextY >= y ? 1 : -1;
 
         if(verticalSign === 1){
+          // Curva que baja: mantener la orientación actual
           cornerRot = dir === 1 ? 90 : 270;
         }else{
-          cornerRot = dir === 1 ? 270 : 90;
+          // Curva que sube: invertir la ficha vertical
+          cornerRot = dir === 1 ? 90 : 270;
         }
 
         if(branchSign === -1){
