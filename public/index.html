@@ -2542,7 +2542,7 @@ function renderBoard(){
       : CENTER_X - openingLen / 2;
 
     // Distancia entre filas. Suficiente para una ficha vertical completa.
-    const ROW_STEP = mobile ? 58 : 82;
+    const ROW_STEP = mobile ? 76 : 112;
 
     for(const index of indices){
 
@@ -2626,7 +2626,7 @@ function renderBoard(){
 
       // Comenzamos la nueva fila justo después de la esquina,
       // con un pequeño margen visual para que la curva se lea bien.
-      const TURN_GAP = mobile ? 3 : 5;
+      const TURN_GAP = mobile ? 6 : 10;
       cursor = dir === -1
         ? edgeX - H / 2 - TURN_GAP
         : edgeX + H / 2 + TURN_GAP;
