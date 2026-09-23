@@ -1062,9 +1062,12 @@ summary{
 /* V15: tablero más amplio para que las dos colas tengan recorrido suficiente */
 @media (min-width:701px){
   .board{
-    min-height:620px;
-    padding-top:42px;
-    padding-bottom:42px;
+    min-height:760px;
+    padding-top:30px;
+    padding-bottom:30px;
+  }
+  .main{
+    min-height:900px;
   }
 }
 
@@ -2500,13 +2503,13 @@ function renderBoard(){
   const CENTER_Y = boardH / 2;
 
   // Límites seguros. Dejamos libres las zonas de los jugadores laterales.
-  const SAFE_LEFT  = mobile ? 28 : 95;
-  const SAFE_RIGHT = boardW - (mobile ? 28 : 95);
+  const SAFE_LEFT  = mobile ? 22 : 70;
+  const SAFE_RIGHT = boardW - (mobile ? 22 : 70);
 
   // Filas superiores e inferiores disponibles.
   // Se calculan con el alto real para que el tablero permanezca estable.
-  const TOP_LANE = Math.max(mobile ? 38 : 55, CENTER_Y - (mobile ? 165 : 245));
-  const BOTTOM_LANE = Math.min(boardH - (mobile ? 38 : 55), CENTER_Y + (mobile ? 165 : 245));
+  const TOP_LANE = Math.max(mobile ? 34 : 42, CENTER_Y - (mobile ? 185 : 300));
+  const BOTTOM_LANE = Math.min(boardH - (mobile ? 34 : 42), CENTER_Y + (mobile ? 185 : 300));
 
   const isDouble = tile => tile[0] === tile[1];
   const visualLength = tile => isDouble(tile) ? H : W;
@@ -2663,8 +2666,8 @@ function renderBoard(){
       const EDGE_CLEARANCE = 0;
 
       cursor = dir === -1
-        ? edgeX - H / 2 - EDGE_CLEARANCE
-        : edgeX + H / 2 + EDGE_CLEARANCE;
+        ? edgeX - H / 2
+        : edgeX + H / 2;
     }
   }
 
