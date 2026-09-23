@@ -1138,6 +1138,36 @@ summary{
 }
 
 </style>
+
+<style id="vertical-side-player-labels">
+  /* Final cosmetic adjustment only: Bot 3 and Bot 1 labels vertical */
+  .seat.left .seat-label,
+  .player-seat.left .player-label,
+  [data-seat="left"] .seat-label,
+  [data-position="left"] .player-label {
+    writing-mode: vertical-rl !important;
+    transform: rotate(180deg) !important;
+    white-space: nowrap !important;
+  }
+
+  .seat.right .seat-label,
+  .player-seat.right .player-label,
+  [data-seat="right"] .seat-label,
+  [data-position="right"] .player-label {
+    writing-mode: vertical-rl !important;
+    white-space: nowrap !important;
+  }
+
+  /* Fallback for the current four-seat DOM: side opponents only */
+  #opponents .opponent:nth-child(2),
+  #opponents .opponent:nth-child(4),
+  .opponents .opponent.left .name,
+  .opponents .opponent.right .name {
+    writing-mode: vertical-rl !important;
+    white-space: nowrap !important;
+  }
+</style>
+
 </head>
 
 
