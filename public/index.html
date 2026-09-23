@@ -2475,7 +2475,7 @@ function renderBoard(){
   const boardW = board.clientWidth;
   const boardH = board.clientHeight;
 
-  const SIDE = mobile ? 18 : 42;
+  const SIDE = mobile ? 28 : 70;
   const LEFT = SIDE;
   const RIGHT = boardW - SIDE;
 
@@ -2568,7 +2568,8 @@ function renderBoard(){
           ? RIGHT - H / 2
           : LEFT + H / 2;
 
-        const cornerCy = y + verticalSign * (W / 4);
+        const LANE_GAP = mobile ? 18 : 30;
+        const cornerCy = y + verticalSign * ((W + LANE_GAP) / 2);
 
         let cornerRot;
 
@@ -2603,15 +2604,16 @@ function renderBoard(){
         };
 
         // La siguiente fila queda pegada a la otra mitad de la esquina.
-        y += verticalSign * (W / 2);
+        y += verticalSign * (W + LANE_GAP);
 
         // Cambiamos el sentido horizontal.
         dir *= -1;
 
         // El siguiente dominó arranca exactamente al lado de la esquina.
+        const TURN_GAP = mobile ? 5 : 8;
         cursor = dir === -1
-          ? edgeX - H / 2
-          : edgeX + H / 2;
+          ? edgeX - H / 2 - TURN_GAP
+          : edgeX + H / 2 + TURN_GAP;
 
         continue;
       }
