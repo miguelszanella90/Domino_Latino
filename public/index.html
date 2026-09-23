@@ -2640,12 +2640,21 @@ function renderBoard(){
       y = cornerCy + verticalSign * (W / 2 + H / 2);
       dir *= -1;
 
-      // Comenzamos la nueva fila justo después de la esquina,
-      // con un pequeño margen visual para que la curva se lea bien.
-      const TURN_GAP = mobile ? 6 : 10;
+      /*
+        V14: la nueva fila NO comienza debajo de la ficha vertical.
+
+        Antes usábamos H/2, que colocaba parte de la primera ficha
+        horizontal dentro del ancho visual de la esquina vertical.
+
+        Ahora reservamos W/2 completo desde el centro de la esquina.
+        Así la ficha horizontal comienza después de la esquina y ambas
+        se encuentran en el borde exterior, sin solaparse.
+      */
+      const EDGE_CLEARANCE = mobile ? 1 : 2;
+
       cursor = dir === -1
-        ? edgeX - H / 2 - TURN_GAP
-        : edgeX + H / 2 + TURN_GAP;
+        ? edgeX - W / 2 - EDGE_CLEARANCE
+        : edgeX + W / 2 + EDGE_CLEARANCE;
     }
   }
 
