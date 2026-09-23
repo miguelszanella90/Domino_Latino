@@ -2467,22 +2467,18 @@ function renderBoard(){
 
   const mobile = isMobile();
 
-  const TILE_W = mobile ? 46 : 60;
-  const TILE_H = mobile ? 25 : 32;
-  const JOIN = 1;
-
-  const boardWidth = board.clientWidth;
-  const boardHeight = board.clientHeight;
+  const W = mobile ? 46 : 60;   // ficha acostada
+  const H = mobile ? 25 : 32;
+  const GAP = 2;                // separación visual real entre fichas
+  const boardW = board.clientWidth;
+  const boardH = board.clientHeight;
 
   /*
-    TABLERO POR PUNTOS DE CONEXIÓN
+    La cadena se construye por CENTROS sobre una línea continua.
+    Los dobles son perpendiculares, pero su longitud sobre la
+    dirección de juego es H, no W. Esto elimina el hueco grande
+    después de un doble.
 
-    Cada ficha comienza exactamente donde termina la anterior.
-    Una ficha normal avanza TILE_W.
-    Un doble se dibuja perpendicular, pero solo avanza TILE_H
-    sobre la línea de juego. Así no se "sale" de la cadena.
-
-    En los bordes:
         → → → → →
                 ↓
         ← ← ← ← ←
@@ -2490,203 +2486,182 @@ function renderBoard(){
         → → → → →
   */
 
-  const marginX = mobile ? 24 : 50;
-  const marginY = mobile ? 26 : 44;
+  const side = mobile ? 26 : 55;
+  const top = mobile ? 30 : 52;
+  const leftEdge = side;
+  const rightEdge = Math.max(leftEdge + W * 4, boardW - side);
 
-  const leftLimit = marginX;
-  const rightLimit = Math.max(leftLimit + TILE_W * 4, boardWidth - marginX);
-  const topLimit = marginY;
+  // Separación vertical entre líneas. Debe permitir una ficha vertical.
+  const lane = mobile ? W + 18 : W + 24;
 
-  const rowDrop = mobile ? 72 : 92;
+  let dir = 1; // 1 derecha, -1 izquierda
+  let row = 0;
 
-  // cursor = punto exacto donde debe comenzar la próxima ficha
-  let cursorX = leftLimit;
-  let cursorY = topLimit;
+  /*
+    "cursor" es el borde exterior exacto donde empieza la próxima
+    ficha horizontal. No saltamos el cursor después de colocarla.
+  */
+  let cursorX = leftEdge;
+  let centerY = top;
 
-  // 0 = derecha, 1 = abajo, 2 = izquierda
-  let direction = 0;
+  const pos = [];
 
-  const positions = [];
-
-  function vec(dir){
-    if(dir === 0) return {x:1,y:0};
-    if(dir === 1) return {x:0,y:1};
-    return {x:-1,y:0};
+  function alongLength(tile){
+    return tile[0] === tile[1] ? H : W;
   }
 
-  function horizontal(dir){
-    return dir === 0 || dir === 2;
+  function addStraight(tile){
+
+    const dbl = tile[0] === tile[1];
+    const len = alongLength(tile);
+
+    const cx =
+      dir === 1
+        ? cursorX + len / 2
+        : cursorX - len / 2;
+
+    pos.push({
+      cx,
+      cy:centerY,
+      rot:dbl ? 90 : 0
+    });
+
+    cursorX += dir * (len + GAP);
   }
 
-  function needed(tile, dir){
-    const isDouble = tile[0] === tile[1];
+  function fits(tile){
+    const len = alongLength(tile);
 
-    // Un doble perpendicular ocupa TILE_H a lo largo de la cadena.
-    if(isDouble) return TILE_H - JOIN;
+    if(dir === 1){
+      return cursorX + len <= rightEdge;
+    }
 
-    // En un tramo vertical, una ficha normal se coloca vertical.
-    return TILE_W - JOIN;
-  }
-
-  function roomFor(tile, dir){
-    const need = needed(tile,dir);
-
-    if(dir === 0) return cursorX + need <= rightLimit;
-    if(dir === 2) return cursorX - need >= leftLimit;
-
-    // El tramo vertical solo necesita bajar hasta la siguiente fila.
-    return cursorY + need <= topLimit + rowDrop * 20;
+    return cursorX - len >= leftEdge;
   }
 
   /*
-    Coloca una ficha partiendo del punto cursor.
-    La rotación depende de la dirección de la cadena.
-    Los dobles siempre son perpendiculares al recorrido.
+    El giro usa UNA ficha real como conector vertical.
+    Su centro queda exactamente debajo del extremo de la cadena.
+    La fila siguiente comienza pegada al extremo inferior del conector.
   */
-  function place(tile, dir){
+  function addTurn(tile){
 
-    const isDouble = tile[0] === tile[1];
-    const v = vec(dir);
+    const dbl = tile[0] === tile[1];
 
-    let advance = needed(tile,dir);
+    /*
+      Para conectar una línea horizontal con la siguiente necesitamos
+      que la ficha visual sea vertical. Una ficha normal se rota 90°.
+      Si es doble, también la dibujamos vertical en el giro: en una
+      esquina prima la continuidad física de la cadena.
+    */
+    const turnRot = 90;
 
-    let rotation;
+    const edgeX =
+      dir === 1
+        ? Math.min(cursorX - GAP, rightEdge)
+        : Math.max(cursorX + GAP, leftEdge);
 
-    if(horizontal(dir)){
-      rotation = isDouble ? 90 : 0;
-    }else{
-      rotation = isDouble ? 0 : 90;
-    }
+    const nextY = centerY + lane;
 
-    const centerX = cursorX + v.x * advance / 2;
-    const centerY = cursorY + v.y * advance / 2;
+    const cy = (centerY + nextY) / 2;
 
-    positions.push({
-      cx:centerX,
-      cy:centerY,
-      rotation
+    pos.push({
+      cx:edgeX,
+      cy,
+      rot:turnRot
     });
 
-    cursorX += v.x * advance;
-    cursorY += v.y * advance;
+    // Cambiamos de sentido y arrancamos la nueva línea junto al conector.
+    dir *= -1;
+    row++;
+    centerY = nextY;
+
+    /*
+      La ficha vertical tiene grosor H. La siguiente horizontal debe
+      empezar a GAP px de su borde, no a W px. Así queda pegada sin
+      superponerse.
+    */
+    cursorX =
+      dir === -1
+        ? edgeX - H / 2 - GAP
+        : edgeX + H / 2 + GAP;
   }
 
   for(let i=0;i<pieces.length;i++){
 
     const tile = pieces[i];
 
-    /*
-      Si el siguiente dominó no cabe horizontalmente,
-      primero bajamos con ESA ficha. No la desplazamos
-      artificialmente. La cadena gira desde el punto exacto
-      donde terminó la ficha anterior.
-    */
-    if(direction === 0 && !roomFor(tile,0)){
-      direction = 1;
-    }else if(direction === 2 && !roomFor(tile,2)){
-      direction = 1;
+    if(fits(tile)){
+      addStraight(tile);
+    }else{
+      addTurn(tile);
     }
-
-    if(direction === 1){
-
-      place(tile,1);
-
-      /*
-        Después de una ficha vertical, comenzamos inmediatamente
-        la siguiente fila en dirección contraria.
-      */
-      cursorY = topLimit + (Math.round((cursorY-topLimit)/rowDrop) || 1) * rowDrop;
-
-      // Mantener el punto de giro dentro del borde.
-      cursorX = Math.max(leftLimit,Math.min(rightLimit,cursorX));
-
-      const previousHorizontal =
-        positions.length > 1
-          ? positions[positions.length-2]
-          : null;
-
-      /*
-        Alternamos la dirección horizontal según el lado del tablero
-        donde ocurrió el giro.
-      */
-      direction =
-        cursorX > (leftLimit + rightLimit)/2
-          ? 2
-          : 0;
-
-      continue;
-    }
-
-    place(tile,direction);
   }
 
   /*
-    El algoritmo anterior conserva las conexiones lógicas.
-    Ahora calculamos los límites visuales reales para centrar
-    y, si hace falta, reducir TODA la cadena como una sola pieza.
+    Límites visuales reales. Como posicionamos por centro, rotar un
+    doble ya no lo desplaza de su lugar.
   */
-  const visual = positions.map(p=>{
+  const boxes = pos.map(p=>{
 
-    const rotated = Math.abs(p.rotation)%180===90;
-
-    const w = rotated ? TILE_H : TILE_W;
-    const h = rotated ? TILE_W : TILE_H;
+    const vertical = Math.abs(p.rot)%180===90;
+    const vw = vertical ? H : W;
+    const vh = vertical ? W : H;
 
     return {
-      left:p.cx-w/2,
-      right:p.cx+w/2,
-      top:p.cy-h/2,
-      bottom:p.cy+h/2
+      l:p.cx-vw/2,
+      r:p.cx+vw/2,
+      t:p.cy-vh/2,
+      b:p.cy+vh/2
     };
   });
 
-  const minX = Math.min(...visual.map(v=>v.left));
-  const maxX = Math.max(...visual.map(v=>v.right));
-  const minY = Math.min(...visual.map(v=>v.top));
-  const maxY = Math.max(...visual.map(v=>v.bottom));
+  const minX = Math.min(...boxes.map(b=>b.l));
+  const maxX = Math.max(...boxes.map(b=>b.r));
+  const minY = Math.min(...boxes.map(b=>b.t));
+  const maxY = Math.max(...boxes.map(b=>b.b));
 
   const contentW = Math.max(1,maxX-minX);
   const contentH = Math.max(1,maxY-minY);
 
-  const availableW = Math.max(1,boardWidth-(mobile?18:30));
-  const availableH = Math.max(1,boardHeight-(mobile?18:30));
+  const padX = mobile ? 14 : 24;
+  const padY = mobile ? 14 : 24;
 
   const scale = Math.min(
     1,
-    availableW/contentW,
-    availableH/contentH
+    Math.max(0.2,(boardW-padX*2)/contentW),
+    Math.max(0.2,(boardH-padY*2)/contentH)
   );
 
-  const offsetX =
-    (boardWidth-contentW*scale)/2 - minX*scale;
+  const originX =
+    (boardW-contentW*scale)/2 - minX*scale;
 
-  const offsetY =
-    (boardHeight-contentH*scale)/2 - minY*scale;
+  const originY =
+    (boardH-contentH*scale)/2 - minY*scale;
 
-  pieces.forEach((tile,index)=>{
+  pieces.forEach((tile,i)=>{
 
-    const p = positions[index];
+    const p = pos[i];
 
     const wrapper = document.createElement('div');
     wrapper.className = 'board-piece';
 
-    /*
-      board-piece tiene transform-origin:center center.
-      Lo posicionamos por CENTRO, no por esquina. Esto es lo
-      que evita que un 1|1, 6|6, etc. "salte" al rotarlo.
-    */
-    wrapper.style.width = TILE_W+'px';
-    wrapper.style.height = TILE_H+'px';
+    wrapper.style.width = W+'px';
+    wrapper.style.height = H+'px';
 
+    /*
+      El centro lógico se transforma al centro visual. Así los dobles
+      permanecen exactamente dentro de la cadena.
+    */
     wrapper.style.left =
-      (offsetX + p.cx*scale - TILE_W/2)+'px';
+      (originX + p.cx*scale - W/2)+'px';
 
     wrapper.style.top =
-      (offsetY + p.cy*scale - TILE_H/2)+'px';
+      (originY + p.cy*scale - H/2)+'px';
 
     wrapper.style.transformOrigin = 'center center';
     wrapper.style.transform =
-      `scale(${scale}) rotate(${p.rotation}deg)`;
+      `scale(${scale}) rotate(${p.rot}deg)`;
 
     const domino = document.createElement('div');
     domino.className = 'board-domino';
