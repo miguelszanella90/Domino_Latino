@@ -1139,29 +1139,46 @@ summary{
 
 </style>
 
-<style id="side-badges-rotated-v6">
-/* ONLY the side player labels. Bot 2 and the racks remain unchanged. */
+<style id="side-badges-rotated-v7">
+/* SOLO Bot 3 y Bot 1.
+   Reservamos un pequeño gutter lateral para que el nombre vertical
+   quede visible completo y no sea cortado por el tablero. */
 @media (min-width:701px){
+
+  /* Dejamos espacio real entre el borde del tablero y cada atril. */
+  .seat-left{
+    left:92px !important;
+  }
+
+  .seat-right{
+    right:92px !important;
+  }
+
   .seat-left .opponent-name,
   .seat-right .opponent-name{
-    position:absolute;
-    top:50%;
-    width:max-content;
-    max-width:none;
-    white-space:nowrap;
-    transform-origin:center center;
+    position:absolute !important;
+    top:50% !important;
+    width:max-content !important;
+    max-width:none !important;
+    white-space:nowrap !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    z-index:30 !important;
+    transform-origin:center center !important;
   }
 
-  /* Bot 3: vertical badge on the OUTER left side of its rack */
+  /* Bot 3: bloque completo vertical, a la IZQUIERDA del atril. */
   .seat-left .opponent-name{
-    right:calc(100% - 18px);
-    transform:translateY(-50%) rotate(-90deg);
+    left:-92px !important;
+    right:auto !important;
+    transform:translate(-50%,-50%) rotate(-90deg) !important;
   }
 
-  /* Bot 1: vertical badge on the OUTER right side of its rack */
+  /* Bot 1: bloque completo vertical, a la DERECHA del atril. */
   .seat-right .opponent-name{
-    left:calc(100% - 18px);
-    transform:translateY(-50%) rotate(90deg);
+    right:-92px !important;
+    left:auto !important;
+    transform:translate(50%,-50%) rotate(90deg) !important;
   }
 }
 </style>
