@@ -1811,12 +1811,40 @@ const peerConnections = new Map();
 const remoteStreams = new Map();
 const handledSignalIds = new Set();
 
-const RTC_CONFIG = {
+let RTC_CONFIG = {
   iceServers:[
-    { urls:'stun:stun.l.google.com:19302' },
-    { urls:'stun:stun1.l.google.com:19302' }
+    { urls:'stun:stun.relay.metered.ca:80' }
   ]
 };
+
+let rtcConfigPromise = null;
+
+async function loadRTCConfig(){
+  if(rtcConfigPromise) return rtcConfigPromise;
+
+  rtcConfigPromise = fetch('/api/game',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'rtcConfig'})
+  })
+    .then(async response=>{
+      const data = await response.json();
+      if(!response.ok) throw new Error(data.error || 'No se pudo cargar TURN');
+      if(Array.isArray(data.iceServers) && data.iceServers.length){
+        RTC_CONFIG = {iceServers:data.iceServers};
+      }
+      return RTC_CONFIG;
+    })
+    .catch(error=>{
+      console.error('TURN config error', error);
+      rtcConfigPromise = null;
+      return RTC_CONFIG;
+    });
+
+  return rtcConfigPromise;
+}
+
+loadRTCConfig();
 
 
 /* =========================
@@ -2830,11 +2858,12 @@ async function sendSignal(to, signal){
   });
 }
 
-function createPeerConnection(remoteId){
+async function createPeerConnection(remoteId){
   if(peerConnections.has(remoteId)){
     return peerConnections.get(remoteId);
   }
 
+  await loadRTCConfig();
   const pc = new RTCPeerConnection(RTC_CONFIG);
   peerConnections.set(remoteId, pc);
 
@@ -2875,7 +2904,7 @@ function createPeerConnection(remoteId){
 }
 
 async function makeOffer(remoteId){
-  const pc = createPeerConnection(remoteId);
+  const pc = await createPeerConnection(remoteId);
 
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
@@ -2919,7 +2948,7 @@ async function handleSignals(){
     try{
       const remoteId = item.from;
       const signal = item.signal || {};
-      const pc = createPeerConnection(remoteId);
+      const pc = await createPeerConnection(remoteId);
 
       if(signal.type === 'offer'){
         await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
