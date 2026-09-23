@@ -2468,7 +2468,9 @@ function renderBoard(){
   const mobile = isMobile();
   const W = mobile ? 46 : 60;
   const H = mobile ? 25 : 32;
-  const GAP = 2;
+
+  // Las fichas se tocan. No dejamos separación entre una y otra.
+  const GAP = 0;
 
   const boardW = board.clientWidth;
   const boardH = board.clientHeight;
@@ -2478,15 +2480,25 @@ function renderBoard(){
   const RIGHT = boardW - SIDE;
 
   /*
-    V7 - SERPIENTE CUADRADA
+    V8 - DOS SERPIENTES SEPARADAS
 
-    - La apertura queda fija en el centro real del tablero.
-    - La cadena crece a izquierda y derecha desde esa ficha.
-    - Al llegar al borde, la ficha que hace la esquina se pone VERTICAL.
-    - La fila siguiente regresa en sentido contrario, como en una mesa
-      de dominó tradicional. Ya no usamos la línea blanca como curva.
-    - La orientación visual se calcula según el sentido de recorrido para
-      conservar qué mitad queda hacia la ficha anterior y cuál hacia la siguiente.
+    APERTURA:
+    - La ficha inicial permanece anclada en el centro real del tablero.
+
+    RAMA DERECHA:
+    - Sale hacia la derecha.
+    - Cuando llega al borde, gira 90° HACIA ABAJO.
+    - Regresa hacia la izquierda.
+    - En el siguiente borde vuelve a bajar y cambia otra vez de dirección.
+
+    RAMA IZQUIERDA:
+    - Sale hacia la izquierda.
+    - Cuando llega al borde, gira 90° HACIA ARRIBA.
+    - Regresa hacia la derecha.
+    - En el siguiente borde vuelve a subir y cambia otra vez de dirección.
+
+    Así las dos ramas nunca intentan ocupar la misma fila.
+    Las esquinas son cuadradas y las fichas quedan pegadas.
   */
 
   const CENTER_X = boardW / 2;
@@ -2495,11 +2507,7 @@ function renderBoard(){
   const isDouble = tile => tile[0] === tile[1];
   const visualLength = tile => isDouble(tile) ? H : W;
 
-  /*
-    Cada jugada por la izquierda hace un unshift() en game.board.
-    El número de jugadas ← permite recuperar el índice de la ficha
-    que abrió la ronda y mantenerla anclada en el centro.
-  */
+  // Recuperamos cuál fue la ficha de apertura.
   const history = game.history || [];
   let openingIndex = history.filter(item =>
     typeof item.text === 'string' && item.text.includes('←')
@@ -2518,22 +2526,22 @@ function renderBoard(){
   };
 
   /*
-    Coloca una rama desde la apertura hacia uno de sus extremos.
+    branchSign:
+      +1 = rama derecha
+      -1 = rama izquierda
 
-    branchSign = +1: rama que originalmente sale hacia la derecha.
-    branchSign = -1: rama que originalmente sale hacia la izquierda.
-
-    Cuando no cabe la próxima ficha horizontal, ESA ficha se convierte
-    en la esquina vertical. La ficha siguiente comienza la nueva fila.
+    verticalSign:
+      +1 = las curvas bajan
+      -1 = las curvas suben
   */
-  function layoutBranch(indices, branchSign){
+  function layoutBranch(indices, branchSign, verticalSign){
 
     let dir = branchSign;
     let y = CENTER_Y;
 
     let cursor = branchSign === 1
-      ? CENTER_X + openingLen / 2 + GAP
-      : CENTER_X - openingLen / 2 - GAP;
+      ? CENTER_X + openingLen / 2
+      : CENTER_X - openingLen / 2;
 
     for(const index of indices){
 
@@ -2548,35 +2556,43 @@ function renderBoard(){
       if(!fits){
 
         /*
-          ESQUINA REAL DE 90°.
+          ESQUINA CUADRADA REAL
 
-          Una ficha normal se coloca vertical en el borde. Su mitad de
-          entrada queda a la altura de la fila actual y su mitad de salida
-          apunta hacia la fila inferior. Después invertimos el sentido.
+          La ficha de la esquina se pone vertical.
+          Su mitad de entrada queda exactamente alineada con la fila actual.
+          Su mitad de salida queda exactamente alineada con la fila nueva.
 
-          En la rama derecha la orientación lógica de las fichas coincide
-          con el recorrido desde la apertura. En la rama izquierda ocurre
-          al revés, por eso la rotación depende de branchSign y dir.
+          No hay GAP y no hay superposición.
         */
         const edgeX = dir === 1
           ? RIGHT - H / 2
           : LEFT + H / 2;
 
-        const cornerCy = y + W / 4 + GAP / 2;
+        const cornerCy = y + verticalSign * (W / 4);
 
         let cornerRot;
 
         if(dbl){
+          // Un doble en la esquina sigue viéndose perpendicular.
           cornerRot = 90;
         }else{
-          const forwardOnLogicalOrder = (dir === branchSign);
-
-          if(dir === 1){
-            // Entrada por la izquierda, salida hacia abajo.
-            cornerRot = forwardOnLogicalOrder ? 90 : 270;
+          /*
+            Rotación según:
+            - desde qué lado entra la cadena
+            - si la curva sube o baja
+            Mantiene el valor conectado mirando hacia la ficha anterior.
+          */
+          if(verticalSign === 1){
+            // Curva hacia abajo
+            cornerRot = dir === 1 ? 90 : 270;
           }else{
-            // Entrada por la derecha, salida hacia abajo.
-            cornerRot = forwardOnLogicalOrder ? 270 : 90;
+            // Curva hacia arriba
+            cornerRot = dir === 1 ? 270 : 90;
+          }
+
+          // En la rama izquierda el orden lógico del array es inverso.
+          if(branchSign === -1){
+            cornerRot = (cornerRot + 180) % 360;
           }
         }
 
@@ -2586,15 +2602,16 @@ function renderBoard(){
           rot: cornerRot
         };
 
-        // La nueva fila queda alineada con la mitad inferior de la esquina.
-        y = y + W / 2 + GAP;
+        // La siguiente fila queda pegada a la otra mitad de la esquina.
+        y += verticalSign * (W / 2);
+
+        // Cambiamos el sentido horizontal.
         dir *= -1;
 
-        // El próximo dominó horizontal arranca pegado a la esquina,
-        // sin superponerse y sin dejar el hueco grande de versiones previas.
+        // El siguiente dominó arranca exactamente al lado de la esquina.
         cursor = dir === -1
-          ? edgeX - H / 2 - GAP
-          : edgeX + H / 2 + GAP;
+          ? edgeX - H / 2
+          : edgeX + H / 2;
 
         continue;
       }
@@ -2606,16 +2623,23 @@ function renderBoard(){
       let rot;
 
       if(dbl){
-        // Los dobles siguen perpendiculares a la dirección de la fila.
+        // Dobles perpendiculares a la fila.
         rot = 90;
       }else{
-        // Al regresar por otra fila, la ficha gira 180° para conservar
-        // visualmente el extremo conectado con la ficha anterior.
+        /*
+          Si la fila regresa en sentido contrario, giramos la ficha 180°
+          únicamente para conservar la continuidad de los valores.
+        */
         rot = dir === branchSign ? 0 : 180;
       }
 
-      positions[index] = { cx, cy:y, rot };
-      cursor += dir * (len + GAP);
+      positions[index] = {
+        cx,
+        cy: y,
+        rot
+      };
+
+      cursor += dir * len;
     }
   }
 
@@ -2629,8 +2653,9 @@ function renderBoard(){
     leftIndices.push(i);
   }
 
-  layoutBranch(rightIndices, 1);
-  layoutBranch(leftIndices, -1);
+  // Derecha baja. Izquierda sube.
+  layoutBranch(rightIndices, 1, 1);
+  layoutBranch(leftIndices, -1, -1);
 
   pieces.forEach((tile, i) => {
 
