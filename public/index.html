@@ -2,10 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1,viewport-fit=cover"
->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 <title>Dominó Online</title>
 
 <style>
@@ -21,23 +19,16 @@
   box-sizing:border-box;
 }
 
-html,
-body{
+html,body{
   margin:0;
   width:100%;
   height:100%;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--felt);
+  color:var(--ink);
 }
 
 body{
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
-  background:var(--felt);
-  color:var(--ink);
   overflow:hidden;
 }
 
@@ -48,12 +39,21 @@ body{
   height:100dvh;
 }
 
+/* =========================
+   PANEL LATERAL
+========================= */
+
 .side{
   background:var(--panel);
   padding:18px;
   overflow-y:auto;
+  overflow-x:hidden;
+  z-index:10;
   transition:transform .25s ease;
-  z-index:20;
+}
+
+.side h2{
+  margin-top:25px;
 }
 
 .toggle{
@@ -61,12 +61,18 @@ body{
   left:270px;
   top:14px;
   z-index:30;
-
   width:42px;
   height:42px;
   padding:0;
-
   font-size:20px;
+}
+
+.side.closed{
+  transform:translateX(-100%);
+}
+
+.side.closed ~ .main .toggle{
+  left:12px;
 }
 
 button,
@@ -95,18 +101,143 @@ input{
   max-width:100%;
 }
 
-.row{
+label{
+  display:inline-block;
+  margin:3px 0;
+}
+
+/* =========================
+   AREA PRINCIPAL
+========================= */
+
+.main{
+  position:relative;
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto auto;
+  overflow:hidden;
+}
+
+.top{
+  padding:12px 55px;
+  text-align:center;
+  min-height:48px;
+}
+
+.board{
+  min-height:0;
   display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  overflow:auto;
+  padding:25px;
   flex-wrap:wrap;
 }
 
-.small{
-  font-size:12px;
-  opacity:.8;
+/* =========================
+   FICHAS
+========================= */
+
+.tile{
+  display:flex;
+  flex:0 0 auto;
+  background:#fff;
+  color:#111;
+  border-radius:8px;
+  border:2px solid #222;
+  box-shadow:0 3px 8px #0005;
+  cursor:pointer;
+  overflow:hidden;
 }
+
+.tile-half{
+  width:48px;
+  height:62px;
+  position:relative;
+  display:block;
+}
+
+.tile-half + .tile-half{
+  border-left:2px solid #222;
+}
+
+.pip{
+  position:absolute;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#111;
+  transform:translate(-50%,-50%);
+}
+
+.p1{left:25%;top:25%}
+.p2{left:50%;top:25%}
+.p3{left:75%;top:25%}
+
+.p4{left:25%;top:50%}
+.p5{left:50%;top:50%}
+.p6{left:75%;top:50%}
+
+.p7{left:25%;top:75%}
+.p8{left:50%;top:75%}
+.p9{left:75%;top:75%}
+
+.selected{
+  outline:4px solid var(--accent);
+  transform:translateY(-4px);
+}
+
+/* =========================
+   MANO
+========================= */
+
+.hand{
+  min-height:94px;
+  background:#0003;
+  padding:12px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+
+.hand .tile{
+  flex:0 0 auto;
+}
+
+/* =========================
+   CONTROLES
+========================= */
+
+.controls{
+  text-align:center;
+  padding:8px;
+  background:#0001;
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.controls button{
+  margin:0;
+}
+
+/* =========================
+   PANEL
+========================= */
 
 details{
   margin:12px 0;
+}
+
+summary{
+  cursor:pointer;
+  font-size:17px;
 }
 
 .players div{
@@ -116,140 +247,36 @@ details{
   border-radius:7px;
 }
 
-.scoreBox{
-  background:#ffffff10;
-  padding:10px;
-  margin:10px 0;
-  border-radius:8px;
-  font-size:14px;
-}
-
-.main{
-  position:relative;
+.row{
   display:flex;
-  flex-direction:column;
-  min-width:0;
-  height:100%;
-}
-
-.top{
-  flex:0 0 auto;
-  padding:12px 60px;
-  text-align:center;
-  min-height:48px;
-}
-
-.board{
-  flex:1 1 auto;
-  min-height:0;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  gap:5px;
-  overflow:auto;
-  padding:30px;
   flex-wrap:wrap;
-}
-
-.tile{
-  display:flex;
-  flex:0 0 auto;
-
-  background:#fff;
-  color:#111;
-
-  border-radius:8px;
-  border:2px solid #222;
-
-  box-shadow:
-    0 3px 8px #0005;
-
-  cursor:pointer;
-}
-
-.tile .face{
-  width:48px;
-  height:60px;
-
-  display:grid;
-
-  grid-template-columns:
-    repeat(3,1fr);
-
-  grid-template-rows:
-    repeat(3,1fr);
-
-  padding:7px;
-
   align-items:center;
-  justify-items:center;
 }
 
-.tile .face+.face{
-  border-left:
-    2px solid #222;
+.small{
+  font-size:12px;
+  opacity:.8;
 }
 
-.tile .face i{
-  width:9px;
-  height:9px;
-
-  border-radius:50%;
-}
-
-.tile .face i.pip{
-  background:#111;
-}
-
-.selected{
-  outline:
-    4px solid var(--accent);
-}
-
-.hand{
-  flex:0 0 auto;
-
-  min-height:105px;
-
-  background:#0003;
-
-  padding:12px;
-
-  display:flex;
-
-  gap:8px;
-
-  align-items:center;
-
-  overflow-x:auto;
-  overflow-y:hidden;
-}
-
-.actions{
-  flex:0 0 auto;
-
-  text-align:center;
-
+.bot-options{
+  margin:8px 0 10px;
   padding:8px;
-
-  padding-bottom:
-    max(
-      8px,
-      env(safe-area-inset-bottom)
-    );
-
-  background:var(--felt);
-
-  display:flex;
-
-  justify-content:center;
-
-  gap:6px;
-
-  flex-wrap:wrap;
+  background:#ffffff0b;
+  border-radius:8px;
 }
+
+.bot-options label{
+  display:block;
+}
+
+#msg{
+  font-size:13px;
+  line-height:1.3;
+}
+
+/* =========================
+   TELÉFONO
+========================= */
 
 @media(max-width:700px){
 
@@ -259,181 +286,99 @@ details{
 
   .app{
     display:block;
-    position:relative;
-
-    width:100%;
     height:100dvh;
   }
 
   .side{
     position:fixed;
-
-    top:0;
     left:0;
-
-    width:min(88vw,340px);
+    top:0;
+    bottom:0;
+    width:min(82vw,300px);
     height:100dvh;
-
-    padding:
-      max(
-        18px,
-        env(safe-area-inset-top)
-      )
-      18px
-      max(
-        24px,
-        env(safe-area-inset-bottom)
-      )
-      18px;
-
-    transform:
-      translateX(-100%);
-
-    box-shadow:
-      8px 0 25px #0006;
+    z-index:20;
+    padding:16px;
+    box-shadow:8px 0 18px #0004;
   }
 
-  .side.open{
-    transform:
-      translateX(0);
+  .side.closed{
+    transform:translateX(-100%);
   }
 
   .toggle{
-    position:fixed;
-
-    top:
-      max(
-        10px,
-        env(safe-area-inset-top)
-      );
-
-    left:10px;
-
-    width:44px;
-    height:44px;
-
-    z-index:40;
-
-    margin:0;
+    left:min(calc(82vw - 44px),256px);
+    top:12px;
   }
 
-  .side.open +
-  .main
-  .toggle{
-    left:
-      min(
-        calc(88vw - 54px),
-        286px
-      );
+  .side.closed ~ .main .toggle{
+    left:12px;
   }
 
   .main{
     width:100%;
     height:100dvh;
+    grid-template-rows:
+      auto
+      minmax(0,1fr)
+      auto
+      auto;
   }
 
   .top{
-    min-height:58px;
-
-    padding:
-      max(
-        16px,
-        env(safe-area-inset-top)
-      )
-      60px
-      8px
-      60px;
-
+    min-height:44px;
+    padding:12px 55px;
     font-size:14px;
   }
 
   .board{
-    padding:
-      15px 10px;
-
-    gap:4px;
-
+    padding:12px;
     align-content:center;
+    justify-content:center;
   }
 
-  .tile .face{
+  .hand{
+    min-height:82px;
+    padding:8px;
+    gap:6px;
+  }
+
+  .tile-half{
     width:36px;
-    height:48px;
-
-    padding:5px;
+    height:50px;
   }
 
-  .tile .face i{
+  .pip{
     width:7px;
     height:7px;
   }
 
-  .hand{
-    width:100%;
-
-    min-height:74px;
-
-    padding:8px;
-
-    gap:6px;
-
-    overflow-x:auto;
-
-    -webkit-overflow-scrolling:
-      touch;
-  }
-
-  .actions{
-    width:100%;
-
-    display:grid;
-
-    grid-template-columns:
-      1fr 1fr;
-
-    gap:6px;
-
+  .controls{
     padding:
       7px
-      7px
-      max(
-        10px,
-        env(safe-area-inset-bottom)
-      );
+      6px
+      calc(7px + env(safe-area-inset-bottom));
+    gap:5px;
   }
 
-  .actions button{
-    margin:0;
-
-    padding:
-      10px 5px;
-
+  .controls button{
     font-size:12px;
-
-    min-height:40px;
+    padding:9px 8px;
   }
 
-  .side h2{
-    margin-top:50px;
-  }
 }
 
 @media(max-width:390px){
 
-  .tile .face{
-    width:32px;
-    height:44px;
-    padding:4px;
+  .tile-half{
+    width:33px;
+    height:47px;
   }
 
-  .tile .face i{
-    width:6px;
-    height:6px;
-  }
-
-  .actions button{
+  .controls button{
     font-size:11px;
+    padding:8px 6px;
   }
+
 }
 
 </style>
@@ -443,14 +388,13 @@ details{
 
 <div class="app">
 
-<aside
-  class="side"
-  id="side"
->
+<!-- =========================
+     PANEL LATERAL
+========================= -->
 
-<h2>
-🁣 Dominó Online
-</h2>
+<aside class="side" id="side">
+
+<h2>🁣 Dominó Online</h2>
 
 <div id="lobby">
 
@@ -459,17 +403,44 @@ details{
   placeholder="Tu nombre"
 >
 
-<select id="max">
-  <option>2</option>
-  <option>3</option>
-  <option selected>
-    4
-  </option>
-</select>
+<br>
 
-<button
-  onclick="create()"
+<label>
+Jugadores
+<select
+  id="max"
+  onchange="updateBotOptions()"
 >
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4" selected>4</option>
+</select>
+</label>
+
+<div class="bot-options">
+
+<label>
+Bots
+<select id="botCount">
+  <option value="0">0 bots</option>
+  <option value="1">1 bot</option>
+  <option value="2">2 bots</option>
+  <option value="3">3 bots</option>
+</select>
+</label>
+
+<label>
+Dificultad
+<select id="botDifficulty">
+  <option value="easy">Fácil</option>
+  <option value="normal" selected>Normal</option>
+  <option value="hard">Difícil</option>
+</select>
+</label>
+
+</div>
+
+<button onclick="create()">
 Crear sala
 </button>
 
@@ -480,9 +451,7 @@ Crear sala
   placeholder="Código"
 >
 
-<button
-  onclick="join()"
->
+<button onclick="join()">
 Unirme
 </button>
 
@@ -490,19 +459,16 @@ Unirme
 
 </div>
 
-<div
-  id="room"
-  hidden
->
+<!-- SALA -->
+
+<div id="room" hidden>
 
 <h3>
 Sala
 <b id="roomCode"></b>
 </h3>
 
-<button
-  onclick="copyLink()"
->
+<button onclick="copyLink()">
 Copiar URL
 </button>
 
@@ -522,11 +488,6 @@ Nueva ronda
 </button>
 
 <div
-  class="scoreBox"
-  id="scoreBox"
-></div>
-
-<div
   class="players"
   id="players"
 ></div>
@@ -535,6 +496,8 @@ Nueva ronda
 
 </div>
 
+<!-- REGLAS -->
+
 <details open>
 
 <summary>
@@ -542,55 +505,25 @@ Reglas
 </summary>
 
 <p class="small">
-
 28 fichas, valores 0 a 6.
 De 2 a 4 jugadores.
-
 Cada jugador recibe 7 fichas.
-
-La partida comienza con el
-doble más alto disponible.
-
-La ficha inicial se coloca
-automáticamente.
-
-En cada turno se juega una
-ficha que coincida con uno
-de los extremos.
-
-Si no puedes jugar y quedan
-fichas en el pozo, debes robar.
-
-Si no puedes jugar y el pozo
-está vacío, debes pasar.
-
-No puedes robar si ya tienes
-una ficha válida.
-
-No puedes pasar si puedes
-jugar o todavía quedan fichas
-en el pozo.
-
-Con 4 jugadores se juega por
-parejas:
-
-Jugador 1 y Jugador 3 =
-Equipo A.
-
-Jugador 2 y Jugador 4 =
-Equipo B.
-
-La ronda termina cuando un
-jugador se queda sin fichas
-o cuando todos quedan
-bloqueados.
-
-La meta puede ser 100 o
-150 puntos.
-
+Comienza quien tenga el doble más alto.
+En cada turno coloca una ficha que coincida
+con uno de los extremos.
+Si no puedes jugar, roba del pozo mientras
+haya fichas.
+Si el pozo está vacío, pasa.
+La ronda termina cuando alguien se queda
+sin fichas o cuando el juego queda cerrado.
+Con 4 jugadores se juega por parejas:
+jugadores 1 y 3 contra jugadores 2 y 4.
+Meta sugerida: 100 o 150 puntos.
 </p>
 
 </details>
+
+<!-- SETTINGS -->
 
 <details>
 
@@ -599,20 +532,15 @@ Settings
 </summary>
 
 <label>
-
 Color mesa
 
 <input
   type="color"
   value="#0d6b4d"
   oninput="
-    document
-    .documentElement
+    document.documentElement
     .style
-    .setProperty(
-      '--felt',
-      this.value
-    )
+    .setProperty('--felt',this.value)
   "
 >
 
@@ -621,15 +549,12 @@ Color mesa
 <br>
 
 <label>
-
 Música
 
 <input
   id="music"
   type="checkbox"
-  onchange="
-    music(this.checked)
-  "
+  onchange="toggleMusic(this.checked)"
 >
 
 </label>
@@ -637,12 +562,11 @@ Música
 <br>
 
 <label>
-
 Meta
 
 <select id="target">
-  <option>100</option>
-  <option>150</option>
+  <option value="100">100</option>
+  <option value="150">150</option>
 </select>
 
 </label>
@@ -651,11 +575,20 @@ Meta
 
 </aside>
 
+<!-- =========================
+     JUEGO
+========================= -->
+
 <main class="main">
 
 <button
   class="toggle"
-  onclick="toggleMenu()"
+  onclick="
+    document
+    .getElementById('side')
+    .classList
+    .toggle('closed')
+  "
 >
 ☰
 </button>
@@ -665,11 +598,6 @@ Meta
 <b id="status">
 Crea o únete a una sala
 </b>
-
-<div
-  id="boneyardInfo"
-  class="small"
-></div>
 
 </div>
 
@@ -683,33 +611,21 @@ Crea o únete a una sala
   id="hand"
 ></div>
 
-<div class="actions">
+<div class="controls">
 
-<button
-  id="leftButton"
-  onclick="play('left')"
->
+<button onclick="play('left')">
 ← Colocar izquierda
 </button>
 
-<button
-  id="rightButton"
-  onclick="play('right')"
->
+<button onclick="play('right')">
 Colocar derecha →
 </button>
 
-<button
-  id="drawButton"
-  onclick="act('draw')"
->
+<button onclick="act('draw')">
 Robar del pozo
 </button>
 
-<button
-  id="passButton"
-  onclick="act('pass')"
->
+<button onclick="act('pass')">
 Pasar
 </button>
 
@@ -721,50 +637,34 @@ Pasar
 
 <script>
 
+/* =========================
+   VARIABLES
+========================= */
+
 let game;
 let pid;
 let selected = null;
 let poll;
+let audioContext;
+let oscillator;
 
 const qs =
   new URLSearchParams(
     location.search
   );
 
-if (qs.get('room')) {
-  code.value =
+if(qs.get('room')){
+  document.getElementById('code').value =
     qs.get('room');
 }
 
-function isMobile() {
-  return window
-    .matchMedia(
-      '(max-width:700px)'
-    )
-    .matches;
-}
+/* =========================
+   API
+========================= */
 
-function toggleMenu() {
-  if (isMobile()) {
-    side.classList
-      .toggle('open');
-  } else {
-    side.classList
-      .toggle('closed');
-  }
-}
+async function api(body){
 
-function closeMobileMenu() {
-  if (isMobile()) {
-    side.classList
-      .remove('open');
-  }
-}
-
-const api =
-async body => {
-
-  const r =
+  const response =
     await fetch(
       '/api/game',
       {
@@ -780,36 +680,125 @@ async body => {
       }
     );
 
-  let j;
+  let data;
 
-  try {
-    j = await r.json();
-  } catch {
-    throw Error(
-      'El servidor devolvió una respuesta inválida'
+  try{
+    data =
+      await response.json();
+  }catch{
+    throw new Error(
+      'El servidor devolvió una respuesta inválida.'
     );
   }
 
-  if (!r.ok) {
-    throw Error(
-      j.error ||
+  if(!response.ok){
+    throw new Error(
+      data.error ||
       'Error del servidor'
     );
   }
 
-  return j;
-};
+  return data;
+}
 
-async function create() {
+/* =========================
+   BOTS
+========================= */
 
-  try {
+function updateBotOptions(){
+
+  const total =
+    Number(
+      document
+      .getElementById('max')
+      .value
+    );
+
+  const botSelect =
+    document
+    .getElementById('botCount');
+
+  const current =
+    Number(
+      botSelect.value || 0
+    );
+
+  botSelect.innerHTML = '';
+
+  for(
+    let i = 0;
+    i <= total - 1;
+    i++
+  ){
+
+    const option =
+      document
+      .createElement('option');
+
+    option.value = i;
+
+    if(i === 0){
+      option.textContent =
+        '0 bots';
+    }
+    else if(i === 1){
+      option.textContent =
+        '1 bot';
+    }
+    else{
+      option.textContent =
+        `${i} bots`;
+    }
+
+    botSelect
+      .appendChild(option);
+  }
+
+  botSelect.value =
+    Math.min(
+      current,
+      total - 1
+    );
+}
+
+updateBotOptions();
+
+/* =========================
+   CREAR SALA
+========================= */
+
+async function create(){
+
+  try{
 
     const r =
       await api({
         action:'create',
-        name:name.value,
-        maxPlayers:max.value,
-        target:target.value
+
+        name:
+          document
+          .getElementById('name')
+          .value,
+
+        maxPlayers:
+          document
+          .getElementById('max')
+          .value,
+
+        botCount:
+          document
+          .getElementById('botCount')
+          .value,
+
+        botDifficulty:
+          document
+          .getElementById('botDifficulty')
+          .value,
+
+        target:
+          document
+          .getElementById('target')
+          .value
       });
 
     pid =
@@ -820,27 +809,44 @@ async function create() {
 
     enter();
 
-  } catch(e) {
+  }catch(e){
 
     alert(e.message);
 
   }
 }
 
-async function join() {
+/* =========================
+   UNIRSE
+========================= */
 
-  try {
+async function join(){
+
+  try{
+
+    const roomCode =
+      document
+      .getElementById('code')
+      .value
+      .trim()
+      .toUpperCase();
+
+    if(!roomCode){
+      return alert(
+        'Introduce el código de la sala'
+      );
+    }
 
     const r =
       await api({
         action:'join',
-        code:
-          code.value
-          .trim()
-          .toUpperCase(),
+
+        code:roomCode,
 
         name:
-          name.value
+          document
+          .getElementById('name')
+          .value
       });
 
     pid =
@@ -851,77 +857,93 @@ async function join() {
 
     enter();
 
-  } catch(e) {
+  }catch(e){
 
     alert(e.message);
 
   }
 }
 
-function enter() {
+/* =========================
+   ENTRAR
+========================= */
 
-  room.hidden =
-    false;
+function enter(){
 
-  lobby.hidden =
-    true;
+  document
+    .getElementById('room')
+    .hidden = false;
 
-  roomCode.textContent =
-    game.code;
+  document
+    .getElementById('lobby')
+    .hidden = true;
 
-  history
-    .replaceState(
-      null,
-      '',
-      '?room=' +
-      game.code
-    );
+  document
+    .getElementById('roomCode')
+    .textContent =
+      game.code;
+
+  history.replaceState(
+    null,
+    '',
+    '?room=' + game.code
+  );
 
   render();
 
-  if (poll) {
-    clearInterval(poll);
-  }
+  clearInterval(poll);
 
   poll =
     setInterval(
       refresh,
       1200
     );
-
-  closeMobileMenu();
 }
 
-async function refresh() {
+/* =========================
+   REFRESH MULTIJUGADOR
+========================= */
 
-  try {
+async function refresh(){
 
-    const r =
+  if(!game || !game.code){
+    return;
+  }
+
+  try{
+
+    const response =
       await fetch(
         '/api/game?code=' +
-        encodeURIComponent(
-          game.code
-        ) +
+        encodeURIComponent(game.code) +
         '&playerId=' +
-        encodeURIComponent(
-          pid
-        )
+        encodeURIComponent(pid || '')
       );
 
-    if (r.ok) {
+    if(response.ok){
 
       game =
-        await r.json();
+        await response.json();
 
       render();
     }
 
-  } catch {}
+  }catch(e){
+
+    console.log(
+      'Refresh error',
+      e
+    );
+  }
 }
 
-async function act(action) {
+/* =========================
+   ACCIONES
+========================= */
 
-  try {
+async function act(action){
+
+  try{
 
     game =
       await api({
@@ -930,31 +952,31 @@ async function act(action) {
         playerId:pid
       });
 
-    selected =
-      null;
+    selected = null;
 
     render();
 
-  } catch(e) {
+  }catch(e){
 
     alert(e.message);
 
   }
 }
 
-async function play(
-  sideToPlay
-) {
+/* =========================
+   JUGAR FICHA
+========================= */
 
-  if (
-    selected === null
-  ) {
+async function play(sideToPlay){
+
+  if(selected === null){
+
     return alert(
       'Selecciona una ficha'
     );
   }
 
-  try {
+  try{
 
     game =
       await api({
@@ -965,59 +987,84 @@ async function play(
         side:sideToPlay
       });
 
-    selected =
-      null;
+    selected = null;
 
     render();
 
-  } catch(e) {
+  }catch(e){
 
     alert(e.message);
 
   }
 }
 
-function pipFace(n) {
+/* =========================
+   PUNTOS DE DOMINÓ
+========================= */
 
-  const layouts = {
+function pipHTML(number){
+
+  const maps = {
+
     0:[],
-    1:[5],
-    2:[1,9],
-    3:[1,5,9],
-    4:[1,3,7,9],
-    5:[1,3,5,7,9],
-    6:[1,3,4,6,7,9]
+
+    1:['p5'],
+
+    2:[
+      'p1',
+      'p9'
+    ],
+
+    3:[
+      'p1',
+      'p5',
+      'p9'
+    ],
+
+    4:[
+      'p1',
+      'p3',
+      'p7',
+      'p9'
+    ],
+
+    5:[
+      'p1',
+      'p3',
+      'p5',
+      'p7',
+      'p9'
+    ],
+
+    6:[
+      'p1',
+      'p3',
+      'p4',
+      'p6',
+      'p7',
+      'p9'
+    ]
   };
 
-  let dots = '';
-
-  for (
-    let pos = 1;
-    pos <= 9;
-    pos++
-  ) {
-
-    dots +=
-      `<i class="${
-        layouts[n]
-        .includes(pos)
-        ? 'pip'
-        : ''
-      }"></i>`;
-  }
-
   return (
-    `<span class="face">` +
-    dots +
-    `</span>`
-  );
+    maps[number] || []
+  )
+  .map(
+    position =>
+      `<i class="pip ${position}"></i>`
+  )
+  .join('');
 }
 
-function tile(
-  t,
-  i,
-  click
-) {
+/* =========================
+   CREAR FICHA VISUAL
+========================= */
+
+function tileElement(
+  tile,
+  index = null,
+  clickable = false
+){
 
   const d =
     document
@@ -1026,213 +1073,277 @@ function tile(
   d.className =
     'tile' +
     (
-      i === selected
-      ? ' selected'
-      : ''
+      index === selected
+        ? ' selected'
+        : ''
     );
 
   d.innerHTML =
-    pipFace(t[0]) +
-    pipFace(t[1]);
+    `<span class="tile-half">
+       ${pipHTML(tile[0])}
+     </span>
+     <span class="tile-half">
+       ${pipHTML(tile[1])}
+     </span>`;
 
-  if (click) {
+  if(clickable){
 
-    d.onclick =
-      () => {
+    d.onclick = () => {
 
-        selected = i;
+      selected =
+        selected === index
+          ? null
+          : index;
 
-        render();
-      };
+      render();
+    };
   }
 
   return d;
 }
 
-function render() {
+/* =========================
+   RENDER
+========================= */
+
+function render(){
+
+  if(!game){
+    return;
+  }
+
+  const status =
+    document
+    .getElementById('status');
+
+  const players =
+    document
+    .getElementById('players');
+
+  const board =
+    document
+    .getElementById('board');
+
+  const hand =
+    document
+    .getElementById('hand');
+
+  const start =
+    document
+    .getElementById('start');
+
+  const newRound =
+    document
+    .getElementById('newRound');
+
+  const msg =
+    document
+    .getElementById('msg');
 
   status.textContent =
     game.message ||
-    game.status;
+    game.status ||
+    '';
 
-  boneyardInfo.textContent =
-    game.status ===
-    'playing'
-      ? `Pozo: ${game.boneyardCount} fichas`
-      : '';
+  msg.textContent =
+    game.status === 'lobby'
+      ? `${game.humanSlots || game.maxPlayers} puesto(s) humano(s). ${game.botCount || 0} bot(s).`
+      : `Pozo: ${game.boneyardCount ?? 0} fichas`;
+
+  /* JUGADORES */
 
   players.innerHTML =
     game.players
     .map(
-      (p,i) => {
+      (player,index) => {
 
-        const arrow =
-          i === game.turn &&
-          game.status ===
-          'playing'
+        const turn =
+          index === game.turn &&
+          game.status === 'playing'
             ? '▶ '
             : '';
 
-        const team =
-          p.team
-            ? ` · Equipo ${p.team}`
-            : '';
-
-        const score =
-          p.score !== null &&
-          p.score !== undefined
-            ? ` · ${p.score} pts`
+        const bot =
+          player.isBot
+            ? ' 🤖'
             : '';
 
         const me =
-          p.isMe
+          player.isMe
             ? ' (Tú)'
             : '';
 
+        const team =
+          player.team
+            ? ` · Equipo ${player.team}`
+            : '';
+
+        const score =
+          player.score !== null &&
+          player.score !== undefined
+            ? ` · ${player.score} pts`
+            : '';
+
         return (
-          `<div>` +
-          arrow +
-          p.name +
-          me +
-          team +
-          ` · ${p.handCount} fichas` +
-          score +
-          `</div>`
+          `<div>
+            ${turn}${player.name}${bot}${me}
+            ${team}
+            · ${player.handCount} fichas
+            ${score}
+          </div>`
         );
       }
     )
     .join('');
 
-  if (
-    game.teamScores
-  ) {
+  if(
+    game.teamScores &&
+    game.players.length === 4
+  ){
 
-    scoreBox.style.display =
-      'block';
-
-    scoreBox.innerHTML =
-      `<b>Marcador por equipos</b><br>` +
-      `Equipo A: ${game.teamScores.A} pts<br>` +
-      `Equipo B: ${game.teamScores.B} pts`;
-
-  } else {
-
-    scoreBox.style.display =
-      'none';
+    players.innerHTML +=
+      `<div>
+        <b>
+        Marcador:
+        Equipo A ${game.teamScores.A}
+        ·
+        Equipo B ${game.teamScores.B}
+        </b>
+      </div>`;
   }
 
-  board.innerHTML =
-    '';
+  /* TABLERO */
 
-  game.board
-    .forEach(
-      t =>
-        board.append(
-          tile(t)
+  board.innerHTML = '';
+
+  (
+    game.board || []
+  )
+  .forEach(
+    t =>
+      board.appendChild(
+        tileElement(t)
+      )
+  );
+
+  /* MANO */
+
+  hand.innerHTML = '';
+
+  (
+    game.myHand || []
+  )
+  .forEach(
+    (t,i) =>
+      hand.appendChild(
+        tileElement(
+          t,
+          i,
+          true
         )
-    );
+      )
+  );
 
-  hand.innerHTML =
-    '';
-
-  (game.myHand || [])
-    .forEach(
-      (t,i) =>
-        hand.append(
-          tile(
-            t,
-            i,
-            true
-          )
-        )
-    );
+  /* BOTONES */
 
   start.style.display =
     game.isHost &&
-    game.status ===
-    'lobby'
+    game.status === 'lobby'
       ? 'inline-block'
       : 'none';
 
   newRound.style.display =
     game.isHost &&
-    game.status ===
-    'finished'
+    game.status === 'finished'
       ? 'inline-block'
       : 'none';
-
-  const myTurn =
-    game.status ===
-    'playing' &&
-    game.myIndex ===
-    game.turn;
-
-  leftButton.disabled =
-    !myTurn;
-
-  rightButton.disabled =
-    !myTurn;
-
-  drawButton.disabled =
-    !myTurn;
-
-  passButton.disabled =
-    !myTurn;
 }
 
-function copyLink() {
+/* =========================
+   COPIAR URL
+========================= */
 
-  navigator
-    .clipboard
-    .writeText(
-      location.origin +
-      '/?room=' +
-      game.code
+async function copyLink(){
+
+  const url =
+    location.origin +
+    '/?room=' +
+    game.code;
+
+  try{
+
+    await navigator
+      .clipboard
+      .writeText(url);
+
+    alert(
+      'URL copiada'
     );
 
-  alert(
-    'URL copiada'
-  );
+  }catch{
+
+    prompt(
+      'Copia esta URL:',
+      url
+    );
+  }
 }
 
-let ac;
+/* =========================
+   MÚSICA
+========================= */
 
-function music(on) {
+function toggleMusic(on){
 
-  if (on) {
+  if(on){
 
-    ac =
-      new AudioContext();
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
 
-    const o =
-      ac.createOscillator();
+    oscillator =
+      audioContext
+      .createOscillator();
 
-    const g =
-      ac.createGain();
+    const gain =
+      audioContext
+      .createGain();
 
-    o.frequency.value =
+    oscillator.frequency.value =
       110;
 
-    g.gain.value =
-      .02;
+    gain.gain.value =
+      0.015;
 
-    o.connect(g)
+    oscillator
+      .connect(gain)
       .connect(
-        ac.destination
+        audioContext.destination
       );
 
-    o.start();
+    oscillator.start();
 
-    window._o = o;
+  }else{
 
-  } else if (
-    window._o
-  ) {
+    if(oscillator){
 
-    window._o.stop();
+      try{
+        oscillator.stop();
+      }catch{}
 
-    window._o =
-      null;
+      oscillator = null;
+    }
+
+    if(audioContext){
+
+      try{
+        audioContext.close();
+      }catch{}
+
+      audioContext = null;
+    }
   }
 }
 
