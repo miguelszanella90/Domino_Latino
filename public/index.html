@@ -1059,41 +1059,81 @@ summary{
 }
 
 
-/* V17: el tablero ocupa el espacio disponible, sin empujar la mano fuera de pantalla */
+/* V18: layout desktop fijo dentro del viewport.
+   La mano y los controles SIEMPRE tienen espacio reservado. */
 @media (min-width:701px){
   .main{
     height:100dvh;
     min-height:0;
     overflow:hidden;
+    display:grid;
+    grid-template-rows:74px minmax(0,1fr) 116px 62px;
+  }
+
+  .top{
+    grid-row:1;
+    min-height:0;
+    height:74px;
+    padding:14px 65px 8px;
   }
 
   .game-content{
+    grid-row:2;
     min-height:0;
+    height:100%;
     overflow:hidden;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 280px;
   }
 
   .table-zone{
     min-height:0;
+    height:100%;
     overflow:hidden;
   }
 
   .board{
     left:4%;
     right:4%;
-    top:4%;
-    bottom:4%;
+    top:3%;
+    bottom:3%;
     min-height:0;
     padding:0;
   }
 
   .hand-zone{
+    grid-row:3;
+    height:116px;
+    min-height:116px;
+    overflow:hidden;
     flex-shrink:0;
     z-index:20;
+    padding:5px 10px 7px;
+  }
+
+  .you-label{
+    margin-bottom:3px;
+  }
+
+  .hand-rack{
+    max-height:88px;
+    padding:7px 10px 8px;
+  }
+
+  .hand{
+    min-height:60px;
+    max-height:64px;
   }
 
   .controls{
+    grid-row:4;
+    height:62px;
+    min-height:62px;
+    overflow:hidden;
     flex-shrink:0;
     z-index:21;
+    padding:7px 8px;
+    align-items:center;
   }
 }
 
