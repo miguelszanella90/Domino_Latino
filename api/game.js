@@ -1,4 +1,8 @@
-const { kv } = require('@vercel/kv');
+const { Redis } = require('@upstash/redis');
+const kv = new Redis({
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN
+});
 const id=()=>Math.random().toString(36).slice(2,8).toUpperCase();
 const set=()=>{let a=[];for(let i=0;i<=6;i++)for(let j=i;j<=6;j++)a.push([i,j]);return a.sort(()=>Math.random()-.5)};
 async function save(g){await kv.set(`domino:${g.code}`,g,{ex:86400})}
