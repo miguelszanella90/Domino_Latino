@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Dominó Online</title>
 
 <style>
@@ -17,42 +17,52 @@
   box-sizing:border-box;
 }
 
-body{
+html,body{
   margin:0;
-  font-family:system-ui;
+  width:100%;
+  height:100%;
+}
+
+body{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   background:var(--felt);
   color:var(--ink);
-  height:100vh;
   overflow:hidden;
 }
 
 .app{
   display:grid;
   grid-template-columns:300px 1fr;
-  height:100%;
+  width:100%;
+  height:100dvh;
 }
+
+/* =========================
+   PANEL LATERAL
+   ========================= */
 
 .side{
   background:var(--panel);
   padding:18px;
-  overflow:auto;
-  transition:.25s;
-}
-
-.side.closed{
-  margin-left:-260px;
+  overflow-y:auto;
+  transition:transform .25s ease;
+  z-index:20;
 }
 
 .toggle{
   position:fixed;
   left:270px;
   top:14px;
-  z-index:4;
+  z-index:30;
+  width:42px;
+  height:42px;
+  padding:0;
+  font-size:20px;
 }
 
-.side.closed+.main .toggle{
-  left:12px;
-}
+/* =========================
+   CONTROLES
+   ========================= */
 
 button,
 input,
@@ -61,104 +71,18 @@ select{
   border-radius:9px;
   border:0;
   margin:4px;
+  font-size:15px;
 }
 
 button{
   cursor:pointer;
   background:var(--accent);
+  color:#111;
   font-weight:700;
 }
 
-.main{
-  position:relative;
-  display:flex;
-  flex-direction:column;
-}
-
-.top{
-  padding:12px;
-  text-align:center;
-}
-
-.board{
-  flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
-  overflow:auto;
-  padding:30px;
-  flex-wrap:wrap;
-}
-
-/* FICHA DE DOMINÓ */
-
-.tile{
-  display:flex;
-  background:#fff;
-  color:#111;
-  border-radius:8px;
-  border:2px solid #222;
-  box-shadow:0 3px 8px #0005;
-  cursor:pointer;
-}
-
-/* Cada mitad de la ficha */
-
-.tile .face{
-  width:48px;
-  height:60px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(3,1fr);
-  padding:7px;
-  align-items:center;
-  justify-items:center;
-}
-
-/* Línea central */
-
-.tile .face+.face{
-  border-left:2px solid #222;
-}
-
-/* Espacios donde pueden ir los puntos */
-
-.tile .face i{
-  width:9px;
-  height:9px;
-  border-radius:50%;
-}
-
-/* Punto negro */
-
-.tile .face i.pip{
-  background:#111;
-}
-
-.hand{
-  min-height:105px;
-  background:#0003;
-  padding:12px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-  overflow:auto;
-}
-
-.selected{
-  outline:4px solid var(--accent);
-}
-
-details{
-  margin:12px 0;
-}
-
-.players div{
-  padding:6px;
-  background:#ffffff12;
-  margin:5px;
-  border-radius:7px;
+input{
+  max-width:100%;
 }
 
 .row{
@@ -171,30 +95,268 @@ details{
   opacity:.8;
 }
 
+details{
+  margin:12px 0;
+}
+
+.players div{
+  padding:7px;
+  background:#ffffff12;
+  margin:5px 0;
+  border-radius:7px;
+}
+
+/* =========================
+   JUEGO
+   ========================= */
+
+.main{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  height:100%;
+}
+
+.top{
+  flex:0 0 auto;
+  padding:12px 60px;
+  text-align:center;
+  min-height:48px;
+}
+
+.board{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  overflow:auto;
+  padding:30px;
+  flex-wrap:wrap;
+}
+
+/* =========================
+   FICHAS
+   ========================= */
+
+.tile{
+  display:flex;
+  flex:0 0 auto;
+  background:#fff;
+  color:#111;
+  border-radius:8px;
+  border:2px solid #222;
+  box-shadow:0 3px 8px #0005;
+  cursor:pointer;
+}
+
+.tile .face{
+  width:48px;
+  height:60px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  padding:7px;
+  align-items:center;
+  justify-items:center;
+}
+
+.tile .face+.face{
+  border-left:2px solid #222;
+}
+
+.tile .face i{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+}
+
+.tile .face i.pip{
+  background:#111;
+}
+
+.selected{
+  outline:4px solid var(--accent);
+}
+
+/* =========================
+   MANO
+   ========================= */
+
+.hand{
+  flex:0 0 auto;
+  min-height:105px;
+  background:#0003;
+  padding:12px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+
+/* =========================
+   BOTONES INFERIORES
+   ========================= */
+
+.actions{
+  flex:0 0 auto;
+  text-align:center;
+  padding:8px;
+  padding-bottom:max(8px,env(safe-area-inset-bottom));
+  background:var(--felt);
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+/* =========================
+   MÓVIL
+   ========================= */
+
 @media(max-width:700px){
 
-  .app{
-    grid-template-columns:260px 1fr;
+  body{
+    overflow:hidden;
   }
+
+  .app{
+    display:block;
+    position:relative;
+    width:100%;
+    height:100dvh;
+  }
+
+  /* El menú ocupa casi toda la pantalla,
+     pero empieza cerrado */
 
   .side{
-    position:absolute;
-    z-index:3;
-    height:100%;
-    width:260px;
+    position:fixed;
+    top:0;
+    left:0;
+    width:min(88vw,340px);
+    height:100dvh;
+    padding:
+      max(18px,env(safe-area-inset-top))
+      18px
+      max(24px,env(safe-area-inset-bottom))
+      18px;
+
+    transform:translateX(-100%);
+    box-shadow:8px 0 25px #0006;
   }
 
-  .side.closed{
-    transform:translateX(-100%);
+  .side.open{
+    transform:translateX(0);
+  }
+
+  /* Botón menú */
+
+  .toggle{
+    position:fixed;
+    top:max(10px,env(safe-area-inset-top));
+    left:10px;
+    width:44px;
+    height:44px;
+    z-index:40;
     margin:0;
   }
 
-  .toggle{
-    left:230px;
+  .side.open + .main .toggle{
+    left:min(calc(88vw - 54px),286px);
   }
 
+  .main{
+    width:100%;
+    height:100dvh;
+  }
+
+  .top{
+    min-height:58px;
+    padding:
+      max(16px,env(safe-area-inset-top))
+      60px
+      8px
+      60px;
+    font-size:14px;
+  }
+
+  .board{
+    padding:15px 10px;
+    gap:4px;
+    align-content:center;
+  }
+
+  /* Fichas un poco más pequeñas */
+
+  .tile .face{
+    width:36px;
+    height:48px;
+    padding:5px;
+  }
+
+  .tile .face i{
+    width:7px;
+    height:7px;
+  }
+
+  /* Mano siempre visible */
+
   .hand{
-    min-height:90px;
+    width:100%;
+    min-height:74px;
+    padding:8px;
+    gap:6px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* Botones accesibles encima de Safari */
+
+  .actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    padding:7px 7px max(10px,env(safe-area-inset-bottom));
+  }
+
+  .actions button{
+    margin:0;
+    padding:10px 5px;
+    font-size:12px;
+    min-height:40px;
+  }
+
+  .side h2{
+    margin-top:50px;
+  }
+
+  #room button{
+    font-size:14px;
+  }
+}
+
+/* Teléfonos muy pequeños */
+
+@media(max-width:390px){
+
+  .tile .face{
+    width:32px;
+    height:44px;
+    padding:4px;
+  }
+
+  .tile .face i{
+    width:6px;
+    height:6px;
+  }
+
+  .actions button{
+    font-size:11px;
   }
 }
 </style>
@@ -297,17 +459,14 @@ Meta
 
 </details>
 
-<p class="small">
-Para multijugador en Vercel conecta Vercel KV/Redis al proyecto.
-</p>
-
 </aside>
 
 <main class="main">
 
 <button
 class="toggle"
-onclick="side.classList.toggle('closed')">
+id="menuButton"
+onclick="toggleMenu()">
 ☰
 </button>
 
@@ -327,7 +486,7 @@ class="hand"
 id="hand">
 </div>
 
-<div style="text-align:center;padding:8px">
+<div class="actions">
 
 <button onclick="play('left')">
 ← Colocar izquierda
@@ -364,6 +523,36 @@ if(qs.get('room')){
   code.value=qs.get('room');
 }
 
+
+/* =========================
+   MENÚ RESPONSIVE
+   ========================= */
+
+function isMobile(){
+  return window.matchMedia('(max-width:700px)').matches;
+}
+
+function toggleMenu(){
+
+  if(isMobile()){
+    side.classList.toggle('open');
+  }else{
+    side.classList.toggle('closed');
+  }
+}
+
+function closeMobileMenu(){
+
+  if(isMobile()){
+    side.classList.remove('open');
+  }
+}
+
+
+/* =========================
+   API
+   ========================= */
+
 const api=async body=>{
 
   let r=await fetch(
@@ -385,6 +574,11 @@ const api=async body=>{
 
   return j;
 };
+
+
+/* =========================
+   CREAR SALA
+   ========================= */
 
 async function create(){
 
@@ -409,6 +603,11 @@ async function create(){
   }
 }
 
+
+/* =========================
+   UNIRSE
+   ========================= */
+
 async function join(){
 
   try{
@@ -431,6 +630,11 @@ async function join(){
   }
 }
 
+
+/* =========================
+   ENTRAR A SALA
+   ========================= */
+
 function enter(){
 
   room.hidden=false;
@@ -450,7 +654,17 @@ function enter(){
     refresh,
     1500
   );
+
+  /* En teléfono cerramos automáticamente
+     el panel para mostrar el tablero */
+
+  closeMobileMenu();
 }
+
+
+/* =========================
+   ACTUALIZAR
+   ========================= */
 
 async function refresh(){
 
@@ -471,6 +685,11 @@ async function refresh(){
   }catch{}
 }
 
+
+/* =========================
+   ACCIONES
+   ========================= */
+
 async function act(action){
 
   try{
@@ -490,7 +709,12 @@ async function act(action){
   }
 }
 
-async function play(side){
+
+/* =========================
+   JUGAR FICHA
+   ========================= */
+
+async function play(sideToPlay){
 
   if(selected===null){
     return alert('Selecciona una ficha');
@@ -503,7 +727,7 @@ async function play(side){
       code:game.code,
       playerId:pid,
       tileIndex:selected,
-      side
+      side:sideToPlay
     });
 
     selected=null;
@@ -539,8 +763,7 @@ function pipFace(n){
   for(let pos=1;pos<=9;pos++){
 
     dots+=`
-      <i class="${layouts[n].includes(pos) ? 'pip' : ''}">
-      </i>
+      <i class="${layouts[n].includes(pos) ? 'pip' : ''}"></i>
     `;
 
   }
@@ -553,7 +776,9 @@ function pipFace(n){
 }
 
 
-/* CREAR VISUALMENTE LA FICHA */
+/* =========================
+   CREAR FICHA
+   ========================= */
 
 function tile(t,i,click){
 
@@ -583,7 +808,9 @@ function tile(t,i,click){
 }
 
 
-/* ACTUALIZAR JUEGO */
+/* =========================
+   RENDER
+   ========================= */
 
 function render(){
 
@@ -630,7 +857,9 @@ function render(){
 }
 
 
-/* COPIAR LINK DE LA SALA */
+/* =========================
+   COPIAR URL
+   ========================= */
 
 function copyLink(){
 
@@ -644,7 +873,9 @@ function copyLink(){
 }
 
 
-/* MUSICA */
+/* =========================
+   MÚSICA
+   ========================= */
 
 let ac;
 
@@ -658,7 +889,6 @@ function music(on){
         g=ac.createGain();
 
     o.frequency.value=110;
-
     g.gain.value=.02;
 
     o.connect(g)
