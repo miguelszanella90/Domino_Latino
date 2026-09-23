@@ -55,6 +55,103 @@ function addHistory(g, text) {
   }
 }
 
+
+/* =========================
+   CHAT
+========================= */
+
+function addChatMessage(g, player, text) {
+  if (!g.chat) {
+    g.chat = [];
+  }
+
+  const clean =
+    String(text || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 300);
+
+  if (!clean) {
+    return false;
+  }
+
+  g.chat.push({
+    id: `${Date.now()}-${id()}`,
+    playerId: player.id,
+    name: player.name,
+    text: clean,
+    time: Date.now()
+  });
+
+  if (g.chat.length > 100) {
+    g.chat =
+      g.chat.slice(-100);
+  }
+
+  return true;
+}
+
+
+/* =========================
+   WEBRTC SIGNALING
+========================= */
+
+function addSignal(
+  g,
+  fromPlayer,
+  toPlayerId,
+  signal
+) {
+  if (!g.signals) {
+    g.signals = [];
+  }
+
+  const target =
+    g.players.find(
+      player =>
+        player.id === toPlayerId &&
+        !player.isBot
+    );
+
+  if (
+    !target ||
+    target.id === fromPlayer.id
+  ) {
+    return false;
+  }
+
+  const allowedTypes = [
+    'offer',
+    'answer',
+    'candidate',
+    'hangup'
+  ];
+
+  if (
+    !signal ||
+    !allowedTypes.includes(signal.type)
+  ) {
+    return false;
+  }
+
+  g.signals.push({
+    id: `${Date.now()}-${id()}`,
+    from: fromPlayer.id,
+    fromName: fromPlayer.name,
+    to: target.id,
+    signal,
+    time: Date.now()
+  });
+
+  if (g.signals.length > 200) {
+    g.signals =
+      g.signals.slice(-200);
+  }
+
+  return true;
+}
+
+
 function canPlayTile(tile, board) {
   if (!tile) return false;
   if (!board.length) return true;
@@ -471,6 +568,7 @@ function placeTile(
     }
 
     g.board.unshift(placed);
+
   } else {
     if (tile[0] === right) {
       placed = tile;
@@ -716,6 +814,15 @@ function publicGame(
     history:
       g.history || [],
 
+    chat:
+      g.chat || [],
+
+    signals:
+      (g.signals || []).filter(
+        signal =>
+          signal.to === playerId
+      ),
+
     myIndex,
 
     myHand:
@@ -732,6 +839,11 @@ function publicGame(
     players:
       g.players.map(
         (player, index) => ({
+          id:
+            player.isBot
+              ? null
+              : player.id,
+
           name:
             player.name,
 
@@ -762,6 +874,7 @@ function publicGame(
         : null
   };
 }
+
 
 module.exports =
 async (req, res) => {
@@ -898,6 +1011,10 @@ async (req, res) => {
 
         history: [],
 
+        chat: [],
+
+        signals: [],
+
         consecutivePasses: 0,
 
         roundNumber: 0
@@ -930,6 +1047,170 @@ async (req, res) => {
             'Sala no encontrada'
         });
     }
+
+
+    /* =========================
+       CHAT
+    ========================= */
+
+    if (
+      action ===
+      'chat'
+    ) {
+      const sender =
+        g.players.find(
+          player =>
+            player.id === b.playerId &&
+            !player.isBot
+        );
+
+      if (!sender) {
+        return res
+          .status(403)
+          .json({
+            error:
+              'Jugador inválido'
+          });
+      }
+
+      const ok =
+        addChatMessage(
+          g,
+          sender,
+          b.text
+        );
+
+      if (!ok) {
+        return res
+          .status(400)
+          .json({
+            error:
+              'El mensaje está vacío'
+          });
+      }
+
+      await save(g);
+
+      return res.json(
+        publicGame(
+          g,
+          b.playerId
+        )
+      );
+    }
+
+
+    /* =========================
+       WEBRTC SIGNAL
+    ========================= */
+
+    if (
+      action ===
+      'signal'
+    ) {
+      const sender =
+        g.players.find(
+          player =>
+            player.id === b.playerId &&
+            !player.isBot
+        );
+
+      if (!sender) {
+        return res
+          .status(403)
+          .json({
+            error:
+              'Jugador inválido'
+          });
+      }
+
+      const ok =
+        addSignal(
+          g,
+          sender,
+          b.to,
+          b.signal
+        );
+
+      if (!ok) {
+        return res
+          .status(400)
+          .json({
+            error:
+              'Señal de cámara inválida'
+          });
+      }
+
+      await save(g);
+
+      return res.json(
+        publicGame(
+          g,
+          b.playerId
+        )
+      );
+    }
+
+
+    /* =========================
+       ACK WEBRTC SIGNALS
+    ========================= */
+
+    if (
+      action ===
+      'ackSignals'
+    ) {
+      const sender =
+        g.players.find(
+          player =>
+            player.id === b.playerId &&
+            !player.isBot
+        );
+
+      if (!sender) {
+        return res
+          .status(403)
+          .json({
+            error:
+              'Jugador inválido'
+          });
+      }
+
+      const ids =
+        Array.isArray(b.signalIds)
+          ? new Set(
+              b.signalIds
+                .map(String)
+                .slice(0, 100)
+            )
+          : new Set();
+
+      g.signals =
+        (g.signals || []).filter(
+          signal =>
+            !(
+              signal.to ===
+                b.playerId &&
+              ids.has(
+                String(signal.id)
+              )
+            )
+        );
+
+      await save(g);
+
+      return res.json(
+        publicGame(
+          g,
+          b.playerId
+        )
+      );
+    }
+
+
+    /* =========================
+       JOIN
+    ========================= */
 
     if (
       action ===
@@ -1005,6 +1286,11 @@ async (req, res) => {
       });
     }
 
+
+    /* =========================
+       START
+    ========================= */
+
     if (
       action ===
       'start'
@@ -1079,6 +1365,11 @@ async (req, res) => {
       );
     }
 
+
+    /* =========================
+       NEW ROUND
+    ========================= */
+
     if (
       action ===
       'newRound'
@@ -1118,6 +1409,11 @@ async (req, res) => {
         )
       );
     }
+
+
+    /* =========================
+       BOT STEP
+    ========================= */
 
     if (
       action ===
@@ -1267,6 +1563,11 @@ async (req, res) => {
       );
     }
 
+
+    /* =========================
+       VALIDATE HUMAN PLAYER
+    ========================= */
+
     const pi =
       g.players.findIndex(
         player =>
@@ -1308,6 +1609,11 @@ async (req, res) => {
 
     const player =
       g.players[pi];
+
+
+    /* =========================
+       DRAW
+    ========================= */
 
     if (
       action ===
@@ -1359,6 +1665,11 @@ async (req, res) => {
         )
       );
     }
+
+
+    /* =========================
+       PASS
+    ========================= */
 
     if (
       action ===
@@ -1425,6 +1736,11 @@ async (req, res) => {
         )
       );
     }
+
+
+    /* =========================
+       PLAY
+    ========================= */
 
     if (
       action ===
