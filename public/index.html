@@ -2594,14 +2594,26 @@ function renderBoard(){
         nextY = TOP_LANE;
       }
 
-      const cornerCy = (y + nextY) / 2;
+      /*
+        La pieza de la esquina debe tocar las filas por LOS BORDES,
+        no cruzarlas.
+
+        Para una ficha vertical de alto visual W:
+        - su borde superior toca el borde inferior de la fila anterior
+        - su borde inferior toca el borde superior de la fila siguiente
+
+        Por eso el centro queda exactamente a W/2 desde la fila actual,
+        en la dirección de la curva.
+      */
+      const verticalSign = nextY >= y ? 1 : -1;
+
+      const cornerCy =
+        y + verticalSign * (H / 2 + W / 2);
 
       let cornerRot;
       if(dbl){
         cornerRot = 90;
       }else{
-        const verticalSign = nextY >= y ? 1 : -1;
-
         if(verticalSign === 1){
           // Curva que baja: mantener la orientación actual
           cornerRot = dir === 1 ? 90 : 270;
@@ -2621,7 +2633,11 @@ function renderBoard(){
         rot: cornerRot
       };
 
-      y = nextY;
+      /*
+        Ajustamos la nueva fila para que quede conectada al borde inferior
+        de la pieza vertical, sin montarse sobre ella.
+      */
+      y = cornerCy + verticalSign * (W / 2 + H / 2);
       dir *= -1;
 
       // Comenzamos la nueva fila justo después de la esquina,
