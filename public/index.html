@@ -2459,516 +2459,211 @@ function tileElement(
 
 function renderBoard(){
 
-  const board =
-    document
-    .getElementById(
-      'board'
-    );
+  const board = document.getElementById('board');
+  board.innerHTML = '';
 
+  const pieces = game.board || [];
+  if(!pieces.length) return;
 
-  board.innerHTML =
-    '';
+  const mobile = isMobile();
 
+  // Fichas del tablero, más pequeñas que las de la mano.
+  const TILE_W = mobile ? 46 : 60;
+  const TILE_H = mobile ? 25 : 32;
+  const OVERLAP = 1;
 
-  const pieces =
-    game.board ||
-    [];
+  const boardWidth = board.clientWidth;
+  const boardHeight = board.clientHeight;
 
+  const SIDE_MARGIN = mobile ? 18 : 34;
+  const TOP_MARGIN = mobile ? 22 : 32;
 
-  if(
-    !pieces.length
-  ){
-
-    return;
-
-  }
-
-
-  const mobile =
-    isMobile();
-
-
-  /*
-    Board pieces are intentionally
-    smaller and slimmer than the
-    player's hand pieces.
-  */
-
-  const TILE_W =
-    mobile
-      ? 48
-      : 62;
-
-
-  const TILE_H =
-    mobile
-      ? 26
-      : 34;
-
-
-  const GAP =
-    mobile
-      ? 2
-      : 3;
-
-
-  /*
-    More vertical breathing room
-    between snake rows.
-  */
-
-  const ROW_GAP =
-    mobile
-      ? 42
-      : 58;
-
-
-  const boardWidth =
-    board.clientWidth;
-
-
-  const boardHeight =
-    board.clientHeight;
-
-
-  const SIDE_MARGIN =
-    mobile
-      ? 22
-      : 45;
-
-
-  const TOP_MARGIN =
-    mobile
-      ? 20
-      : 35;
-
-
-  let rowCapacity =
-    Math.floor(
-
-      (
-        boardWidth -
-        SIDE_MARGIN * 2
-      )
-
-      /
-
-      (
-        TILE_W +
-        GAP
-      )
-
-    );
-
-
-  rowCapacity =
-    Math.max(
-
-      mobile
-        ? 5
-        : 7,
-
-      Math.min(
-
-        rowCapacity,
-
-        mobile
-          ? 8
-          : 11
-
-      )
-
-    );
-
-
-  const positions =
-    [];
-
-
-  let x =
-    0;
-
-
-  let y =
-    0;
-
-
-  let direction =
-    1;
-
-
-  let countInRow =
-    0;
-
-
-  /*
-    Snake:
-
-    → → → → →
-              ↓
-    ← ← ← ← ←
-    ↓
-    → → → → →
-  */
-
-
-  for(
-
-    let i=0;
-
-    i<pieces.length;
-
-    i++
-
-  ){
-
-    const tile =
-      pieces[i];
-
-
-    const isDouble =
-      tile[0] ===
-      tile[1];
-
-
-    if(
-      countInRow >=
-      rowCapacity
-    ){
-
-      /*
-        Turn piece.
-      */
-
-      x +=
-        direction *
-        (
-          TILE_W *
-          .25
-        );
-
-
-      positions.push({
-
-        x,
-
-        y:
-          y +
-          ROW_GAP / 2,
-
-        rotation:
-          90,
-
-        turn:
-          true,
-
-        double:
-          isDouble
-
-      });
-
-
-      y +=
-        ROW_GAP +
-        TILE_H;
-
-
-      direction *=
-        -1;
-
-
-      x +=
-        direction *
-        (
-          TILE_W *
-          .75
-        );
-
-
-      countInRow =
-        0;
-
-
-      continue;
-
-    }
-
-
-    positions.push({
-
-      x,
-
-      y,
-
-      rotation:
-
-        isDouble
-
-        ? 90
-
-        : 0,
-
-      turn:
-        false,
-
-      double:
-        isDouble
-
-    });
-
-
-    x +=
-
-      direction *
-
-      (
-        TILE_W +
-        GAP
-      );
-
-
-    countInRow++;
-
-  }
-
-
-  const xs =
-    positions.map(
-      p=>p.x
-    );
-
-
-  const ys =
-    positions.map(
-      p=>p.y
-    );
-
-
-  const minX =
-    Math.min(
-      ...xs
-    );
-
-
-  const maxX =
-    Math.max(
-      ...xs
-    );
-
-
-  const minY =
-    Math.min(
-      ...ys
-    );
-
-
-  const maxY =
-    Math.max(
-      ...ys
-    );
-
-
-  const contentWidth =
-
-    maxX -
-    minX +
-    TILE_W;
-
-
-  const contentHeight =
-
-    maxY -
-    minY +
-    TILE_H;
-
-
-  const availableWidth =
-
-    boardWidth -
-    SIDE_MARGIN * 2;
-
-
-  const availableHeight =
-
-    boardHeight -
-    TOP_MARGIN * 2;
-
-
-  let scale =
-    Math.min(
-
-      1,
-
-      availableWidth /
-      contentWidth,
-
-      availableHeight /
-      contentHeight
-
-    );
-
-
-  scale =
-    Math.max(
-
-      mobile
-        ? .68
-        : .74,
-
-      scale
-
-    );
-
-
-  const scaledWidth =
-    contentWidth *
-    scale;
-
-
-  const scaledHeight =
-    contentHeight *
-    scale;
-
-
-  const centerX =
-
-    (
-      boardWidth -
-      scaledWidth
-    )
-
-    /
-    2;
-
-
-  const centerY =
-
-    (
-      boardHeight -
-      scaledHeight
-    )
-
-    /
-    2;
-
-
-  pieces.forEach(
-
-    (
-      tile,
-      index
-    )=>{
-
-
-      const p =
-        positions[index];
-
-
-      const wrapper =
-        document
-        .createElement(
-          'div'
-        );
-
-
-      wrapper.className =
-        'board-piece';
-
-
-      wrapper.style.left =
-
-        (
-
-          centerX +
-
-          (
-            p.x -
-            minX
-          )
-
-          *
-          scale
-
-        )
-
-        +
-        'px';
-
-
-      wrapper.style.top =
-
-        (
-
-          centerY +
-
-          (
-            p.y -
-            minY
-          )
-
-          *
-          scale
-
-        )
-
-        +
-        'px';
-
-
-      wrapper.style.width =
-        TILE_W +
-        'px';
-
-
-      wrapper.style.height =
-        TILE_H +
-        'px';
-
-
-      wrapper.style.transform =
-
-        `scale(${scale}) rotate(${p.rotation}deg)`;
-
-
-      const domino =
-        document
-        .createElement(
-          'div'
-        );
-
-
-      domino.className =
-        'board-domino';
-
-
-      domino.innerHTML =
-
-        `
-        <span class="board-half">
-          ${pipHTML(tile[0])}
-        </span>
-
-        <span class="board-half">
-          ${pipHTML(tile[1])}
-        </span>
-        `;
-
-
-      wrapper
-        .appendChild(
-          domino
-        );
-
-
-      board
-        .appendChild(
-          wrapper
-        );
-
-    }
-
+  const usableWidth = Math.max(
+    TILE_W * 4,
+    boardWidth - SIDE_MARGIN * 2
   );
 
+  // Cantidad de fichas por tramo horizontal.
+  let rowCapacity = Math.floor(
+    (usableWidth - TILE_H) /
+    (TILE_W - OVERLAP)
+  );
+
+  rowCapacity = Math.max(
+    mobile ? 5 : 7,
+    Math.min(
+      rowCapacity,
+      mobile ? 8 : 12
+    )
+  );
+
+  // Distancia entre tramos. Deja espacio para los dobles.
+  const ROW_STEP = mobile
+    ? TILE_H + 30
+    : TILE_H + 38;
+
+  const positions = [];
+
+  let direction = 1;
+  let countInRow = 0;
+  let x = 0;
+  let y = 0;
+
+  /*
+       → → → → →
+               ↓
+       ← ← ← ← ←
+       ↓
+       → → → → →
+
+     Las fichas se solapan 1 px para que se vean conectadas.
+  */
+
+  for(let i = 0; i < pieces.length; i++){
+
+    const tile = pieces[i];
+    const isDouble = tile[0] === tile[1];
+
+    if(countInRow >= rowCapacity){
+
+      // Esta ficha forma la esquina de la serpiente.
+      const turnX = direction === 1
+        ? x - OVERLAP - TILE_H
+        : x + OVERLAP;
+
+      const turnY = y + TILE_H - OVERLAP;
+
+      positions.push({
+        x: turnX,
+        y: turnY,
+        rotation: 90
+      });
+
+      direction *= -1;
+      y += ROW_STEP;
+
+      // La fila siguiente nace junto a la ficha de giro.
+      x = direction === -1
+        ? turnX + TILE_H - TILE_W
+        : turnX;
+
+      countInRow = 0;
+      continue;
+    }
+
+    positions.push({
+      x,
+      y,
+      rotation: isDouble ? 90 : 0
+    });
+
+    x += direction * (TILE_W - OVERLAP);
+    countInRow++;
+  }
+
+  // Calcula el área visual real, incluyendo fichas rotadas.
+  const bounds = positions.map(p => {
+
+    const rotated =
+      Math.abs(p.rotation) % 180 === 90;
+
+    const visualW = rotated ? TILE_H : TILE_W;
+    const visualH = rotated ? TILE_W : TILE_H;
+
+    const dx = rotated
+      ? (TILE_W - TILE_H) / 2
+      : 0;
+
+    const dy = rotated
+      ? (TILE_H - TILE_W) / 2
+      : 0;
+
+    return {
+      left: p.x + dx,
+      right: p.x + dx + visualW,
+      top: p.y + dy,
+      bottom: p.y + dy + visualH
+    };
+  });
+
+  const minX = Math.min(...bounds.map(b => b.left));
+  const maxX = Math.max(...bounds.map(b => b.right));
+  const minY = Math.min(...bounds.map(b => b.top));
+  const maxY = Math.max(...bounds.map(b => b.bottom));
+
+  const contentWidth = Math.max(1, maxX - minX);
+  const contentHeight = Math.max(1, maxY - minY);
+
+  const availableWidth = Math.max(
+    1,
+    boardWidth - SIDE_MARGIN * 2
+  );
+
+  const availableHeight = Math.max(
+    1,
+    boardHeight - TOP_MARGIN * 2
+  );
+
+  // Reduce toda la cadena si hace falta, sin romper conexiones.
+  const scale = Math.min(
+    1,
+    availableWidth / contentWidth,
+    availableHeight / contentHeight
+  );
+
+  const scaledWidth = contentWidth * scale;
+  const scaledHeight = contentHeight * scale;
+
+  const originX =
+    (boardWidth - scaledWidth) / 2 -
+    minX * scale;
+
+  const originY =
+    (boardHeight - scaledHeight) / 2 -
+    minY * scale;
+
+  pieces.forEach((tile,index)=>{
+
+    const p = positions[index];
+
+    const wrapper =
+      document.createElement('div');
+
+    wrapper.className = 'board-piece';
+
+    wrapper.style.left =
+      (originX + p.x * scale) + 'px';
+
+    wrapper.style.top =
+      (originY + p.y * scale) + 'px';
+
+    wrapper.style.width =
+      TILE_W + 'px';
+
+    wrapper.style.height =
+      TILE_H + 'px';
+
+    wrapper.style.transform =
+      `scale(${scale}) rotate(${p.rotation}deg)`;
+
+    const domino =
+      document.createElement('div');
+
+    domino.className =
+      'board-domino';
+
+    domino.innerHTML = `
+      <span class="board-half">
+        ${pipHTML(tile[0])}
+      </span>
+      <span class="board-half">
+        ${pipHTML(tile[1])}
+      </span>
+    `;
+
+    wrapper.appendChild(domino);
+    board.appendChild(wrapper);
+  });
 }
 
 
