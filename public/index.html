@@ -1139,21 +1139,56 @@ summary{
 
 </style>
 
-<style id="side-labels-vertical-only">
-/* Bot 3 (left) and Bot 1 (right): vertical titles only */
-#seatLeft .seat-name,
-#seatRight .seat-name,
-.seat-left .seat-name,
-.seat-right .seat-name,
+<style id="side-badges-rotated-v5">
+/*
+  SOLO Bot 3 (izquierda) y Bot 1 (derecha).
+  Se rota el badge COMPLETO 90°, no las letras individualmente.
+*/
+
+/* Common likely selectors for the LEFT side badge */
+#seatLeft .seat-label,
+#seatLeft .player-label,
+#seatLeft .player-name,
+.seat-left .seat-label,
+.seat-left .player-label,
+.seat-left .player-name,
+.player-left .seat-label,
+.player-left .player-label,
 .player-left .player-name,
-.player-right .player-name,
+[data-seat="left"] .seat-label,
+[data-seat="left"] .player-label,
 [data-seat="left"] .player-name,
-[data-seat="right"] .player-name,
-[data-position="left"] .player-name,
-[data-position="right"] .player-name {
-  writing-mode: vertical-rl !important;
+[data-position="left"] .seat-label,
+[data-position="left"] .player-label,
+[data-position="left"] .player-name {
+  writing-mode: horizontal-tb !important;
   text-orientation: mixed !important;
   white-space: nowrap !important;
+  transform: rotate(-90deg) !important;
+  transform-origin: center center !important;
+}
+
+/* Common likely selectors for the RIGHT side badge */
+#seatRight .seat-label,
+#seatRight .player-label,
+#seatRight .player-name,
+.seat-right .seat-label,
+.seat-right .player-label,
+.seat-right .player-name,
+.player-right .seat-label,
+.player-right .player-label,
+.player-right .player-name,
+[data-seat="right"] .seat-label,
+[data-seat="right"] .player-label,
+[data-seat="right"] .player-name,
+[data-position="right"] .seat-label,
+[data-position="right"] .player-label,
+[data-position="right"] .player-name {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  white-space: nowrap !important;
+  transform: rotate(90deg) !important;
+  transform-origin: center center !important;
 }
 </style>
 
