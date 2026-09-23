@@ -1059,15 +1059,41 @@ summary{
 }
 
 
-/* V15: tablero más amplio para que las dos colas tengan recorrido suficiente */
+/* V17: el tablero ocupa el espacio disponible, sin empujar la mano fuera de pantalla */
 @media (min-width:701px){
-  .board{
-    min-height:760px;
-    padding-top:30px;
-    padding-bottom:30px;
-  }
   .main{
-    min-height:900px;
+    height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+
+  .game-content{
+    min-height:0;
+    overflow:hidden;
+  }
+
+  .table-zone{
+    min-height:0;
+    overflow:hidden;
+  }
+
+  .board{
+    left:4%;
+    right:4%;
+    top:4%;
+    bottom:4%;
+    min-height:0;
+    padding:0;
+  }
+
+  .hand-zone{
+    flex-shrink:0;
+    z-index:20;
+  }
+
+  .controls{
+    flex-shrink:0;
+    z-index:21;
   }
 }
 
