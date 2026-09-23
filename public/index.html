@@ -2466,7 +2466,6 @@ function renderBoard(){
   if(!pieces.length) return;
 
   const mobile = isMobile();
-
   const W = mobile ? 46 : 60;
   const H = mobile ? 25 : 32;
   const GAP = 2;
@@ -2474,175 +2473,171 @@ function renderBoard(){
   const boardW = board.clientWidth;
   const boardH = board.clientHeight;
 
-  /*
-    V5
-
-    - La partida nace en el CENTRO de la mesa.
-    - La mesa NO se recentra después de cada jugada.
-    - Una ficha normal NUNCA se gira solo porque llegó al borde.
-    - Los dobles siguen viéndose verticales.
-    - El cambio de fila ocurre ENTRE fichas, no usando una ficha
-      normal como "bisagra". Así no cambia visualmente 6|1 a 1|6
-      ni se voltea una ficha de valor por culpa de la curva.
-  */
-
-  const SIDE = mobile ? 22 : 54;
-  const TOP = mobile ? 44 : 70;
-
+  const SIDE = mobile ? 18 : 42;
   const LEFT = SIDE;
-  const RIGHT = Math.max(LEFT + W * 5, boardW - SIDE);
-
-  // Primera ficha exactamente en el centro horizontal del tablero.
-  const START_X = boardW / 2;
-  const START_Y = Math.max(TOP, boardH * (mobile ? 0.28 : 0.30));
-
-  // Espacio entre líneas de la serpiente.
-  const LANE = mobile ? 62 : 78;
-
-  let dir = 1; // derecha
-  let y = START_Y;
+  const RIGHT = boardW - SIDE;
 
   /*
-    cursor representa el borde desde donde se colocará la próxima ficha.
-    Para que la PRIMERA quede centrada, inicializamos según su longitud.
+    V6
+    1. La ficha de apertura queda anclada al centro REAL del tablero.
+    2. Las jugadas a la izquierda crecen desde ella hacia la izquierda.
+    3. Las jugadas a la derecha crecen desde ella hacia la derecha.
+    4. Al regresar en una fila de la serpiente, una ficha normal gira 180°.
+       Esto mantiene físicamente el mismo valor conectado con el valor vecino.
+    5. Los dobles siguen perpendiculares a la cadena.
   */
-  let cursor = null;
 
-  const pos = [];
+  const CENTER_X = boardW / 2;
+  const CENTER_Y = boardH / 2;
+  const LANE = mobile ? 58 : 70;
 
-  function isDouble(tile){
-    return tile[0] === tile[1];
+  const isDouble = tile => tile[0] === tile[1];
+  const visualLength = tile => isDouble(tile) ? H : W;
+
+  /*
+    Cada jugada por la izquierda hace un unshift() en game.board.
+    Por eso el índice actual de la ficha de apertura es exactamente
+    el número de jugadas registradas con flecha hacia la izquierda.
+  */
+  const history = game.history || [];
+  let openingIndex = history.filter(item =>
+    typeof item.text === 'string' && item.text.includes('←')
+  ).length;
+
+  // Seguridad para salas/partidas antiguas sin historial completo.
+  openingIndex = Math.max(0, Math.min(openingIndex, pieces.length - 1));
+
+  const openingTile = pieces[openingIndex];
+  const openingLen = visualLength(openingTile);
+  const positions = new Array(pieces.length);
+
+  positions[openingIndex] = {
+    cx: CENTER_X,
+    cy: CENTER_Y,
+    rot: isDouble(openingTile) ? 90 : 0
+  };
+
+  function drawConnector(x, y1, y2){
+    const connector = document.createElement('div');
+    connector.className = 'board-turn-connector';
+    connector.style.position = 'absolute';
+    connector.style.left = (x - 1) + 'px';
+    connector.style.top = Math.min(y1,y2) + 'px';
+    connector.style.width = '2px';
+    connector.style.height = Math.max(2, Math.abs(y2-y1)) + 'px';
+    connector.style.background = '#f4f0e6';
+    connector.style.border = '1px solid rgba(0,0,0,.38)';
+    connector.style.borderRadius = '2px';
+    connector.style.zIndex = '1';
+    board.appendChild(connector);
   }
 
-  function visualLength(tile){
-    // Un doble vertical ocupa H sobre el eje horizontal.
-    return isDouble(tile) ? H : W;
-  }
+  /*
+    Coloca una rama desde la apertura hacia afuera.
 
-  function initializeCursor(tile){
-    if(cursor !== null) return;
+    branchSign = +1  => rama derecha
+    branchSign = -1  => rama izquierda
 
-    const len = visualLength(tile);
-    cursor = START_X - len / 2;
-  }
+    Los índices se recorren DESDE la apertura hacia el extremo.
+  */
+  function layoutBranch(indices, branchSign){
 
-  function fits(tile){
-    const len = visualLength(tile);
+    let dir = branchSign;
+    let y = CENTER_Y;
 
-    if(dir === 1){
-      return cursor + len <= RIGHT;
-    }
+    let cursor = branchSign === 1
+      ? CENTER_X + openingLen / 2 + GAP
+      : CENTER_X - openingLen / 2 - GAP;
 
-    return cursor - len >= LEFT;
-  }
+    for(const index of indices){
 
-  function placeStraight(tile){
+      const tile = pieces[index];
+      const dbl = isDouble(tile);
+      const len = visualLength(tile);
 
-    const dbl = isDouble(tile);
-    const len = visualLength(tile);
+      const fits = dir === 1
+        ? cursor + len <= RIGHT
+        : cursor - len >= LEFT;
 
-    const cx =
-      dir === 1
+      if(!fits){
+        const oldY = y;
+        const edgeX = dir === 1
+          ? RIGHT - H / 2
+          : LEFT + H / 2;
+
+        y += LANE;
+        drawConnector(edgeX, oldY + H/2, y - H/2);
+
+        dir *= -1;
+
+        cursor = dir === -1
+          ? RIGHT - H - GAP
+          : LEFT + H + GAP;
+      }
+
+      const cx = dir === 1
         ? cursor + len / 2
         : cursor - len / 2;
 
-    pos.push({
-      cx,
-      cy:y,
-      rot:dbl ? 90 : 0
-    });
+      /*
+        MUY IMPORTANTE:
+        La orientación lógica de game.board siempre es izquierda -> derecha.
 
-    cursor += dir * (len + GAP);
-  }
+        Rama derecha:
+          avanza derecha = 0°
+          regresa izquierda = 180°
 
-  /*
-    CAMBIO DE FILA SIN VOLTEAR UNA FICHA NORMAL.
+        Rama izquierda:
+          avanza izquierda = 0°
+          regresa derecha = 180°
 
-    Cuando ya no cabe la próxima ficha:
-    1. Bajamos a la línea siguiente.
-    2. Invertimos el sentido.
-    3. Colocamos ESA MISMA ficha horizontal si es normal.
-       Solo un doble permanece vertical por ser doble.
+        Así un 3|0 nunca termina mostrando el 3 contra un 0 por culpa
+        de la geometría de la curva.
+      */
+      let rot;
 
-    El pequeño tramo de unión se dibuja aparte como un conector visual,
-    no consume ni altera ninguna ficha del juego.
-  */
-  function changeLane(){
+      if(dbl){
+        rot = 90;
+      }else{
+        rot = dir === branchSign ? 0 : 180;
+      }
 
-    const oldY = y;
-
-    const edgeX =
-      dir === 1
-        ? RIGHT - H / 2
-        : LEFT + H / 2;
-
-    y += LANE;
-
-    // Conector visual discreto entre ambas filas.
-    const connector = document.createElement('div');
-    connector.className = 'board-turn-connector';
-
-    connector.style.position = 'absolute';
-    connector.style.left = (edgeX - 1) + 'px';
-    connector.style.top = (oldY + H / 2) + 'px';
-    connector.style.width = '2px';
-    connector.style.height = Math.max(4, LANE - H) + 'px';
-    connector.style.background = '#f4f0e6';
-    connector.style.border = '1px solid rgba(0,0,0,.45)';
-    connector.style.borderRadius = '2px';
-    connector.style.zIndex = '1';
-
-    board.appendChild(connector);
-
-    dir *= -1;
-
-    /*
-      La nueva fila comienza cerca del mismo borde, pero deja espacio
-      suficiente para que la primera ficha no choque con el lateral.
-    */
-    cursor =
-      dir === -1
-        ? RIGHT - H - GAP
-        : LEFT + H + GAP;
-  }
-
-  for(let i=0;i<pieces.length;i++){
-
-    const tile = pieces[i];
-
-    initializeCursor(tile);
-
-    if(!fits(tile)){
-      changeLane();
+      positions[index] = { cx, cy:y, rot };
+      cursor += dir * (len + GAP);
     }
-
-    placeStraight(tile);
   }
 
-  /*
-    Coordenadas FIJAS.
-    No calculamos min/max del contenido y no recentramos la cadena.
-    Por eso las fichas ya jugadas permanecen en su sitio visual.
-  */
-  pieces.forEach((tile,i)=>{
+  // Desde la apertura hacia el extremo derecho.
+  const rightIndices = [];
+  for(let i = openingIndex + 1; i < pieces.length; i++){
+    rightIndices.push(i);
+  }
 
-    const p = pos[i];
+  // Desde la apertura hacia el extremo izquierdo.
+  const leftIndices = [];
+  for(let i = openingIndex - 1; i >= 0; i--){
+    leftIndices.push(i);
+  }
+
+  layoutBranch(rightIndices, 1);
+  layoutBranch(leftIndices, -1);
+
+  pieces.forEach((tile, i) => {
+
+    const p = positions[i];
+    if(!p) return;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'board-piece';
-
     wrapper.style.width = W + 'px';
     wrapper.style.height = H + 'px';
-
     wrapper.style.left = (p.cx - W / 2) + 'px';
     wrapper.style.top = (p.cy - H / 2) + 'px';
-
     wrapper.style.transformOrigin = 'center center';
     wrapper.style.transform = `rotate(${p.rot}deg)`;
 
     const domino = document.createElement('div');
     domino.className = 'board-domino';
-
     domino.innerHTML = `
       <span class="board-half">${pipHTML(tile[0])}</span>
       <span class="board-half">${pipHTML(tile[1])}</span>
