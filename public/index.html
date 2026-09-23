@@ -3,85 +3,58 @@
 
 <head>
 <meta charset="utf-8">
-
 <meta
   name="viewport"
   content="width=device-width,initial-scale=1,viewport-fit=cover"
 >
-
 <title>Dominó Online</title>
 
 <style>
-
 :root{
   --felt:#0d6b4d;
   --felt-dark:#07563e;
   --accent:#ffd166;
   --panel:#102a2e;
   --ink:#f8f7f2;
-
   --wood1:#8b552d;
   --wood2:#5f361d;
-  --wood3:#3f2416;
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
-html,
-body{
+html,body{
   margin:0;
   width:100%;
   height:100%;
 }
 
 body{
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   background:var(--felt);
   color:var(--ink);
   overflow:hidden;
 }
 
-/* =========================
-   ESTRUCTURA
-========================= */
-
 .app{
   display:grid;
   grid-template-columns:300px 1fr;
-
   width:100%;
   height:100dvh;
 }
 
-/* =========================
-   PANEL IZQUIERDO
-========================= */
+/* SIDEBAR */
 
 .side{
   background:var(--panel);
-
   padding:18px;
-
   overflow-y:auto;
   overflow-x:hidden;
-
   z-index:30;
-
-  transition:
-    transform .25s ease;
+  transition:transform .25s ease;
 }
 
 .side.closed{
-  transform:
-    translateX(-100%);
+  transform:translateX(-100%);
 }
 
 .side h2{
@@ -90,18 +63,13 @@ body{
 
 .toggle{
   position:fixed;
-
   top:14px;
   left:270px;
-
   z-index:50;
-
   width:42px;
   height:42px;
-
   margin:0;
   padding:0;
-
   font-size:20px;
 }
 
@@ -109,30 +77,18 @@ body{
   left:12px;
 }
 
-/* =========================
-   FORMULARIOS
-========================= */
-
-button,
-input,
-select{
+button,input,select{
   border:0;
-
   border-radius:9px;
-
   padding:10px;
-
   margin:4px;
-
   font-size:15px;
 }
 
 button{
   cursor:pointer;
-
   background:var(--accent);
   color:#111;
-
   font-weight:700;
 }
 
@@ -147,7 +103,6 @@ input{
 
 label{
   display:inline-block;
-
   margin:3px 0;
 }
 
@@ -172,21 +127,15 @@ summary{
 
 .players div{
   margin:5px 0;
-
   padding:7px;
-
   border-radius:7px;
-
   background:#ffffff12;
 }
 
 .bot-options{
   margin:8px 0;
-
   padding:8px;
-
   border-radius:9px;
-
   background:#ffffff0b;
 }
 
@@ -194,75 +143,48 @@ summary{
   display:block;
 }
 
-/* =========================
-   MAIN
-========================= */
+/* MAIN */
 
 .main{
   position:relative;
-
   min-width:0;
   min-height:0;
-
   display:grid;
-
-  grid-template-rows:
-    auto
-    minmax(0,1fr)
-    auto
-    auto;
-
+  grid-template-rows:auto minmax(0,1fr) auto auto;
   overflow:hidden;
 }
 
 .top{
   min-height:58px;
-
-  padding:
-    12px
-    65px;
-
+  padding:12px 65px;
   text-align:center;
-
   background:#063e2e33;
 }
 
 #status{
   display:block;
-
   font-size:17px;
 }
 
 #subStatus{
   margin-top:3px;
-
   font-size:12px;
-
   opacity:.8;
 }
 
-/* =========================
-   AREA JUEGO + HISTORIAL
-========================= */
+/* GAME */
 
 .game-content{
   min-height:0;
-
   display:grid;
-
-  grid-template-columns:
-    minmax(0,1fr)
-    280px;
+  grid-template-columns:minmax(0,1fr) 280px;
 }
 
 .table-zone{
   position:relative;
-
   min-width:0;
   min-height:0;
-
   overflow:hidden;
-
   background:
     radial-gradient(
       circle at center,
@@ -271,139 +193,82 @@ summary{
     );
 }
 
-/* =========================
-   TABLERO CENTRAL
-========================= */
-
 .board{
   position:absolute;
-
   left:13%;
   right:13%;
-
   top:20%;
   bottom:20%;
-
   display:flex;
-
   align-items:center;
   justify-content:center;
-
   align-content:center;
-
   gap:5px;
-
   overflow:auto;
-
   flex-wrap:wrap;
-
   padding:25px;
 }
 
-/* =========================
-   JUGADORES RIVALES
-========================= */
+/* OPPONENTS */
 
 .opponent{
   position:absolute;
-
   z-index:8;
-
   display:flex;
-
   flex-direction:column;
-
   align-items:center;
-
   gap:4px;
-
   max-width:240px;
-
   color:white;
 }
 
 .opponent-name{
   max-width:220px;
-
   overflow:hidden;
-
   text-overflow:ellipsis;
-
   white-space:nowrap;
-
-  padding:
-    4px
-    9px;
-
+  padding:4px 9px;
   border-radius:20px;
-
   background:#061d1bbb;
-
-  box-shadow:
-    0 2px 7px #0005;
-
+  box-shadow:0 2px 7px #0005;
   font-size:13px;
   font-weight:700;
 }
 
-.opponent.turn
-.opponent-name{
-  outline:
-    2px solid var(--accent);
-
+.opponent.turn .opponent-name{
+  outline:2px solid var(--accent);
   color:var(--accent);
 }
-
-/* posiciones */
 
 .seat-top{
   top:12px;
   left:50%;
-
-  transform:
-    translateX(-50%);
+  transform:translateX(-50%);
 }
 
 .seat-left{
   left:14px;
   top:50%;
-
-  transform:
-    translateY(-50%);
+  transform:translateY(-50%);
 }
 
 .seat-right{
   right:14px;
   top:50%;
-
-  transform:
-    translateY(-50%);
+  transform:translateY(-50%);
 }
 
-/* =========================
-   RACK DE MADERA
-========================= */
+/* WOOD RACK */
 
 .wood-rack{
   position:relative;
-
   display:flex;
-
   align-items:center;
   justify-content:center;
-
   gap:3px;
-
-  padding:
-    7px
-    9px
-    9px;
-
-  border:
-    2px solid #321b0f;
-
+  padding:7px 9px 9px;
+  border:2px solid #321b0f;
   border-radius:10px;
-
   background:
     linear-gradient(
       180deg,
@@ -411,7 +276,6 @@ summary{
       var(--wood1) 45%,
       var(--wood2)
     );
-
   box-shadow:
     inset 0 1px 2px #ffffff33,
     inset 0 -3px 4px #0005,
@@ -420,48 +284,29 @@ summary{
 
 .wood-rack::after{
   content:"";
-
   position:absolute;
-
   left:5px;
   right:5px;
   bottom:3px;
-
   height:4px;
-
   border-radius:4px;
-
   background:#321b0f88;
 }
 
-/* racks laterales */
-
-.seat-left
-.wood-rack,
-.seat-right
-.wood-rack{
+.seat-left .wood-rack,
+.seat-right .wood-rack{
   flex-direction:column;
-
-  padding:
-    9px
-    7px;
+  padding:9px 7px;
 }
 
-/* =========================
-   FICHAS BOCA ABAJO
-========================= */
+/* BACK TILES */
 
 .back-tile{
   flex:0 0 auto;
-
   width:18px;
   height:34px;
-
   border-radius:4px;
-
-  border:
-    1px solid #2f180c;
-
+  border:1px solid #2f180c;
   background:
     linear-gradient(
       135deg,
@@ -470,196 +315,119 @@ summary{
       #9b5d2f 52%,
       #693918
     );
-
   box-shadow:
     inset 1px 1px 1px #ffffff2b,
     inset -1px -1px 2px #0005;
 }
 
-.seat-left
-.back-tile,
-.seat-right
-.back-tile{
+.seat-left .back-tile,
+.seat-right .back-tile{
   width:34px;
   height:17px;
 }
 
-/* =========================
-   FICHAS NORMALES
-========================= */
+/* DOMINOES */
 
 .tile{
   display:flex;
-
   flex:0 0 auto;
-
   background:#fff;
   color:#111;
-
-  border:
-    2px solid #222;
-
+  border:2px solid #222;
   border-radius:8px;
-
-  box-shadow:
-    0 3px 8px #0005;
-
+  box-shadow:0 3px 8px #0005;
   cursor:pointer;
-
   overflow:hidden;
 }
 
 .tile-half{
   position:relative;
-
   display:block;
-
   width:44px;
   height:58px;
 }
 
-.tile-half +
-.tile-half{
-  border-left:
-    2px solid #222;
+.tile-half + .tile-half{
+  border-left:2px solid #222;
 }
 
 .pip{
   position:absolute;
-
   width:8px;
   height:8px;
-
   border-radius:50%;
-
   background:#111;
-
-  transform:
-    translate(-50%,-50%);
+  transform:translate(-50%,-50%);
 }
 
 .p1{left:25%;top:25%}
 .p2{left:50%;top:25%}
 .p3{left:75%;top:25%}
-
 .p4{left:25%;top:50%}
 .p5{left:50%;top:50%}
 .p6{left:75%;top:50%}
-
 .p7{left:25%;top:75%}
 .p8{left:50%;top:75%}
 .p9{left:75%;top:75%}
 
 .selected{
-  outline:
-    4px solid var(--accent);
-
-  transform:
-    translateY(-4px);
+  outline:4px solid var(--accent);
+  transform:translateY(-4px);
 }
 
-/* =========================
-   HISTORIAL
-========================= */
+/* HISTORY */
 
 .history-panel{
   margin:0;
-
   min-width:0;
-
-  border-left:
-    2px solid #3b2114;
-
-  background:
-    linear-gradient(
-      180deg,
-      #102321,
-      #071816
-    );
-
+  border-left:2px solid #3b2114;
+  background:linear-gradient(180deg,#102321,#071816);
   overflow:auto;
 }
 
 .history-panel summary{
   position:sticky;
-
   top:0;
-
   z-index:4;
-
-  padding:
-    14px;
-
+  padding:14px;
   background:#0b1e1c;
-
   font-size:16px;
   font-weight:700;
 }
 
 .history-list{
-  padding:
-    6px
-    12px
-    20px;
+  padding:6px 12px 20px;
 }
 
 .history-item{
-  padding:
-    9px
-    4px;
-
-  border-bottom:
-    1px solid #ffffff16;
-
+  padding:9px 4px;
+  border-bottom:1px solid #ffffff16;
   font-size:13px;
-
   line-height:1.3;
 }
 
 .history-time{
   display:block;
-
   margin-top:2px;
-
   font-size:10px;
-
   opacity:.55;
 }
 
-/* =========================
-   MANO DEL JUGADOR
-========================= */
+/* PLAYER HAND */
 
 .hand-zone{
   position:relative;
-
-  background:
-    linear-gradient(
-      180deg,
-      #0003,
-      #0004
-    );
-
-  padding:
-    7px 10px 10px;
+  background:linear-gradient(180deg,#0003,#0004);
+  padding:7px 10px 10px;
 }
 
 .you-label{
   width:max-content;
-
   max-width:90%;
-
-  margin:
-    0 auto 4px;
-
-  padding:
-    4px
-    12px;
-
+  margin:0 auto 4px;
+  padding:4px 12px;
   border-radius:14px;
-
   background:#061d1bbb;
-
   font-size:12px;
   font-weight:700;
 }
@@ -667,26 +435,11 @@ summary{
 .hand-rack{
   width:max-content;
   max-width:100%;
-
   margin:auto;
-
-  padding:
-    9px
-    12px
-    11px;
-
-  border:
-    2px solid #3b2113;
-
+  padding:9px 12px 11px;
+  border:2px solid #3b2113;
   border-radius:12px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #9b6032,
-      #75431f
-    );
-
+  background:linear-gradient(180deg,#9b6032,#75431f);
   box-shadow:
     inset 0 1px 2px #ffffff28,
     0 3px 10px #0007;
@@ -694,124 +447,71 @@ summary{
 
 .hand{
   min-height:62px;
-
   display:flex;
-
   align-items:center;
-
   gap:6px;
-
   overflow-x:auto;
   overflow-y:visible;
-
-  -webkit-overflow-scrolling:
-    touch;
+  -webkit-overflow-scrolling:touch;
 }
 
-/* =========================
-   BOTONES
-========================= */
+/* CONTROLS */
 
 .controls{
   display:flex;
-
   justify-content:center;
-
   flex-wrap:wrap;
-
   gap:6px;
-
-  padding:
-    8px
-    8px
-    max(
-      8px,
-      env(safe-area-inset-bottom)
-    );
-
-  background:
-    #092f24;
+  padding:8px 8px max(8px,env(safe-area-inset-bottom));
+  background:#092f24;
 }
 
 .controls button{
   margin:0;
 }
 
-/* =========================
-   MÓVIL
-========================= */
+/* MOBILE */
 
 @media(max-width:700px){
 
   .app{
     display:block;
-
     width:100%;
     height:100dvh;
   }
 
   .side{
     position:fixed;
-
     left:0;
     top:0;
-
     width:min(86vw,320px);
     height:100dvh;
-
     z-index:40;
-
-    box-shadow:
-      8px 0 20px #0007;
+    box-shadow:8px 0 20px #0007;
   }
 
   .side.closed{
-    transform:
-      translateX(-100%);
+    transform:translateX(-100%);
   }
 
   .toggle{
-    top:
-      max(
-        10px,
-        env(safe-area-inset-top)
-      );
-
-    left:
-      min(
-        calc(86vw - 52px),
-        268px
-      );
+    top:max(10px,env(safe-area-inset-top));
+    left:min(calc(86vw - 52px),268px);
   }
 
-  .side.closed ~
-  .main
-  .toggle{
+  .side.closed ~ .main .toggle{
     left:10px;
   }
 
   .main{
     width:100%;
     height:100dvh;
-
-    grid-template-rows:
-      auto
-      minmax(0,1fr)
-      auto
-      auto;
+    grid-template-rows:auto minmax(0,1fr) auto auto;
   }
 
   .top{
     min-height:54px;
-
-    padding:
-      max(
-        13px,
-        env(safe-area-inset-top)
-      )
-      55px
-      8px;
-
+    padding:max(13px,env(safe-area-inset-top)) 55px 8px;
     font-size:13px;
   }
 
@@ -821,11 +521,8 @@ summary{
 
   .game-content{
     display:block;
-
     position:relative;
-
     min-height:0;
-
     overflow:hidden;
   }
 
@@ -837,13 +534,9 @@ summary{
   .board{
     left:8%;
     right:8%;
-
     top:23%;
     bottom:22%;
-
-    padding:
-      10px 4px;
-
+    padding:10px 4px;
     gap:3px;
   }
 
@@ -859,162 +552,96 @@ summary{
 
   .opponent-name{
     font-size:10px;
-
-    padding:
-      3px
-      6px;
+    padding:3px 6px;
   }
 
-  .seat-top{
-    top:4px;
-  }
-
-  .seat-left{
-    left:4px;
-  }
-
-  .seat-right{
-    right:4px;
-  }
+  .seat-top{top:4px}
+  .seat-left{left:4px}
+  .seat-right{right:4px}
 
   .back-tile{
     width:11px;
     height:24px;
   }
 
-  .seat-left
-  .back-tile,
-  .seat-right
-  .back-tile{
+  .seat-left .back-tile,
+  .seat-right .back-tile{
     width:24px;
     height:11px;
   }
 
   .wood-rack{
     gap:2px;
-
-    padding:
-      5px
-      6px
-      7px;
+    padding:5px 6px 7px;
   }
 
-  .seat-left
-  .wood-rack,
-  .seat-right
-  .wood-rack{
-    padding:
-      6px
-      5px;
+  .seat-left .wood-rack,
+  .seat-right .wood-rack{
+    padding:6px 5px;
   }
-
-  /* historial como cajón */
 
   .history-panel{
     position:absolute;
-
     left:8px;
     right:8px;
     bottom:6px;
-
     max-height:42%;
-
     z-index:18;
-
-    border:
-      1px solid #ffffff20;
-
+    border:1px solid #ffffff20;
     border-radius:10px;
-
-    box-shadow:
-      0 3px 14px #0008;
+    box-shadow:0 3px 14px #0008;
   }
 
   .history-panel:not([open]){
     width:max-content;
-
     left:auto;
     right:8px;
-
     background:#0b1e1ce8;
   }
 
   .history-panel summary{
-    padding:
-      8px 10px;
-
+    padding:8px 10px;
     font-size:12px;
   }
 
   .history-list{
     max-height:150px;
-
     overflow:auto;
-
-    padding:
-      3px
-      10px
-      10px;
+    padding:3px 10px 10px;
   }
 
   .history-item{
     font-size:11px;
-
-    padding:
-      6px 2px;
+    padding:6px 2px;
   }
 
   .hand-zone{
-    padding:
-      5px
-      6px
-      6px;
+    padding:5px 6px 6px;
   }
 
   .hand-rack{
-    padding:
-      6px
-      7px
-      7px;
-
+    padding:6px 7px 7px;
     max-width:100%;
   }
 
   .hand{
     min-height:48px;
-
     gap:4px;
   }
 
   .controls{
     display:grid;
-
-    grid-template-columns:
-      1fr
-      1fr;
-
+    grid-template-columns:1fr 1fr;
     gap:5px;
-
-    padding:
-      6px
-      6px
-      max(
-        8px,
-        env(safe-area-inset-bottom)
-      );
+    padding:6px 6px max(8px,env(safe-area-inset-bottom));
   }
 
   .controls button{
     min-height:38px;
-
-    padding:
-      8px
-      4px;
-
+    padding:8px 4px;
     font-size:11px;
   }
 }
-
 </style>
 </head>
 
@@ -1022,143 +649,66 @@ summary{
 
 <div class="app">
 
-<!-- =====================
-     SIDEBAR
-===================== -->
+<aside class="side" id="side">
 
-<aside
-  class="side"
-  id="side"
->
-
-<h2>
-🁣 Dominó Online
-</h2>
+<h2>🁣 Dominó Online</h2>
 
 <div id="lobby">
 
-<input
-  id="name"
-  placeholder="Tu nombre"
->
+<input id="name" placeholder="Tu nombre">
 
 <br>
 
 <label>
 Jugadores
-
-<select
-  id="max"
-  onchange="updateBotOptions()"
->
-  <option value="2">
-    2
-  </option>
-
-  <option value="3">
-    3
-  </option>
-
-  <option
-    value="4"
-    selected
-  >
-    4
-  </option>
+<select id="max" onchange="updateBotOptions()">
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4" selected>4</option>
 </select>
-
 </label>
 
 <div class="bot-options">
 
 <label>
 Bots
-
 <select id="botCount">
-  <option value="0">
-    0 bots
-  </option>
-
-  <option value="1">
-    1 bot
-  </option>
-
-  <option value="2">
-    2 bots
-  </option>
-
-  <option value="3">
-    3 bots
-  </option>
+  <option value="0">0 bots</option>
+  <option value="1">1 bot</option>
+  <option value="2">2 bots</option>
+  <option value="3">3 bots</option>
 </select>
-
 </label>
 
 <label>
 Dificultad
-
 <select id="botDifficulty">
-
-  <option value="easy">
-    Fácil
-  </option>
-
-  <option
-    value="normal"
-    selected
-  >
-    Normal
-  </option>
-
-  <option value="hard">
-    Difícil
-  </option>
-
+  <option value="easy">Fácil</option>
+  <option value="normal" selected>Normal</option>
+  <option value="hard">Difícil</option>
 </select>
-
 </label>
 
 </div>
 
-<button onclick="create()">
-Crear sala
-</button>
+<button onclick="create()">Crear sala</button>
 
 <div class="row">
-
-<input
-  id="code"
-  placeholder="Código"
->
-
-<button onclick="join()">
-Unirme
-</button>
-
+<input id="code" placeholder="Código">
+<button onclick="join()">Unirme</button>
 </div>
 
 </div>
 
-<!-- SALA -->
-
-<div
-  id="room"
-  hidden
->
+<div id="room" hidden>
 
 <h3>
-Sala
-<b id="roomCode"></b>
+Sala <b id="roomCode"></b>
 </h3>
 
-<button onclick="copyLink()">
-Copiar URL
-</button>
+<button onclick="copyLink()">Copiar URL</button>
 
-<button
-  id="start"
-  onclick="act('start')"
->
+<button id="start" onclick="act('start')">
 Iniciar partida
 </button>
 
@@ -1170,128 +720,67 @@ Iniciar partida
 Nueva ronda
 </button>
 
-<div
-  class="players"
-  id="players"
-></div>
+<div class="players" id="players"></div>
 
-<p
-  id="msg"
-  class="small"
-></p>
+<p id="msg" class="small"></p>
 
 </div>
 
-<!-- REGLAS -->
-
 <details>
 
-<summary>
-Reglas
-</summary>
+<summary>Reglas</summary>
 
 <p class="small">
-
 28 fichas, valores 0 a 6.
-
 De 2 a 4 jugadores.
-
 Cada jugador recibe 7 fichas.
-
-Comienza quien tenga el doble
-más alto.
-
-La ficha inicial se coloca
-automáticamente.
-
-En cada turno se juega una
-ficha que coincida con uno
-de los extremos.
-
-Si no puedes jugar y quedan
-fichas en el pozo, debes robar.
-
-Si el pozo está vacío y no
-puedes jugar, debes pasar.
-
-Con cuatro jugadores se juega
-por equipos: jugadores 1 y 3
-contra jugadores 2 y 4.
-
+Comienza quien tenga el doble más alto.
+La ficha inicial se coloca automáticamente.
+En cada turno se juega una ficha que coincida con uno de los extremos.
+Si no puedes jugar y quedan fichas en el pozo, debes robar.
+Si el pozo está vacío y no puedes jugar, debes pasar.
+Con cuatro jugadores se juega por equipos: jugadores 1 y 3 contra jugadores 2 y 4.
 </p>
 
 </details>
 
-<!-- SETTINGS -->
-
 <details>
 
-<summary>
-Settings
-</summary>
+<summary>Settings</summary>
 
 <label>
 Color mesa
-
 <input
   type="color"
   value="#0d6b4d"
-  oninput="
-    document
-    .documentElement
-    .style
-    .setProperty(
-      '--felt',
-      this.value
-    )
-  "
+  oninput="document.documentElement.style.setProperty('--felt',this.value)"
 >
-
 </label>
 
 <br>
 
 <label>
 Música
-
 <input
   id="music"
   type="checkbox"
-  onchange="
-    toggleMusic(
-      this.checked
-    )
-  "
+  onchange="toggleMusic(this.checked)"
 >
-
 </label>
 
 <br>
 
 <label>
 Meta
-
 <select id="target">
-
-<option value="100">
-100
-</option>
-
-<option value="150">
-150
-</option>
-
+  <option value="100">100</option>
+  <option value="150">150</option>
 </select>
-
 </label>
 
 </details>
 
 </aside>
-
-<!-- =====================
-     MAIN
-===================== -->
 
 <main class="main">
 
@@ -1314,16 +803,12 @@ Crea o únete a una sala
 
 <div class="game-content">
 
-<!-- MESA -->
-
 <section
   class="table-zone"
   id="tableZone"
 >
 
-<div
-  id="opponents"
-></div>
+<div id="opponents"></div>
 
 <div
   class="board"
@@ -1331,8 +816,6 @@ Crea o únete a una sala
 ></div>
 
 </section>
-
-<!-- HISTORIAL -->
 
 <details
   class="history-panel"
@@ -1353,8 +836,6 @@ Crea o únete a una sala
 
 </div>
 
-<!-- TU MANO -->
-
 <section class="hand-zone">
 
 <div
@@ -1374,8 +855,6 @@ Tus fichas
 </div>
 
 </section>
-
-<!-- BOTONES -->
 
 <div class="controls">
 
@@ -1415,9 +894,7 @@ Pasar
 
 <script>
 
-/* =========================
-   VARIABLES
-========================= */
+/* VARIABLES */
 
 let game;
 let pid;
@@ -1427,35 +904,27 @@ let poll;
 let botTimer = null;
 let botStepInFlight = false;
 
-let audioContext;
-let oscillator;
-
 const BOT_DELAY = 1500;
 
-/* =========================
-   QUERY ROOM
-========================= */
+
+/* ROOM FROM URL */
 
 const qs =
   new URLSearchParams(
     location.search
   );
 
-if(
-  qs.get('room')
-){
+if(qs.get('room')){
   document
     .getElementById('code')
     .value =
-      qs.get('room');
+    qs.get('room');
 }
 
-/* =========================
-   MOBILE INITIAL STATE
-========================= */
+
+/* MOBILE */
 
 function isMobile(){
-
   return window
     .matchMedia(
       '(max-width:700px)'
@@ -1463,24 +932,20 @@ function isMobile(){
     .matches;
 }
 
-if(
-  isMobile()
-){
+if(isMobile()){
+
   document
     .getElementById('side')
     .classList
     .add('closed');
 
   document
-    .getElementById(
-      'historyPanel'
-    )
+    .getElementById('historyPanel')
     .removeAttribute('open');
 }
 
-/* =========================
-   SIDEBAR
-========================= */
+
+/* SIDEBAR */
 
 function toggleSide(){
 
@@ -1490,9 +955,8 @@ function toggleSide(){
     .toggle('closed');
 }
 
-/* =========================
-   API
-========================= */
+
+/* API */
 
 async function api(body){
 
@@ -1504,7 +968,7 @@ async function api(body){
 
         headers:{
           'content-type':
-            'application/json'
+          'application/json'
         },
 
         body:
@@ -1515,20 +979,16 @@ async function api(body){
   let data;
 
   try{
-
     data =
       await response.json();
-
-  }catch{
-
+  }
+  catch{
     throw new Error(
       'El servidor devolvió una respuesta inválida'
     );
   }
 
-  if(
-    !response.ok
-  ){
+  if(!response.ok){
     throw new Error(
       data.error ||
       'Error del servidor'
@@ -1538,32 +998,26 @@ async function api(body){
   return data;
 }
 
-/* =========================
-   BOT OPTIONS
-========================= */
+
+/* BOT OPTIONS */
 
 function updateBotOptions(){
 
   const total =
     Number(
       document
-      .getElementById('max')
-      .value
+        .getElementById('max')
+        .value
     );
 
   const select =
     document
-      .getElementById(
-        'botCount'
-      );
+      .getElementById('botCount');
 
   const current =
-    Number(
-      select.value || 0
-    );
+    Number(select.value || 0);
 
-  select.innerHTML =
-    '';
+  select.innerHTML = '';
 
   for(
     let i = 0;
@@ -1573,12 +1027,9 @@ function updateBotOptions(){
 
     const option =
       document
-      .createElement(
-        'option'
-      );
+        .createElement('option');
 
-    option.value =
-      i;
+    option.value = i;
 
     option.textContent =
       i === 0
@@ -1587,10 +1038,7 @@ function updateBotOptions(){
           ? '1 bot'
           : `${i} bots`;
 
-    select
-      .appendChild(
-        option
-      );
+    select.appendChild(option);
   }
 
   select.value =
@@ -1602,9 +1050,8 @@ function updateBotOptions(){
 
 updateBotOptions();
 
-/* =========================
-   CREAR
-========================= */
+
+/* CREATE */
 
 async function create(){
 
@@ -1613,64 +1060,47 @@ async function create(){
     const r =
       await api({
 
-        action:
-          'create',
+        action:'create',
 
         name:
           document
-          .getElementById(
-            'name'
-          )
-          .value,
+            .getElementById('name')
+            .value,
 
         maxPlayers:
           document
-          .getElementById(
-            'max'
-          )
-          .value,
+            .getElementById('max')
+            .value,
 
         botCount:
           document
-          .getElementById(
-            'botCount'
-          )
-          .value,
+            .getElementById('botCount')
+            .value,
 
         botDifficulty:
           document
-          .getElementById(
-            'botDifficulty'
-          )
-          .value,
+            .getElementById('botDifficulty')
+            .value,
 
         target:
           document
-          .getElementById(
-            'target'
-          )
-          .value
+            .getElementById('target')
+            .value
       });
 
-    pid =
-      r.playerId;
-
-    game =
-      r.game;
+    pid = r.playerId;
+    game = r.game;
 
     enter();
 
-  }catch(e){
-
-    alert(
-      e.message
-    );
+  }
+  catch(e){
+    alert(e.message);
   }
 }
 
-/* =========================
-   JOIN
-========================= */
+
+/* JOIN */
 
 async function join(){
 
@@ -1678,16 +1108,12 @@ async function join(){
 
     const roomCode =
       document
-      .getElementById(
-        'code'
-      )
-      .value
-      .trim()
-      .toUpperCase();
+        .getElementById('code')
+        .value
+        .trim()
+        .toUpperCase();
 
-    if(
-      !roomCode
-    ){
+    if(!roomCode){
       return alert(
         'Introduce el código de la sala'
       );
@@ -1696,89 +1122,61 @@ async function join(){
     const r =
       await api({
 
-        action:
-          'join',
+        action:'join',
 
-        code:
-          roomCode,
+        code:roomCode,
 
         name:
           document
-          .getElementById(
-            'name'
-          )
-          .value
+            .getElementById('name')
+            .value
       });
 
-    pid =
-      r.playerId;
-
-    game =
-      r.game;
+    pid = r.playerId;
+    game = r.game;
 
     enter();
 
-  }catch(e){
-
-    alert(
-      e.message
-    );
+  }
+  catch(e){
+    alert(e.message);
   }
 }
 
-/* =========================
-   ENTER
-========================= */
+
+/* ENTER */
 
 function enter(){
 
   document
-    .getElementById(
-      'room'
-    )
-    .hidden =
-      false;
+    .getElementById('room')
+    .hidden = false;
 
   document
-    .getElementById(
-      'lobby'
-    )
-    .hidden =
-      true;
+    .getElementById('lobby')
+    .hidden = true;
 
   document
-    .getElementById(
-      'roomCode'
-    )
+    .getElementById('roomCode')
     .textContent =
-      game.code;
+    game.code;
 
-  history
-    .replaceState(
-      null,
-      '',
-      '?room=' +
-      game.code
-    );
+  history.replaceState(
+    null,
+    '',
+    '?room=' + game.code
+  );
 
-  if(
-    isMobile()
-  ){
+  if(isMobile()){
     document
-      .getElementById(
-        'side'
-      )
+      .getElementById('side')
       .classList
-      .add(
-        'closed'
-      );
+      .add('closed');
   }
 
   render();
 
-  clearInterval(
-    poll
-  );
+  clearInterval(poll);
 
   poll =
     setInterval(
@@ -1787,9 +1185,8 @@ function enter(){
     );
 }
 
-/* =========================
-   REFRESH
-========================= */
+
+/* REFRESH */
 
 async function refresh(){
 
@@ -1805,18 +1202,12 @@ async function refresh(){
     const response =
       await fetch(
         '/api/game?code=' +
-        encodeURIComponent(
-          game.code
-        ) +
+        encodeURIComponent(game.code) +
         '&playerId=' +
-        encodeURIComponent(
-          pid || ''
-        )
+        encodeURIComponent(pid || '')
       );
 
-    if(
-      response.ok
-    ){
+    if(response.ok){
 
       game =
         await response.json();
@@ -1824,8 +1215,8 @@ async function refresh(){
       render();
     }
 
-  }catch(e){
-
+  }
+  catch(e){
     console.log(
       'Refresh error',
       e
@@ -1833,9 +1224,8 @@ async function refresh(){
   }
 }
 
-/* =========================
-   HUMAN ACTIONS
-========================= */
+
+/* HUMAN ACTION */
 
 async function act(action){
 
@@ -1846,38 +1236,27 @@ async function act(action){
 
         action,
 
-        code:
-          game.code,
+        code:game.code,
 
-        playerId:
-          pid
+        playerId:pid
       });
 
-    selected =
-      null;
+    selected = null;
 
     render();
 
-  }catch(e){
-
-    alert(
-      e.message
-    );
+  }
+  catch(e){
+    alert(e.message);
   }
 }
 
-/* =========================
-   PLAY TILE
-========================= */
 
-async function play(
-  sideToPlay
-){
+/* PLAY */
 
-  if(
-    selected === null
-  ){
+async function play(sideToPlay){
 
+  if(selected === null){
     return alert(
       'Selecciona una ficha'
     );
@@ -1888,70 +1267,70 @@ async function play(
     game =
       await api({
 
-        action:
-          'play',
+        action:'play',
 
-        code:
-          game.code,
+        code:game.code,
 
-        playerId:
-          pid,
+        playerId:pid,
 
-        tileIndex:
-          selected,
+        tileIndex:selected,
 
-        side:
-          sideToPlay
+        side:sideToPlay
       });
 
-    selected =
-      null;
+    selected = null;
 
     render();
 
-  }catch(e){
-
-    alert(
-      e.message
-    );
+  }
+  catch(e){
+    alert(e.message);
   }
 }
 
-/* =========================
-   BOT DELAY
-========================= */
+
+/* =========================================
+   BOT SYSTEM
+   FIX: polling NO reinicia el temporizador
+========================================= */
 
 function scheduleBotStep(){
 
-  clearTimeout(
-    botTimer
-  );
+  /*
+    Si ya no estamos jugando,
+    si este navegador no es el host,
+    o si el turno no pertenece a un bot,
+    cancelamos cualquier timer pendiente.
+  */
 
   if(
     !game ||
-    game.status !==
-      'playing'
+    game.status !== 'playing' ||
+    !game.isHost ||
+    !game.currentPlayerIsBot
   ){
+
+    if(botTimer){
+      clearTimeout(botTimer);
+      botTimer = null;
+    }
+
     return;
   }
 
   /*
-    Solo el host controla
-    los bots.
+    IMPORTANTE:
+    Si ya existe un timer,
+    NO lo reiniciamos.
 
-    Así evitamos que dos
-    teléfonos manden botStep
-    al mismo tiempo.
+    El refresh ocurre cada 900 ms,
+    pero el bot espera 1500 ms.
+    Esto evita que el polling mantenga
+    al bot esperando eternamente.
   */
 
   if(
-    !game.isHost ||
-    !game.currentPlayerIsBot
-  ){
-    return;
-  }
-
-  if(
+    botTimer ||
     botStepInFlight
   ){
     return;
@@ -1964,52 +1343,63 @@ function scheduleBotStep(){
     setTimeout(
       async () => {
 
+        botTimer = null;
+
         /*
-          Verifica que durante
-          la espera no haya
-          cambiado el turno.
+          Verificamos que durante
+          los 1.5 segundos de espera
+          el turno siga perteneciendo
+          al mismo bot.
         */
 
         if(
           !game ||
-          game.turn !==
-            expectedTurn ||
-          !game
-            .currentPlayerIsBot
+          game.status !== 'playing' ||
+          !game.isHost ||
+          !game.currentPlayerIsBot ||
+          game.turn !== expectedTurn
         ){
+          scheduleBotStep();
           return;
         }
 
-        botStepInFlight =
-          true;
+        botStepInFlight = true;
 
         try{
 
           game =
             await api({
 
-              action:
-                'botStep',
+              action:'botStep',
 
-              code:
-                game.code,
+              code:game.code,
 
-              playerId:
-                pid
+              playerId:pid
             });
 
           render();
 
-        }catch(e){
+        }
+        catch(e){
 
           console.error(
+            'Error ejecutando bot:',
             e
           );
 
-        }finally{
+        }
+        finally{
 
-          botStepInFlight =
-            false;
+          botStepInFlight = false;
+
+          /*
+            Si después de esta jugada
+            le toca a otro bot,
+            se crea un nuevo timer
+            de 1.5 segundos.
+          */
+
+          scheduleBotStep();
         }
 
       },
@@ -2017,61 +1407,41 @@ function scheduleBotStep(){
     );
 }
 
-/* =========================
-   DOMINO DOTS
-========================= */
 
-function pipHTML(
-  number
-){
+/* PIPS */
+
+function pipHTML(number){
 
   const maps = {
 
     0:[],
 
-    1:[
-      'p5'
-    ],
+    1:['p5'],
 
-    2:[
-      'p1',
-      'p9'
-    ],
+    2:['p1','p9'],
 
-    3:[
-      'p1',
-      'p5',
-      'p9'
-    ],
+    3:['p1','p5','p9'],
 
     4:[
-      'p1',
-      'p3',
-      'p7',
-      'p9'
+      'p1','p3',
+      'p7','p9'
     ],
 
     5:[
-      'p1',
-      'p3',
+      'p1','p3',
       'p5',
-      'p7',
-      'p9'
+      'p7','p9'
     ],
 
     6:[
-      'p1',
-      'p3',
-      'p4',
-      'p6',
-      'p7',
-      'p9'
+      'p1','p3',
+      'p4','p6',
+      'p7','p9'
     ]
   };
 
   return (
-    maps[number] ||
-    []
+    maps[number] || []
   )
   .map(
     pos =>
@@ -2080,9 +1450,8 @@ function pipHTML(
   .join('');
 }
 
-/* =========================
-   DOMINO TILE
-========================= */
+
+/* TILE */
 
 function tileElement(
   tile,
@@ -2092,31 +1461,28 @@ function tileElement(
 
   const el =
     document
-    .createElement(
-      'div'
-    );
+      .createElement('div');
 
   el.className =
     'tile' +
     (
-      index ===
-      selected
+      index === selected
         ? ' selected'
         : ''
     );
 
   el.innerHTML =
-    `<span class="tile-half">
+    `
+    <span class="tile-half">
       ${pipHTML(tile[0])}
     </span>
 
     <span class="tile-half">
       ${pipHTML(tile[1])}
-    </span>`;
+    </span>
+    `;
 
-  if(
-    clickable
-  ){
+  if(clickable){
 
     el.onclick =
       () => {
@@ -2133,17 +1499,14 @@ function tileElement(
   return el;
 }
 
-/* =========================
-   BACK TILE
-========================= */
+
+/* BACK TILE */
 
 function backTile(){
 
   const el =
     document
-    .createElement(
-      'div'
-    );
+      .createElement('div');
 
   el.className =
     'back-tile';
@@ -2151,20 +1514,16 @@ function backTile(){
   return el;
 }
 
-/* =========================
-   OPPONENT SEATS
-========================= */
+
+/* OPPONENTS */
 
 function renderOpponents(){
 
   const container =
     document
-    .getElementById(
-      'opponents'
-    );
+      .getElementById('opponents');
 
-  container.innerHTML =
-    '';
+  container.innerHTML = '';
 
   if(
     !game ||
@@ -2176,176 +1535,136 @@ function renderOpponents(){
   const total =
     game.players.length;
 
-  game.players
-    .forEach(
-      (
-        player,
-        index
-      ) => {
+  game.players.forEach(
+    (player,index) => {
 
-        if(
-          player.isMe
-        ){
-          return;
+      if(player.isMe){
+        return;
+      }
+
+      const offset =
+        (
+          index -
+          game.myIndex +
+          total
+        ) % total;
+
+      let seatClass =
+        'seat-top';
+
+      if(total === 2){
+
+        seatClass =
+          'seat-top';
+      }
+
+      else if(total === 3){
+
+        seatClass =
+          offset === 1
+            ? 'seat-right'
+            : 'seat-left';
+      }
+
+      else if(total === 4){
+
+        if(offset === 1){
+          seatClass =
+            'seat-right';
         }
 
-        /*
-          Posición relativa a ti.
-        */
-
-        const offset =
-          (
-            index -
-            game.myIndex +
-            total
-          ) %
-          total;
-
-        let seatClass =
-          'seat-top';
-
-        if(
-          total === 2
-        ){
+        else if(offset === 2){
           seatClass =
             'seat-top';
         }
 
-        else if(
-          total === 3
-        ){
+        else{
           seatClass =
-            offset === 1
-              ? 'seat-right'
-              : 'seat-left';
+            'seat-left';
         }
-
-        else if(
-          total === 4
-        ){
-          if(
-            offset === 1
-          ){
-            seatClass =
-              'seat-right';
-          }
-
-          else if(
-            offset === 2
-          ){
-            seatClass =
-              'seat-top';
-          }
-
-          else{
-            seatClass =
-              'seat-left';
-          }
-        }
-
-        const opponent =
-          document
-          .createElement(
-            'div'
-          );
-
-        opponent.className =
-          'opponent ' +
-          seatClass +
-          (
-            index ===
-            game.turn &&
-            game.status ===
-              'playing'
-              ? ' turn'
-              : ''
-          );
-
-        const name =
-          document
-          .createElement(
-            'div'
-          );
-
-        name.className =
-          'opponent-name';
-
-        const bot =
-          player.isBot
-            ? ' 🤖'
-            : '';
-
-        const team =
-          player.team
-            ? ` · Equipo ${player.team}`
-            : '';
-
-        name.textContent =
-          `${player.name}${bot}${team} · ${player.handCount}`;
-
-        const rack =
-          document
-          .createElement(
-            'div'
-          );
-
-        rack.className =
-          'wood-rack';
-
-        for(
-          let i = 0;
-          i <
-          player.handCount;
-          i++
-        ){
-
-          rack.appendChild(
-            backTile()
-          );
-        }
-
-        opponent
-          .appendChild(
-            name
-          );
-
-        opponent
-          .appendChild(
-            rack
-          );
-
-        container
-          .appendChild(
-            opponent
-          );
       }
-    );
+
+      const opponent =
+        document
+          .createElement('div');
+
+      opponent.className =
+        'opponent ' +
+        seatClass +
+        (
+          index === game.turn &&
+          game.status === 'playing'
+            ? ' turn'
+            : ''
+        );
+
+      const name =
+        document
+          .createElement('div');
+
+      name.className =
+        'opponent-name';
+
+      const bot =
+        player.isBot
+          ? ' 🤖'
+          : '';
+
+      const team =
+        player.team
+          ? ` · Equipo ${player.team}`
+          : '';
+
+      name.textContent =
+        `${player.name}${bot}${team} · ${player.handCount}`;
+
+      const rack =
+        document
+          .createElement('div');
+
+      rack.className =
+        'wood-rack';
+
+      for(
+        let i = 0;
+        i < player.handCount;
+        i++
+      ){
+        rack.appendChild(
+          backTile()
+        );
+      }
+
+      opponent.appendChild(name);
+      opponent.appendChild(rack);
+
+      container.appendChild(
+        opponent
+      );
+    }
+  );
 }
 
-/* =========================
-   HISTORY
-========================= */
+
+/* HISTORY */
 
 function renderHistory(){
 
   const list =
     document
-    .getElementById(
-      'historyList'
-    );
+      .getElementById('historyList');
 
   const historyItems =
-    game.history ||
-    [];
+    game.history || [];
 
-  if(
-    !historyItems.length
-  ){
+  if(!historyItems.length){
 
     list.innerHTML =
-      `<div class="history-item">
+      `
+      <div class="history-item">
         La partida todavía no tiene jugadas.
-      </div>`;
+      </div>
+      `;
 
     return;
   }
@@ -2362,118 +1681,90 @@ function renderHistory(){
               item.time
             );
 
-          return (
-            `<div class="history-item">
+          return `
+            <div class="history-item">
+
               ${item.text}
 
               <span class="history-time">
+
                 ${
-                  time
-                  .toLocaleTimeString(
+                  time.toLocaleTimeString(
                     [],
                     {
-                      hour:
-                        '2-digit',
-
-                      minute:
-                        '2-digit',
-
-                      second:
-                        '2-digit'
+                      hour:'2-digit',
+                      minute:'2-digit',
+                      second:'2-digit'
                     }
                   )
                 }
+
               </span>
-            </div>`
-          );
+
+            </div>
+          `;
         }
       )
       .join('');
 }
 
-/* =========================
-   RENDER
-========================= */
+
+/* RENDER */
 
 function render(){
 
-  if(
-    !game
-  ){
+  if(!game){
     return;
   }
 
   const statusEl =
     document
-    .getElementById(
-      'status'
-    );
+      .getElementById('status');
 
   const subStatus =
     document
-    .getElementById(
-      'subStatus'
-    );
+      .getElementById('subStatus');
 
   const playersEl =
     document
-    .getElementById(
-      'players'
-    );
+      .getElementById('players');
 
   const boardEl =
     document
-    .getElementById(
-      'board'
-    );
+      .getElementById('board');
 
   const handEl =
     document
-    .getElementById(
-      'hand'
-    );
+      .getElementById('hand');
 
   const msg =
     document
-    .getElementById(
-      'msg'
-    );
+      .getElementById('msg');
 
   const start =
     document
-    .getElementById(
-      'start'
-    );
+      .getElementById('start');
 
   const newRound =
     document
-    .getElementById(
-      'newRound'
-    );
+      .getElementById('newRound');
 
   const leftButton =
     document
-    .getElementById(
-      'leftButton'
-    );
+      .getElementById('leftButton');
 
   const rightButton =
     document
-    .getElementById(
-      'rightButton'
-    );
+      .getElementById('rightButton');
 
   const drawButton =
     document
-    .getElementById(
-      'drawButton'
-    );
+      .getElementById('drawButton');
 
   const passButton =
     document
-    .getElementById(
-      'passButton'
-    );
+      .getElementById('passButton');
+
 
   /* STATUS */
 
@@ -2483,8 +1774,7 @@ function render(){
     '';
 
   if(
-    game.status ===
-      'playing'
+    game.status === 'playing'
   ){
 
     const current =
@@ -2497,148 +1787,135 @@ function render(){
       `${current?.isBot ? ' 🤖' : ''}` +
       ` · Pozo: ${game.boneyardCount} fichas`;
   }
-
   else{
 
-    subStatus.textContent =
-      '';
+    subStatus.textContent = '';
   }
 
-  /* SIDEBAR PLAYERS */
+
+  /* SIDEBAR */
 
   playersEl.innerHTML =
     game.players
-    .map(
-      (
-        player,
-        index
-      ) => {
+      .map(
+        (player,index) => {
 
-        const arrow =
-          index ===
-            game.turn &&
-          game.status ===
-            'playing'
-            ? '▶ '
-            : '';
+          const arrow =
+            index === game.turn &&
+            game.status === 'playing'
+              ? '▶ '
+              : '';
 
-        const bot =
-          player.isBot
-            ? ' 🤖'
-            : '';
+          const bot =
+            player.isBot
+              ? ' 🤖'
+              : '';
 
-        const you =
-          player.isMe
-            ? ' (Tú)'
-            : '';
+          const you =
+            player.isMe
+              ? ' (Tú)'
+              : '';
 
-        const team =
-          player.team
-            ? ` · Equipo ${player.team}`
-            : '';
+          const team =
+            player.team
+              ? ` · Equipo ${player.team}`
+              : '';
 
-        const score =
-          player.score !== null &&
-          player.score !== undefined
-            ? ` · ${player.score} pts`
-            : '';
+          const score =
+            player.score !== null &&
+            player.score !== undefined
+              ? ` · ${player.score} pts`
+              : '';
 
-        return (
-          `<div>
-            ${arrow}
-            ${player.name}
-            ${bot}
-            ${you}
-            ${team}
-            · ${player.handCount} fichas
-            ${score}
-          </div>`
-        );
-      }
-    )
-    .join('');
+          return `
+            <div>
+              ${arrow}
+              ${player.name}
+              ${bot}
+              ${you}
+              ${team}
+              · ${player.handCount} fichas
+              ${score}
+            </div>
+          `;
+        }
+      )
+      .join('');
+
+
+  /* TEAM SCORE */
 
   if(
     game.teamScores &&
-    game.players.length ===
-      4
+    game.players.length === 4
   ){
 
     playersEl.innerHTML +=
-      `<div>
+      `
+      <div>
         <b>
-        Equipo A:
-        ${game.teamScores.A}
-        pts
-        ·
-        Equipo B:
-        ${game.teamScores.B}
-        pts
+          Equipo A:
+          ${game.teamScores.A} pts
+          ·
+          Equipo B:
+          ${game.teamScores.B} pts
         </b>
-      </div>`;
+      </div>
+      `;
   }
 
-  /* ROOM MESSAGE */
+
+  /* MESSAGE */
 
   if(
-    game.status ===
-      'lobby'
+    game.status === 'lobby'
   ){
 
     msg.textContent =
       `${game.humanSlots} puesto(s) humano(s) · ${game.botCount} bot(s)`;
   }
-
   else{
 
     msg.textContent =
       `Ronda ${game.roundNumber} · Meta ${game.target}`;
   }
 
-  /* CENTRAL BOARD */
 
-  boardEl.innerHTML =
-    '';
+  /* BOARD */
 
-  (
-    game.board ||
-    []
-  )
-  .forEach(
-    tile => {
+  boardEl.innerHTML = '';
 
-      boardEl.appendChild(
-        tileElement(
-          tile
-        )
-      );
-    }
-  );
+  (game.board || [])
+    .forEach(
+      tile => {
 
-  /* YOUR HAND */
+        boardEl.appendChild(
+          tileElement(tile)
+        );
+      }
+    );
 
-  handEl.innerHTML =
-    '';
 
-  (
-    game.myHand ||
-    []
-  )
-  .forEach(
-    (
-      tile,
-      index
-    ) => {
+  /* HAND */
 
-      handEl.appendChild(
-        tileElement(
-          tile,
-          index,
-          true
-        )
-      );
-    }
-  );
+  handEl.innerHTML = '';
+
+  (game.myHand || [])
+    .forEach(
+      (tile,index) => {
+
+        handEl.appendChild(
+          tileElement(
+            tile,
+            index,
+            true
+          )
+        );
+      }
+    );
+
+
+  /* PLAYER LABEL */
 
   const me =
     game.players[
@@ -2646,49 +1923,47 @@ function render(){
     ];
 
   document
-    .getElementById(
-      'youLabel'
-    )
+    .getElementById('youLabel')
     .textContent =
       me
         ? `${me.name} (Tú) · ${game.myHand.length} fichas`
         : 'Tus fichas';
 
+
   /* OPPONENTS */
 
   renderOpponents();
+
 
   /* HISTORY */
 
   renderHistory();
 
-  /* LOBBY BUTTON */
+
+  /* START */
 
   start.style.display =
     game.isHost &&
-    game.status ===
-      'lobby'
+    game.status === 'lobby'
       ? 'inline-block'
       : 'none';
+
 
   /* NEW ROUND */
 
   newRound.style.display =
     game.isHost &&
-    game.status ===
-      'finished'
+    game.status === 'finished'
       ? 'inline-block'
       : 'none';
 
-  /* HUMAN CONTROLS */
+
+  /* CONTROLS */
 
   const myTurn =
-    game.status ===
-      'playing' &&
-    game.myIndex ===
-      game.turn &&
-    !game
-      .currentPlayerIsBot;
+    game.status === 'playing' &&
+    game.myIndex === game.turn &&
+    !game.currentPlayerIsBot;
 
   leftButton.disabled =
     !myTurn;
@@ -2702,18 +1977,18 @@ function render(){
   passButton.disabled =
     !myTurn;
 
+
   /*
-    Después de renderizar,
-    programamos el siguiente
-    bot si corresponde.
+    IMPORTANT:
+    This no longer resets an
+    existing bot timer.
   */
 
   scheduleBotStep();
 }
 
-/* =========================
-   COPY LINK
-========================= */
+
+/* COPY LINK */
 
 async function copyLink(){
 
@@ -2726,15 +2001,13 @@ async function copyLink(){
 
     await navigator
       .clipboard
-      .writeText(
-        url
-      );
+      .writeText(url);
 
     alert(
       'URL copiada'
     );
-
-  }catch{
+  }
+  catch{
 
     prompt(
       'Copia esta URL:',
@@ -2743,9 +2016,8 @@ async function copyLink(){
   }
 }
 
-/* =========================
-   MUSIC
-========================= */
+
+/* MUSIC */
 
 function toggleMusic(on){
 
@@ -2759,62 +2031,51 @@ function toggleMusic(on){
 
     oscillator =
       audioContext
-      .createOscillator();
+        .createOscillator();
 
     const gain =
       audioContext
-      .createGain();
+        .createGain();
 
     oscillator
       .frequency
       .value =
-        110;
+      110;
 
     gain
       .gain
       .value =
-        0.015;
+      0.015;
 
     oscillator
+      .connect(gain)
       .connect(
-        gain
-      )
-      .connect(
-        audioContext
-        .destination
+        audioContext.destination
       );
 
-    oscillator
-      .start();
-
+    oscillator.start();
   }
 
   else{
 
-    if(
-      oscillator
-    ){
+    if(oscillator){
 
       try{
-        oscillator
-          .stop();
-      }catch{}
+        oscillator.stop();
+      }
+      catch{}
 
-      oscillator =
-        null;
+      oscillator = null;
     }
 
-    if(
-      audioContext
-    ){
+    if(audioContext){
 
       try{
-        audioContext
-          .close();
-      }catch{}
+        audioContext.close();
+      }
+      catch{}
 
-      audioContext =
-        null;
+      audioContext = null;
     }
   }
 }
