@@ -1058,6 +1058,16 @@ summary{
   }
 }
 
+
+/* V15: tablero más amplio para que las dos colas tengan recorrido suficiente */
+@media (min-width:701px){
+  .board{
+    min-height:620px;
+    padding-top:42px;
+    padding-bottom:42px;
+  }
+}
+
 </style>
 </head>
 
@@ -2490,13 +2500,13 @@ function renderBoard(){
   const CENTER_Y = boardH / 2;
 
   // Límites seguros. Dejamos libres las zonas de los jugadores laterales.
-  const SAFE_LEFT  = mobile ? 42 : 150;
-  const SAFE_RIGHT = boardW - (mobile ? 42 : 150);
+  const SAFE_LEFT  = mobile ? 28 : 95;
+  const SAFE_RIGHT = boardW - (mobile ? 28 : 95);
 
   // Filas superiores e inferiores disponibles.
   // Se calculan con el alto real para que el tablero permanezca estable.
-  const TOP_LANE = Math.max(mobile ? 72 : 105, CENTER_Y - (mobile ? 105 : 155));
-  const BOTTOM_LANE = Math.min(boardH - (mobile ? 72 : 105), CENTER_Y + (mobile ? 105 : 155));
+  const TOP_LANE = Math.max(mobile ? 38 : 55, CENTER_Y - (mobile ? 165 : 245));
+  const BOTTOM_LANE = Math.min(boardH - (mobile ? 38 : 55), CENTER_Y + (mobile ? 165 : 245));
 
   const isDouble = tile => tile[0] === tile[1];
   const visualLength = tile => isDouble(tile) ? H : W;
@@ -2542,7 +2552,7 @@ function renderBoard(){
       : CENTER_X - openingLen / 2;
 
     // Distancia entre filas. Suficiente para una ficha vertical completa.
-    const ROW_STEP = mobile ? 76 : 112;
+    const ROW_STEP = mobile ? 70 : 100;
 
     for(const index of indices){
 
@@ -2650,11 +2660,11 @@ function renderBoard(){
         Así la ficha horizontal comienza después de la esquina y ambas
         se encuentran en el borde exterior, sin solaparse.
       */
-      const EDGE_CLEARANCE = mobile ? 1 : 2;
+      const EDGE_CLEARANCE = 0;
 
       cursor = dir === -1
-        ? edgeX - W / 2 - EDGE_CLEARANCE
-        : edgeX + W / 2 + EDGE_CLEARANCE;
+        ? edgeX - H / 2 - EDGE_CLEARANCE
+        : edgeX + H / 2 + EDGE_CLEARANCE;
     }
   }
 
