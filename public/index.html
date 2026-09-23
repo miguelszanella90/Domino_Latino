@@ -20,9 +20,12 @@
   --wood2:#5f361d;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
-html,body{
+html,
+body{
   margin:0;
   width:100%;
   height:100%;
@@ -42,7 +45,9 @@ body{
   height:100dvh;
 }
 
-/* SIDEBAR */
+/* =========================
+   SIDEBAR
+========================= */
 
 .side{
   background:var(--panel);
@@ -77,7 +82,9 @@ body{
   left:12px;
 }
 
-button,input,select{
+button,
+input,
+select{
   border:0;
   border-radius:9px;
   padding:10px;
@@ -143,7 +150,9 @@ summary{
   display:block;
 }
 
-/* MAIN */
+/* =========================
+   MAIN
+========================= */
 
 .main{
   position:relative;
@@ -172,7 +181,9 @@ summary{
   opacity:.8;
 }
 
-/* GAME */
+/* =========================
+   GAME AREA
+========================= */
 
 .game-content{
   min-height:0;
@@ -193,23 +204,40 @@ summary{
     );
 }
 
+/* =========================
+   DOMINO BOARD
+========================= */
+
 .board{
   position:absolute;
-  left:13%;
-  right:13%;
-  top:20%;
-  bottom:20%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  align-content:center;
-  gap:5px;
-  overflow:auto;
-  flex-wrap:wrap;
-  padding:25px;
+  left:12%;
+  right:12%;
+  top:16%;
+  bottom:16%;
+  overflow:hidden;
 }
 
-/* OPPONENTS */
+/*
+  Las fichas del tablero ahora
+  se posicionan absolutamente.
+
+  JavaScript calcula X/Y y crea
+  la cadena tipo serpiente.
+*/
+
+.board-piece{
+  position:absolute;
+  transform-origin:center center;
+  transition:
+    left .25s ease,
+    top .25s ease,
+    transform .25s ease;
+  z-index:2;
+}
+
+/* =========================
+   OPPONENTS
+========================= */
 
 .opponent{
   position:absolute;
@@ -258,7 +286,9 @@ summary{
   transform:translateY(-50%);
 }
 
-/* WOOD RACK */
+/* =========================
+   WOOD RACK
+========================= */
 
 .wood-rack{
   position:relative;
@@ -299,7 +329,9 @@ summary{
   padding:9px 7px;
 }
 
-/* BACK TILES */
+/* =========================
+   BACK TILES
+========================= */
 
 .back-tile{
   flex:0 0 auto;
@@ -326,7 +358,9 @@ summary{
   height:17px;
 }
 
-/* DOMINOES */
+/* =========================
+   DOMINO TILES
+========================= */
 
 .tile{
   display:flex;
@@ -375,7 +409,9 @@ summary{
   transform:translateY(-4px);
 }
 
-/* HISTORY */
+/* =========================
+   HISTORY
+========================= */
 
 .history-panel{
   margin:0;
@@ -413,7 +449,9 @@ summary{
   opacity:.55;
 }
 
-/* PLAYER HAND */
+/* =========================
+   PLAYER HAND
+========================= */
 
 .hand-zone{
   position:relative;
@@ -439,7 +477,12 @@ summary{
   padding:9px 12px 11px;
   border:2px solid #3b2113;
   border-radius:12px;
-  background:linear-gradient(180deg,#9b6032,#75431f);
+  background:
+    linear-gradient(
+      180deg,
+      #9b6032,
+      #75431f
+    );
   box-shadow:
     inset 0 1px 2px #ffffff28,
     0 3px 10px #0007;
@@ -455,14 +498,19 @@ summary{
   -webkit-overflow-scrolling:touch;
 }
 
-/* CONTROLS */
+/* =========================
+   CONTROLS
+========================= */
 
 .controls{
   display:flex;
   justify-content:center;
   flex-wrap:wrap;
   gap:6px;
-  padding:8px 8px max(8px,env(safe-area-inset-bottom));
+  padding:
+    8px
+    8px
+    max(8px,env(safe-area-inset-bottom));
   background:#092f24;
 }
 
@@ -470,7 +518,9 @@ summary{
   margin:0;
 }
 
-/* MOBILE */
+/* =========================
+   MOBILE
+========================= */
 
 @media(max-width:700px){
 
@@ -506,13 +556,14 @@ summary{
   .main{
     width:100%;
     height:100dvh;
-    grid-template-rows:auto minmax(0,1fr) auto auto;
   }
 
   .top{
     min-height:54px;
-    padding:max(13px,env(safe-area-inset-top)) 55px 8px;
-    font-size:13px;
+    padding:
+      max(13px,env(safe-area-inset-top))
+      55px
+      8px;
   }
 
   #status{
@@ -534,10 +585,8 @@ summary{
   .board{
     left:8%;
     right:8%;
-    top:23%;
-    bottom:22%;
-    padding:10px 4px;
-    gap:3px;
+    top:18%;
+    bottom:18%;
   }
 
   .tile-half{
@@ -555,9 +604,17 @@ summary{
     padding:3px 6px;
   }
 
-  .seat-top{top:4px}
-  .seat-left{left:4px}
-  .seat-right{right:4px}
+  .seat-top{
+    top:4px;
+  }
+
+  .seat-left{
+    left:4px;
+  }
+
+  .seat-right{
+    right:4px;
+  }
 
   .back-tile{
     width:11px;
@@ -633,7 +690,10 @@ summary{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:5px;
-    padding:6px 6px max(8px,env(safe-area-inset-bottom));
+    padding:
+      6px
+      6px
+      max(8px,env(safe-area-inset-bottom));
   }
 
   .controls button{
@@ -642,6 +702,7 @@ summary{
     font-size:11px;
   }
 }
+
 </style>
 </head>
 
@@ -649,66 +710,99 @@ summary{
 
 <div class="app">
 
-<aside class="side" id="side">
+<aside
+  class="side"
+  id="side"
+>
 
 <h2>🁣 Dominó Online</h2>
 
 <div id="lobby">
 
-<input id="name" placeholder="Tu nombre">
+<input
+  id="name"
+  placeholder="Tu nombre"
+>
 
 <br>
 
 <label>
 Jugadores
-<select id="max" onchange="updateBotOptions()">
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="4" selected>4</option>
+
+<select
+  id="max"
+  onchange="updateBotOptions()"
+>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4" selected>4</option>
 </select>
+
 </label>
 
 <div class="bot-options">
 
 <label>
 Bots
+
 <select id="botCount">
-  <option value="0">0 bots</option>
-  <option value="1">1 bot</option>
-  <option value="2">2 bots</option>
-  <option value="3">3 bots</option>
+<option value="0">0 bots</option>
+<option value="1">1 bot</option>
+<option value="2">2 bots</option>
+<option value="3">3 bots</option>
 </select>
+
 </label>
 
 <label>
 Dificultad
+
 <select id="botDifficulty">
-  <option value="easy">Fácil</option>
-  <option value="normal" selected>Normal</option>
-  <option value="hard">Difícil</option>
+<option value="easy">Fácil</option>
+<option value="normal" selected>Normal</option>
+<option value="hard">Difícil</option>
 </select>
+
 </label>
 
 </div>
 
-<button onclick="create()">Crear sala</button>
+<button onclick="create()">
+Crear sala
+</button>
 
 <div class="row">
-<input id="code" placeholder="Código">
-<button onclick="join()">Unirme</button>
-</div>
+
+<input
+  id="code"
+  placeholder="Código"
+>
+
+<button onclick="join()">
+Unirme
+</button>
 
 </div>
 
-<div id="room" hidden>
+</div>
+
+<div
+  id="room"
+  hidden
+>
 
 <h3>
 Sala <b id="roomCode"></b>
 </h3>
 
-<button onclick="copyLink()">Copiar URL</button>
+<button onclick="copyLink()">
+Copiar URL
+</button>
 
-<button id="start" onclick="act('start')">
+<button
+  id="start"
+  onclick="act('start')"
+>
 Iniciar partida
 </button>
 
@@ -720,15 +814,23 @@ Iniciar partida
 Nueva ronda
 </button>
 
-<div class="players" id="players"></div>
+<div
+  class="players"
+  id="players"
+></div>
 
-<p id="msg" class="small"></p>
+<p
+  id="msg"
+  class="small"
+></p>
 
 </div>
 
 <details>
 
-<summary>Reglas</summary>
+<summary>
+Reglas
+</summary>
 
 <p class="small">
 28 fichas, valores 0 a 6.
@@ -739,48 +841,62 @@ La ficha inicial se coloca automáticamente.
 En cada turno se juega una ficha que coincida con uno de los extremos.
 Si no puedes jugar y quedan fichas en el pozo, debes robar.
 Si el pozo está vacío y no puedes jugar, debes pasar.
-Con cuatro jugadores se juega por equipos: jugadores 1 y 3 contra jugadores 2 y 4.
+Con cuatro jugadores se juega por equipos:
+jugadores 1 y 3 contra jugadores 2 y 4.
 </p>
 
 </details>
 
 <details>
 
-<summary>Settings</summary>
+<summary>
+Settings
+</summary>
 
 <label>
 Color mesa
+
 <input
   type="color"
   value="#0d6b4d"
-  oninput="document.documentElement.style.setProperty('--felt',this.value)"
+  oninput="
+    document.documentElement
+    .style
+    .setProperty('--felt',this.value)
+  "
 >
+
 </label>
 
 <br>
 
 <label>
 Música
+
 <input
   id="music"
   type="checkbox"
   onchange="toggleMusic(this.checked)"
 >
+
 </label>
 
 <br>
 
 <label>
 Meta
+
 <select id="target">
-  <option value="100">100</option>
-  <option value="150">150</option>
+<option value="100">100</option>
+<option value="150">150</option>
 </select>
+
 </label>
 
 </details>
 
 </aside>
+
 
 <main class="main">
 
@@ -791,6 +907,7 @@ Meta
 ☰
 </button>
 
+
 <div class="top">
 
 <b id="status">
@@ -800,6 +917,7 @@ Crea o únete a una sala
 <div id="subStatus"></div>
 
 </div>
+
 
 <div class="game-content">
 
@@ -816,6 +934,7 @@ Crea o únete a una sala
 ></div>
 
 </section>
+
 
 <details
   class="history-panel"
@@ -836,6 +955,7 @@ Crea o únete a una sala
 
 </div>
 
+
 <section class="hand-zone">
 
 <div
@@ -855,6 +975,7 @@ Tus fichas
 </div>
 
 </section>
+
 
 <div class="controls">
 
@@ -892,9 +1013,12 @@ Pasar
 
 </div>
 
+
 <script>
 
-/* VARIABLES */
+/* =========================
+   VARIABLES
+========================= */
 
 let game;
 let pid;
@@ -904,10 +1028,15 @@ let poll;
 let botTimer = null;
 let botStepInFlight = false;
 
+let audioContext = null;
+let oscillator = null;
+
 const BOT_DELAY = 1500;
 
 
-/* ROOM FROM URL */
+/* =========================
+   ROOM URL
+========================= */
 
 const qs =
   new URLSearchParams(
@@ -915,6 +1044,7 @@ const qs =
   );
 
 if(qs.get('room')){
+
   document
     .getElementById('code')
     .value =
@@ -922,9 +1052,12 @@ if(qs.get('room')){
 }
 
 
-/* MOBILE */
+/* =========================
+   MOBILE
+========================= */
 
 function isMobile(){
+
   return window
     .matchMedia(
       '(max-width:700px)'
@@ -945,7 +1078,9 @@ if(isMobile()){
 }
 
 
-/* SIDEBAR */
+/* =========================
+   SIDEBAR
+========================= */
 
 function toggleSide(){
 
@@ -956,7 +1091,9 @@ function toggleSide(){
 }
 
 
-/* API */
+/* =========================
+   API
+========================= */
 
 async function api(body){
 
@@ -979,16 +1116,20 @@ async function api(body){
   let data;
 
   try{
+
     data =
       await response.json();
+
   }
   catch{
+
     throw new Error(
       'El servidor devolvió una respuesta inválida'
     );
   }
 
   if(!response.ok){
+
     throw new Error(
       data.error ||
       'Error del servidor'
@@ -999,7 +1140,9 @@ async function api(body){
 }
 
 
-/* BOT OPTIONS */
+/* =========================
+   BOT OPTIONS
+========================= */
 
 function updateBotOptions(){
 
@@ -1015,13 +1158,15 @@ function updateBotOptions(){
       .getElementById('botCount');
 
   const current =
-    Number(select.value || 0);
+    Number(
+      select.value || 0
+    );
 
   select.innerHTML = '';
 
   for(
-    let i = 0;
-    i <= total - 1;
+    let i=0;
+    i<=total-1;
     i++
   ){
 
@@ -1032,26 +1177,30 @@ function updateBotOptions(){
     option.value = i;
 
     option.textContent =
-      i === 0
+      i===0
         ? '0 bots'
-        : i === 1
+        : i===1
           ? '1 bot'
           : `${i} bots`;
 
-    select.appendChild(option);
+    select.appendChild(
+      option
+    );
   }
 
   select.value =
     Math.min(
       current,
-      total - 1
+      total-1
     );
 }
 
 updateBotOptions();
 
 
-/* CREATE */
+/* =========================
+   CREATE
+========================= */
 
 async function create(){
 
@@ -1095,12 +1244,15 @@ async function create(){
 
   }
   catch(e){
+
     alert(e.message);
   }
 }
 
 
-/* JOIN */
+/* =========================
+   JOIN
+========================= */
 
 async function join(){
 
@@ -1114,6 +1266,7 @@ async function join(){
         .toUpperCase();
 
     if(!roomCode){
+
       return alert(
         'Introduce el código de la sala'
       );
@@ -1139,12 +1292,15 @@ async function join(){
 
   }
   catch(e){
+
     alert(e.message);
   }
 }
 
 
-/* ENTER */
+/* =========================
+   ENTER
+========================= */
 
 function enter(){
 
@@ -1168,6 +1324,7 @@ function enter(){
   );
 
   if(isMobile()){
+
     document
       .getElementById('side')
       .classList
@@ -1186,7 +1343,9 @@ function enter(){
 }
 
 
-/* REFRESH */
+/* =========================
+   REFRESH
+========================= */
 
 async function refresh(){
 
@@ -1217,6 +1376,7 @@ async function refresh(){
 
   }
   catch(e){
+
     console.log(
       'Refresh error',
       e
@@ -1225,7 +1385,9 @@ async function refresh(){
 }
 
 
-/* HUMAN ACTION */
+/* =========================
+   ACTION
+========================= */
 
 async function act(action){
 
@@ -1247,16 +1409,20 @@ async function act(action){
 
   }
   catch(e){
+
     alert(e.message);
   }
 }
 
 
-/* PLAY */
+/* =========================
+   PLAY
+========================= */
 
 async function play(sideToPlay){
 
   if(selected === null){
+
     return alert(
       'Selecciona una ficha'
     );
@@ -1284,24 +1450,17 @@ async function play(sideToPlay){
 
   }
   catch(e){
+
     alert(e.message);
   }
 }
 
 
-/* =========================================
+/* =========================
    BOT SYSTEM
-   FIX: polling NO reinicia el temporizador
-========================================= */
+========================= */
 
 function scheduleBotStep(){
-
-  /*
-    Si ya no estamos jugando,
-    si este navegador no es el host,
-    o si el turno no pertenece a un bot,
-    cancelamos cualquier timer pendiente.
-  */
 
   if(
     !game ||
@@ -1311,23 +1470,16 @@ function scheduleBotStep(){
   ){
 
     if(botTimer){
-      clearTimeout(botTimer);
+
+      clearTimeout(
+        botTimer
+      );
+
       botTimer = null;
     }
 
     return;
   }
-
-  /*
-    IMPORTANTE:
-    Si ya existe un timer,
-    NO lo reiniciamos.
-
-    El refresh ocurre cada 900 ms,
-    pero el bot espera 1500 ms.
-    Esto evita que el polling mantenga
-    al bot esperando eternamente.
-  */
 
   if(
     botTimer ||
@@ -1341,16 +1493,9 @@ function scheduleBotStep(){
 
   botTimer =
     setTimeout(
-      async () => {
+      async()=>{
 
         botTimer = null;
-
-        /*
-          Verificamos que durante
-          los 1.5 segundos de espera
-          el turno siga perteneciendo
-          al mismo bot.
-        */
 
         if(
           !game ||
@@ -1359,6 +1504,7 @@ function scheduleBotStep(){
           !game.currentPlayerIsBot ||
           game.turn !== expectedTurn
         ){
+
           scheduleBotStep();
           return;
         }
@@ -1392,51 +1538,63 @@ function scheduleBotStep(){
 
           botStepInFlight = false;
 
-          /*
-            Si después de esta jugada
-            le toca a otro bot,
-            se crea un nuevo timer
-            de 1.5 segundos.
-          */
-
           scheduleBotStep();
         }
 
       },
+
       BOT_DELAY
     );
 }
 
 
-/* PIPS */
+/* =========================
+   PIPS
+========================= */
 
 function pipHTML(number){
 
-  const maps = {
+  const maps={
 
     0:[],
 
-    1:['p5'],
+    1:[
+      'p5'
+    ],
 
-    2:['p1','p9'],
+    2:[
+      'p1',
+      'p9'
+    ],
 
-    3:['p1','p5','p9'],
+    3:[
+      'p1',
+      'p5',
+      'p9'
+    ],
 
     4:[
-      'p1','p3',
-      'p7','p9'
+      'p1',
+      'p3',
+      'p7',
+      'p9'
     ],
 
     5:[
-      'p1','p3',
+      'p1',
+      'p3',
       'p5',
-      'p7','p9'
+      'p7',
+      'p9'
     ],
 
     6:[
-      'p1','p3',
-      'p4','p6',
-      'p7','p9'
+      'p1',
+      'p3',
+      'p4',
+      'p6',
+      'p7',
+      'p9'
     ]
   };
 
@@ -1444,19 +1602,21 @@ function pipHTML(number){
     maps[number] || []
   )
   .map(
-    pos =>
-      `<i class="pip ${pos}"></i>`
+    position =>
+      `<i class="pip ${position}"></i>`
   )
   .join('');
 }
 
 
-/* TILE */
+/* =========================
+   TILE
+========================= */
 
 function tileElement(
   tile,
-  index = null,
-  clickable = false
+  index=null,
+  clickable=false
 ){
 
   const el =
@@ -1485,7 +1645,7 @@ function tileElement(
   if(clickable){
 
     el.onclick =
-      () => {
+      ()=>{
 
         selected =
           selected === index
@@ -1500,7 +1660,321 @@ function tileElement(
 }
 
 
-/* BACK TILE */
+/* =========================
+   NEW BOARD ENGINE
+   SERPENTINE DOMINO CHAIN
+========================= */
+
+function renderBoard(){
+
+  const board =
+    document
+      .getElementById('board');
+
+  board.innerHTML = '';
+
+  const pieces =
+    game.board || [];
+
+  if(!pieces.length){
+    return;
+  }
+
+  /*
+    The virtual board uses a grid.
+
+    Horizontal domino:
+      2 grid units wide
+      1 grid unit high
+
+    Vertical domino:
+      1 grid unit wide
+      2 grid units high
+
+    The route follows:
+
+          → → → →
+                ↓
+          ← ← ← ←
+          ↓
+          → → → →
+
+    producing the classic domino
+    snake / square pattern.
+  */
+
+  const mobile =
+    isMobile();
+
+  const cell =
+    mobile
+      ? 25
+      : 35;
+
+  const horizontalStep =
+    cell * 2;
+
+  const verticalStep =
+    cell * 2;
+
+  const rect =
+    board
+      .getBoundingClientRect();
+
+  const usableWidth =
+    Math.max(
+      rect.width,
+      300
+    );
+
+  /*
+    Number of horizontal dominoes
+    before making a turn.
+  */
+
+  let rowCapacity =
+    Math.floor(
+      usableWidth /
+      horizontalStep
+    ) - 1;
+
+  rowCapacity =
+    Math.max(
+      mobile ? 4 : 6,
+      Math.min(
+        rowCapacity,
+        mobile ? 6 : 9
+      )
+    );
+
+  /*
+    Build the route.
+
+    First piece begins in the
+    upper-left portion of the
+    virtual chain.
+  */
+
+  const positions=[];
+
+  let x=0;
+  let y=0;
+
+  let direction=1;
+
+  let piecesInRow=0;
+
+  for(
+    let i=0;
+    i<pieces.length;
+    i++
+  ){
+
+    const tile =
+      pieces[i];
+
+    const isDouble =
+      tile[0] === tile[1];
+
+    /*
+      At the end of a row,
+      make a vertical corner.
+    */
+
+    const shouldTurn =
+      i>0 &&
+      piecesInRow>=rowCapacity;
+
+    if(shouldTurn){
+
+      positions.push({
+        x,
+        y,
+        rotation:
+          direction===1
+            ? 90
+            : -90,
+        double:isDouble
+      });
+
+      y += verticalStep;
+
+      direction *= -1;
+
+      piecesInRow=0;
+
+      continue;
+    }
+
+    /*
+      Normal horizontal tile.
+    */
+
+    positions.push({
+      x,
+      y,
+
+      /*
+        Doubles are displayed
+        perpendicular to the
+        direction of the chain.
+      */
+
+      rotation:
+        isDouble
+          ? 90
+          : direction===1
+            ? 0
+            : 180,
+
+      double:isDouble
+    });
+
+    x +=
+      horizontalStep *
+      direction;
+
+    piecesInRow++;
+  }
+
+  /*
+    Find the dimensions occupied
+    by the virtual chain.
+  */
+
+  const xs =
+    positions.map(
+      p=>p.x
+    );
+
+  const ys =
+    positions.map(
+      p=>p.y
+    );
+
+  const minX =
+    Math.min(...xs);
+
+  const maxX =
+    Math.max(...xs);
+
+  const minY =
+    Math.min(...ys);
+
+  const maxY =
+    Math.max(...ys);
+
+  const chainWidth =
+    maxX -
+    minX +
+    horizontalStep;
+
+  const chainHeight =
+    maxY -
+    minY +
+    verticalStep;
+
+  /*
+    Scale the complete chain
+    if it becomes too large.
+  */
+
+  const availableWidth =
+    Math.max(
+      board.clientWidth - 20,
+      100
+    );
+
+  const availableHeight =
+    Math.max(
+      board.clientHeight - 20,
+      100
+    );
+
+  const scale =
+    Math.min(
+      1,
+      availableWidth /
+      chainWidth,
+      availableHeight /
+      chainHeight
+    );
+
+  /*
+    Center the entire chain.
+  */
+
+  const offsetX =
+    (
+      board.clientWidth -
+      chainWidth * scale
+    ) / 2;
+
+  const offsetY =
+    (
+      board.clientHeight -
+      chainHeight * scale
+    ) / 2;
+
+  pieces.forEach(
+    (tile,index)=>{
+
+      const position =
+        positions[index];
+
+      const wrapper =
+        document
+          .createElement('div');
+
+      wrapper.className =
+        'board-piece';
+
+      wrapper.style.left =
+        (
+          offsetX +
+          (
+            position.x -
+            minX
+          ) * scale
+        ) +
+        'px';
+
+      wrapper.style.top =
+        (
+          offsetY +
+          (
+            position.y -
+            minY
+          ) * scale
+        ) +
+        'px';
+
+      wrapper.style.transform =
+        `
+        scale(${scale})
+        rotate(${position.rotation}deg)
+        `;
+
+      const domino =
+        tileElement(
+          tile
+        );
+
+      wrapper.appendChild(
+        domino
+      );
+
+      board.appendChild(
+        wrapper
+      );
+    }
+  );
+}
+
+
+/* =========================
+   BACK TILE
+========================= */
 
 function backTile(){
 
@@ -1515,7 +1989,9 @@ function backTile(){
 }
 
 
-/* OPPONENTS */
+/* =========================
+   OPPONENTS
+========================= */
 
 function renderOpponents(){
 
@@ -1536,7 +2012,7 @@ function renderOpponents(){
     game.players.length;
 
   game.players.forEach(
-    (player,index) => {
+    (player,index)=>{
 
       if(player.isMe){
         return;
@@ -1552,33 +2028,36 @@ function renderOpponents(){
       let seatClass =
         'seat-top';
 
-      if(total === 2){
+      if(total===2){
 
         seatClass =
           'seat-top';
       }
 
-      else if(total === 3){
+      else if(total===3){
 
         seatClass =
-          offset === 1
+          offset===1
             ? 'seat-right'
             : 'seat-left';
       }
 
-      else if(total === 4){
+      else if(total===4){
 
-        if(offset === 1){
+        if(offset===1){
+
           seatClass =
             'seat-right';
         }
 
-        else if(offset === 2){
+        else if(offset===2){
+
           seatClass =
             'seat-top';
         }
 
         else{
+
           seatClass =
             'seat-left';
         }
@@ -1592,8 +2071,8 @@ function renderOpponents(){
         'opponent ' +
         seatClass +
         (
-          index === game.turn &&
-          game.status === 'playing'
+          index===game.turn &&
+          game.status==='playing'
             ? ' turn'
             : ''
         );
@@ -1626,17 +2105,23 @@ function renderOpponents(){
         'wood-rack';
 
       for(
-        let i = 0;
-        i < player.handCount;
+        let i=0;
+        i<player.handCount;
         i++
       ){
+
         rack.appendChild(
           backTile()
         );
       }
 
-      opponent.appendChild(name);
-      opponent.appendChild(rack);
+      opponent.appendChild(
+        name
+      );
+
+      opponent.appendChild(
+        rack
+      );
 
       container.appendChild(
         opponent
@@ -1646,13 +2131,17 @@ function renderOpponents(){
 }
 
 
-/* HISTORY */
+/* =========================
+   HISTORY
+========================= */
 
 function renderHistory(){
 
   const list =
     document
-      .getElementById('historyList');
+      .getElementById(
+        'historyList'
+      );
 
   const historyItems =
     game.history || [];
@@ -1674,7 +2163,7 @@ function renderHistory(){
       .slice()
       .reverse()
       .map(
-        item => {
+        item=>{
 
           const time =
             new Date(
@@ -1682,26 +2171,26 @@ function renderHistory(){
             );
 
           return `
-            <div class="history-item">
+          <div class="history-item">
 
-              ${item.text}
+            ${item.text}
 
-              <span class="history-time">
+            <span class="history-time">
 
-                ${
-                  time.toLocaleTimeString(
-                    [],
-                    {
-                      hour:'2-digit',
-                      minute:'2-digit',
-                      second:'2-digit'
-                    }
-                  )
-                }
+              ${
+                time.toLocaleTimeString(
+                  [],
+                  {
+                    hour:'2-digit',
+                    minute:'2-digit',
+                    second:'2-digit'
+                  }
+                )
+              }
 
-              </span>
+            </span>
 
-            </div>
+          </div>
           `;
         }
       )
@@ -1709,7 +2198,9 @@ function renderHistory(){
 }
 
 
-/* RENDER */
+/* =========================
+   RENDER
+========================= */
 
 function render(){
 
@@ -1723,47 +2214,63 @@ function render(){
 
   const subStatus =
     document
-      .getElementById('subStatus');
+      .getElementById(
+        'subStatus'
+      );
 
   const playersEl =
     document
-      .getElementById('players');
-
-  const boardEl =
-    document
-      .getElementById('board');
+      .getElementById(
+        'players'
+      );
 
   const handEl =
     document
-      .getElementById('hand');
+      .getElementById(
+        'hand'
+      );
 
   const msg =
     document
-      .getElementById('msg');
+      .getElementById(
+        'msg'
+      );
 
   const start =
     document
-      .getElementById('start');
+      .getElementById(
+        'start'
+      );
 
   const newRound =
     document
-      .getElementById('newRound');
+      .getElementById(
+        'newRound'
+      );
 
   const leftButton =
     document
-      .getElementById('leftButton');
+      .getElementById(
+        'leftButton'
+      );
 
   const rightButton =
     document
-      .getElementById('rightButton');
+      .getElementById(
+        'rightButton'
+      );
 
   const drawButton =
     document
-      .getElementById('drawButton');
+      .getElementById(
+        'drawButton'
+      );
 
   const passButton =
     document
-      .getElementById('passButton');
+      .getElementById(
+        'passButton'
+      );
 
 
   /* STATUS */
@@ -1774,7 +2281,8 @@ function render(){
     '';
 
   if(
-    game.status === 'playing'
+    game.status ===
+    'playing'
   ){
 
     const current =
@@ -1787,22 +2295,24 @@ function render(){
       `${current?.isBot ? ' 🤖' : ''}` +
       ` · Pozo: ${game.boneyardCount} fichas`;
   }
+
   else{
 
-    subStatus.textContent = '';
+    subStatus.textContent =
+      '';
   }
 
 
-  /* SIDEBAR */
+  /* PLAYERS */
 
   playersEl.innerHTML =
     game.players
       .map(
-        (player,index) => {
+        (player,index)=>{
 
           const arrow =
-            index === game.turn &&
-            game.status === 'playing'
+            index===game.turn &&
+            game.status==='playing'
               ? '▶ '
               : '';
 
@@ -1828,37 +2338,37 @@ function render(){
               : '';
 
           return `
-            <div>
-              ${arrow}
-              ${player.name}
-              ${bot}
-              ${you}
-              ${team}
-              · ${player.handCount} fichas
-              ${score}
-            </div>
+          <div>
+            ${arrow}
+            ${player.name}
+            ${bot}
+            ${you}
+            ${team}
+            · ${player.handCount} fichas
+            ${score}
+          </div>
           `;
         }
       )
       .join('');
 
 
-  /* TEAM SCORE */
+  /* TEAM SCORES */
 
   if(
     game.teamScores &&
-    game.players.length === 4
+    game.players.length===4
   ){
 
     playersEl.innerHTML +=
       `
       <div>
         <b>
-          Equipo A:
-          ${game.teamScores.A} pts
-          ·
-          Equipo B:
-          ${game.teamScores.B} pts
+        Equipo A:
+        ${game.teamScores.A} pts
+        ·
+        Equipo B:
+        ${game.teamScores.B} pts
         </b>
       </div>
       `;
@@ -1868,12 +2378,13 @@ function render(){
   /* MESSAGE */
 
   if(
-    game.status === 'lobby'
+    game.status==='lobby'
   ){
 
     msg.textContent =
       `${game.humanSlots} puesto(s) humano(s) · ${game.botCount} bot(s)`;
   }
+
   else{
 
     msg.textContent =
@@ -1881,19 +2392,9 @@ function render(){
   }
 
 
-  /* BOARD */
+  /* NEW SERPENTINE BOARD */
 
-  boardEl.innerHTML = '';
-
-  (game.board || [])
-    .forEach(
-      tile => {
-
-        boardEl.appendChild(
-          tileElement(tile)
-        );
-      }
-    );
+  renderBoard();
 
 
   /* HAND */
@@ -1902,7 +2403,7 @@ function render(){
 
   (game.myHand || [])
     .forEach(
-      (tile,index) => {
+      (tile,index)=>{
 
         handEl.appendChild(
           tileElement(
@@ -1923,7 +2424,9 @@ function render(){
     ];
 
   document
-    .getElementById('youLabel')
+    .getElementById(
+      'youLabel'
+    )
     .textContent =
       me
         ? `${me.name} (Tú) · ${game.myHand.length} fichas`
@@ -1944,7 +2447,7 @@ function render(){
 
   start.style.display =
     game.isHost &&
-    game.status === 'lobby'
+    game.status==='lobby'
       ? 'inline-block'
       : 'none';
 
@@ -1953,7 +2456,7 @@ function render(){
 
   newRound.style.display =
     game.isHost &&
-    game.status === 'finished'
+    game.status==='finished'
       ? 'inline-block'
       : 'none';
 
@@ -1961,8 +2464,8 @@ function render(){
   /* CONTROLS */
 
   const myTurn =
-    game.status === 'playing' &&
-    game.myIndex === game.turn &&
+    game.status==='playing' &&
+    game.myIndex===game.turn &&
     !game.currentPlayerIsBot;
 
   leftButton.disabled =
@@ -1978,17 +2481,44 @@ function render(){
     !myTurn;
 
 
-  /*
-    IMPORTANT:
-    This no longer resets an
-    existing bot timer.
-  */
+  /* BOT */
 
   scheduleBotStep();
 }
 
 
-/* COPY LINK */
+/* =========================
+   RESIZE BOARD
+========================= */
+
+let resizeTimer;
+
+window.addEventListener(
+  'resize',
+  ()=>{
+
+    clearTimeout(
+      resizeTimer
+    );
+
+    resizeTimer =
+      setTimeout(
+        ()=>{
+
+          if(game){
+            renderBoard();
+          }
+
+        },
+        150
+      );
+  }
+);
+
+
+/* =========================
+   COPY URL
+========================= */
 
 async function copyLink(){
 
@@ -2006,6 +2536,7 @@ async function copyLink(){
     alert(
       'URL copiada'
     );
+
   }
   catch{
 
@@ -2017,14 +2548,16 @@ async function copyLink(){
 }
 
 
-/* MUSIC */
+/* =========================
+   MUSIC
+========================= */
 
 function toggleMusic(on){
 
   if(on){
 
     audioContext =
-      new (
+      new(
         window.AudioContext ||
         window.webkitAudioContext
       )();
@@ -2045,7 +2578,7 @@ function toggleMusic(on){
     gain
       .gain
       .value =
-      0.015;
+      .015;
 
     oscillator
       .connect(gain)
@@ -2054,6 +2587,7 @@ function toggleMusic(on){
       );
 
     oscillator.start();
+
   }
 
   else{
@@ -2065,7 +2599,7 @@ function toggleMusic(on){
       }
       catch{}
 
-      oscillator = null;
+      oscillator=null;
     }
 
     if(audioContext){
@@ -2075,7 +2609,7 @@ function toggleMusic(on){
       }
       catch{}
 
-      audioContext = null;
+      audioContext=null;
     }
   }
 }
