@@ -2572,9 +2572,9 @@ function renderBoard(){
 
   // Use nearly all of the board. The side racks live outside this central
   // play area, so only a small visual safety margin is necessary here.
-  const SIDE_GAP = mobile ? 16 : 26;
-  const SAFE_LEFT = SIDE_GAP;
-  const SAFE_RIGHT = boardW - SIDE_GAP;
+  const SIDE_GAP = mobile ? 70 : 115;
+  const SAFE_LEFT = mobile ? 70 : 115;
+  const SAFE_RIGHT = boardW - (mobile ? 70 : 115);
   const TOP_LIMIT = mobile ? 18 : 24;
   const BOTTOM_LIMIT = boardH - (mobile ? 18 : 24);
 
