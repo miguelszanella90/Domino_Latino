@@ -2466,48 +2466,42 @@ function renderBoard(){
   if(!pieces.length) return;
 
   const mobile = isMobile();
-  const W = mobile ? 46 : 60;
-  const H = mobile ? 25 : 32;
-
-  // Las fichas se tocan. No dejamos separación entre una y otra.
-  const GAP = 0;
+  const W = mobile ? 44 : 58;
+  const H = mobile ? 24 : 31;
 
   const boardW = board.clientWidth;
   const boardH = board.clientHeight;
 
-  const SIDE = mobile ? 28 : 70;
-  const LEFT = SIDE;
-  const RIGHT = boardW - SIDE;
-
   /*
-    V8 - DOS SERPIENTES SEPARADAS
+    V10 - TABLERO POR CARRILES
 
-    APERTURA:
-    - La ficha inicial permanece anclada en el centro real del tablero.
+    En vez de calcular las curvas pegadas al borde, reservamos zonas
+    específicas del tablero para la cadena.
 
-    RAMA DERECHA:
-    - Sale hacia la derecha.
-    - Cuando llega al borde, gira 90° HACIA ABAJO.
-    - Regresa hacia la izquierda.
-    - En el siguiente borde vuelve a bajar y cambia otra vez de dirección.
+    Centro: ficha de apertura.
+    Extremo izquierdo: sube.
+    Extremo derecho: baja.
 
-    RAMA IZQUIERDA:
-    - Sale hacia la izquierda.
-    - Cuando llega al borde, gira 90° HACIA ARRIBA.
-    - Regresa hacia la derecha.
-    - En el siguiente borde vuelve a subir y cambia otra vez de dirección.
-
-    Así las dos ramas nunca intentan ocupar la misma fila.
-    Las esquinas son cuadradas y las fichas quedan pegadas.
+    Esto aprovecha el espacio libre superior e inferior sin invadir
+    los atriles de los jugadores laterales ni el historial.
   */
 
   const CENTER_X = boardW / 2;
   const CENTER_Y = boardH / 2;
 
+  // Límites seguros. Dejamos libres las zonas de los jugadores laterales.
+  const SAFE_LEFT  = mobile ? 42 : 150;
+  const SAFE_RIGHT = boardW - (mobile ? 42 : 150);
+
+  // Filas superiores e inferiores disponibles.
+  // Se calculan con el alto real para que el tablero permanezca estable.
+  const TOP_LANE = Math.max(mobile ? 72 : 105, CENTER_Y - (mobile ? 105 : 155));
+  const BOTTOM_LANE = Math.min(boardH - (mobile ? 72 : 105), CENTER_Y + (mobile ? 105 : 155));
+
   const isDouble = tile => tile[0] === tile[1];
   const visualLength = tile => isDouble(tile) ? H : W;
 
-  // Recuperamos cuál fue la ficha de apertura.
+  // Localizamos la ficha que abrió la partida.
   const history = game.history || [];
   let openingIndex = history.filter(item =>
     typeof item.text === 'string' && item.text.includes('←')
@@ -2526,22 +2520,29 @@ function renderBoard(){
   };
 
   /*
-    branchSign:
-      +1 = rama derecha
-      -1 = rama izquierda
+    Cada rama tiene un recorrido independiente.
 
-    verticalSign:
-      +1 = las curvas bajan
-      -1 = las curvas suben
+    DERECHA:
+      centro -> derecha -> ABAJO -> izquierda -> ABAJO -> derecha...
+
+    IZQUIERDA:
+      centro -> izquierda -> ARRIBA -> derecha -> ARRIBA -> izquierda...
+
+    Las filas están separadas por ROW_STEP y nunca comparten la misma
+    zona inicial.
   */
-  function layoutBranch(indices, branchSign, verticalSign){
+  function layoutBranch(indices, branchSign){
 
+    const goesDown = branchSign === 1;
     let dir = branchSign;
     let y = CENTER_Y;
 
     let cursor = branchSign === 1
       ? CENTER_X + openingLen / 2
       : CENTER_X - openingLen / 2;
+
+    // Distancia entre filas. Suficiente para una ficha vertical completa.
+    const ROW_STEP = mobile ? 58 : 82;
 
     for(const index of indices){
 
@@ -2550,98 +2551,83 @@ function renderBoard(){
       const len = visualLength(tile);
 
       const fits = dir === 1
-        ? cursor + len <= RIGHT
-        : cursor - len >= LEFT;
+        ? cursor + len <= SAFE_RIGHT
+        : cursor - len >= SAFE_LEFT;
 
-      if(!fits){
+      if(fits){
 
-        /*
-          ESQUINA CUADRADA REAL
+        const cx = dir === 1
+          ? cursor + len / 2
+          : cursor - len / 2;
 
-          La ficha de la esquina se pone vertical.
-          Su mitad de entrada queda exactamente alineada con la fila actual.
-          Su mitad de salida queda exactamente alineada con la fila nueva.
-
-          No hay GAP y no hay superposición.
-        */
-        const edgeX = dir === 1
-          ? RIGHT - H / 2
-          : LEFT + H / 2;
-
-        const LANE_GAP = mobile ? 18 : 30;
-        const cornerCy = y + verticalSign * ((W + LANE_GAP) / 2);
-
-        let cornerRot;
-
+        let rot;
         if(dbl){
-          // Un doble en la esquina sigue viéndose perpendicular.
-          cornerRot = 90;
+          rot = 90;
         }else{
-          /*
-            Rotación según:
-            - desde qué lado entra la cadena
-            - si la curva sube o baja
-            Mantiene el valor conectado mirando hacia la ficha anterior.
-          */
-          if(verticalSign === 1){
-            // Curva hacia abajo
-            cornerRot = dir === 1 ? 90 : 270;
-          }else{
-            // Curva hacia arriba
-            cornerRot = dir === 1 ? 270 : 90;
-          }
-
-          // En la rama izquierda el orden lógico del array es inverso.
-          if(branchSign === -1){
-            cornerRot = (cornerRot + 180) % 360;
-          }
+          // La ficha gira 180° únicamente cuando la fila regresa.
+          rot = dir === branchSign ? 0 : 180;
         }
 
-        positions[index] = {
-          cx: edgeX,
-          cy: cornerCy,
-          rot: cornerRot
-        };
-
-        // La siguiente fila queda pegada a la otra mitad de la esquina.
-        y += verticalSign * (W + LANE_GAP);
-
-        // Cambiamos el sentido horizontal.
-        dir *= -1;
-
-        // El siguiente dominó arranca exactamente al lado de la esquina.
-        const TURN_GAP = mobile ? 5 : 8;
-        cursor = dir === -1
-          ? edgeX - H / 2 - TURN_GAP
-          : edgeX + H / 2 + TURN_GAP;
-
+        positions[index] = { cx, cy:y, rot };
+        cursor += dir * len;
         continue;
       }
 
-      const cx = dir === 1
-        ? cursor + len / 2
-        : cursor - len / 2;
+      /*
+        CURVA CUADRADA
 
-      let rot;
+        La ficha que provoca el giro se convierte en la pieza vertical
+        de la esquina. La siguiente fila comienza después de ella.
+      */
+      const edgeX = dir === 1
+        ? SAFE_RIGHT - H / 2
+        : SAFE_LEFT + H / 2;
 
+      let nextY = y + (goesDown ? ROW_STEP : -ROW_STEP);
+
+      // Si alcanzamos la última fila disponible, seguimos alternando
+      // dentro de la zona libre en vez de salir del tablero.
+      if(goesDown && nextY > BOTTOM_LANE){
+        nextY = BOTTOM_LANE;
+      }
+      if(!goesDown && nextY < TOP_LANE){
+        nextY = TOP_LANE;
+      }
+
+      const cornerCy = (y + nextY) / 2;
+
+      let cornerRot;
       if(dbl){
-        // Dobles perpendiculares a la fila.
-        rot = 90;
+        cornerRot = 90;
       }else{
-        /*
-          Si la fila regresa en sentido contrario, giramos la ficha 180°
-          únicamente para conservar la continuidad de los valores.
-        */
-        rot = dir === branchSign ? 0 : 180;
+        const verticalSign = nextY >= y ? 1 : -1;
+
+        if(verticalSign === 1){
+          cornerRot = dir === 1 ? 90 : 270;
+        }else{
+          cornerRot = dir === 1 ? 270 : 90;
+        }
+
+        if(branchSign === -1){
+          cornerRot = (cornerRot + 180) % 360;
+        }
       }
 
       positions[index] = {
-        cx,
-        cy: y,
-        rot
+        cx: edgeX,
+        cy: cornerCy,
+        rot: cornerRot
       };
 
-      cursor += dir * len;
+      y = nextY;
+      dir *= -1;
+
+      // Comenzamos la nueva fila justo después de la esquina,
+      // con un pequeño margen visual para que la curva se lea bien.
+      const TURN_GAP = mobile ? 3 : 5;
+      cursor = dir === -1
+        ? edgeX - H / 2 - TURN_GAP
+        : edgeX + H / 2 + TURN_GAP;
     }
   }
 
@@ -2655,9 +2641,8 @@ function renderBoard(){
     leftIndices.push(i);
   }
 
-  // Derecha baja. Izquierda sube.
-  layoutBranch(rightIndices, 1, 1);
-  layoutBranch(leftIndices, -1, -1);
+  layoutBranch(rightIndices, 1);
+  layoutBranch(leftIndices, -1);
 
   pieces.forEach((tile, i) => {
 
