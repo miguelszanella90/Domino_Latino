@@ -10,6 +10,7 @@
 <title>Dominó Online</title>
 
 <style>
+
 :root{
   --felt:#0d6b4d;
   --felt-dark:#07563e;
@@ -32,7 +33,13 @@ body{
 }
 
 body{
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
   background:var(--felt);
   color:var(--ink);
   overflow:hidden;
@@ -71,10 +78,13 @@ body{
   top:14px;
   left:270px;
   z-index:50;
+
   width:42px;
   height:42px;
+
   margin:0;
   padding:0;
+
   font-size:20px;
 }
 
@@ -156,17 +166,30 @@ summary{
 
 .main{
   position:relative;
+
   min-width:0;
   min-height:0;
+
   display:grid;
-  grid-template-rows:auto minmax(0,1fr) auto auto;
+
+  grid-template-rows:
+    auto
+    minmax(0,1fr)
+    auto
+    auto;
+
   overflow:hidden;
 }
 
 .top{
   min-height:58px;
-  padding:12px 65px;
+
+  padding:
+    12px
+    65px;
+
   text-align:center;
+
   background:#063e2e33;
 }
 
@@ -187,15 +210,22 @@ summary{
 
 .game-content{
   min-height:0;
+
   display:grid;
-  grid-template-columns:minmax(0,1fr) 280px;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    280px;
 }
 
 .table-zone{
   position:relative;
+
   min-width:0;
   min-height:0;
+
   overflow:hidden;
+
   background:
     radial-gradient(
       circle at center,
@@ -205,34 +235,94 @@ summary{
 }
 
 /* =========================
-   DOMINO BOARD
+   BOARD
 ========================= */
 
 .board{
   position:absolute;
-  left:12%;
-  right:12%;
-  top:16%;
-  bottom:16%;
+
+  left:8%;
+  right:8%;
+
+  top:13%;
+  bottom:13%;
+
   overflow:hidden;
 }
 
-/*
-  Las fichas del tablero ahora
-  se posicionan absolutamente.
-
-  JavaScript calcula X/Y y crea
-  la cadena tipo serpiente.
-*/
-
 .board-piece{
   position:absolute;
+
   transform-origin:center center;
+
   transition:
-    left .25s ease,
-    top .25s ease,
-    transform .25s ease;
-  z-index:2;
+    left .28s ease,
+    top .28s ease,
+    transform .28s ease;
+
+  z-index:3;
+
+  filter:
+    drop-shadow(
+      0 3px 3px #0005
+    );
+}
+
+/* =========================
+   BOARD DOMINO STYLE
+========================= */
+
+.board-domino{
+  width:100%;
+  height:100%;
+
+  display:flex;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fffefa 0%,
+      #f8f5ec 55%,
+      #e9e4d8 100%
+    );
+
+  border:
+    1.5px solid #262626;
+
+  border-radius:6px;
+
+  overflow:hidden;
+
+  box-shadow:
+    inset 0 1px 1px #ffffff,
+    inset 0 -1px 2px #b8b2a8,
+    0 2px 4px #0005;
+}
+
+.board-half{
+  position:relative;
+
+  display:block;
+
+  width:50%;
+  height:100%;
+}
+
+.board-half +
+.board-half{
+  border-left:
+    1.5px solid #252525;
+}
+
+.board-domino .pip{
+  width:6px;
+  height:6px;
+
+  background:#111;
+
+  box-shadow:
+    inset 0 1px 1px #555,
+    0 .5px 1px #0004;
 }
 
 /* =========================
@@ -241,49 +331,71 @@ summary{
 
 .opponent{
   position:absolute;
+
   z-index:8;
+
   display:flex;
   flex-direction:column;
   align-items:center;
+
   gap:4px;
+
   max-width:240px;
+
   color:white;
 }
 
 .opponent-name{
   max-width:220px;
+
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  padding:4px 9px;
+
+  padding:
+    4px
+    9px;
+
   border-radius:20px;
+
   background:#061d1bbb;
-  box-shadow:0 2px 7px #0005;
+
+  box-shadow:
+    0 2px 7px #0005;
+
   font-size:13px;
   font-weight:700;
 }
 
 .opponent.turn .opponent-name{
-  outline:2px solid var(--accent);
+  outline:
+    2px solid var(--accent);
+
   color:var(--accent);
 }
 
 .seat-top{
   top:12px;
   left:50%;
-  transform:translateX(-50%);
+
+  transform:
+    translateX(-50%);
 }
 
 .seat-left{
   left:14px;
   top:50%;
-  transform:translateY(-50%);
+
+  transform:
+    translateY(-50%);
 }
 
 .seat-right{
   right:14px;
   top:50%;
-  transform:translateY(-50%);
+
+  transform:
+    translateY(-50%);
 }
 
 /* =========================
@@ -292,13 +404,24 @@ summary{
 
 .wood-rack{
   position:relative;
+
   display:flex;
+
   align-items:center;
   justify-content:center;
+
   gap:3px;
-  padding:7px 9px 9px;
-  border:2px solid #321b0f;
+
+  padding:
+    7px
+    9px
+    9px;
+
+  border:
+    2px solid #321b0f;
+
   border-radius:10px;
+
   background:
     linear-gradient(
       180deg,
@@ -306,6 +429,7 @@ summary{
       var(--wood1) 45%,
       var(--wood2)
     );
+
   box-shadow:
     inset 0 1px 2px #ffffff33,
     inset 0 -3px 4px #0005,
@@ -314,19 +438,27 @@ summary{
 
 .wood-rack::after{
   content:"";
+
   position:absolute;
+
   left:5px;
   right:5px;
   bottom:3px;
+
   height:4px;
+
   border-radius:4px;
+
   background:#321b0f88;
 }
 
 .seat-left .wood-rack,
 .seat-right .wood-rack{
   flex-direction:column;
-  padding:9px 7px;
+
+  padding:
+    9px
+    7px;
 }
 
 /* =========================
@@ -335,10 +467,15 @@ summary{
 
 .back-tile{
   flex:0 0 auto;
+
   width:18px;
   height:34px;
+
   border-radius:4px;
-  border:1px solid #2f180c;
+
+  border:
+    1px solid #2f180c;
+
   background:
     linear-gradient(
       135deg,
@@ -347,6 +484,7 @@ summary{
       #9b5d2f 52%,
       #693918
     );
+
   box-shadow:
     inset 1px 1px 1px #ffffff2b,
     inset -1px -1px 2px #0005;
@@ -359,54 +497,110 @@ summary{
 }
 
 /* =========================
-   DOMINO TILES
+   PLAYER DOMINOES
 ========================= */
 
 .tile{
   display:flex;
+
   flex:0 0 auto;
+
   background:#fff;
   color:#111;
-  border:2px solid #222;
+
+  border:
+    2px solid #222;
+
   border-radius:8px;
-  box-shadow:0 3px 8px #0005;
+
+  box-shadow:
+    0 3px 8px #0005;
+
   cursor:pointer;
+
   overflow:hidden;
 }
 
 .tile-half{
   position:relative;
+
   display:block;
+
   width:44px;
   height:58px;
 }
 
-.tile-half + .tile-half{
-  border-left:2px solid #222;
+.tile-half +
+.tile-half{
+  border-left:
+    2px solid #222;
 }
 
 .pip{
   position:absolute;
+
   width:8px;
   height:8px;
+
   border-radius:50%;
+
   background:#111;
-  transform:translate(-50%,-50%);
+
+  transform:
+    translate(-50%,-50%);
 }
 
-.p1{left:25%;top:25%}
-.p2{left:50%;top:25%}
-.p3{left:75%;top:25%}
-.p4{left:25%;top:50%}
-.p5{left:50%;top:50%}
-.p6{left:75%;top:50%}
-.p7{left:25%;top:75%}
-.p8{left:50%;top:75%}
-.p9{left:75%;top:75%}
+.p1{
+  left:25%;
+  top:25%;
+}
+
+.p2{
+  left:50%;
+  top:25%;
+}
+
+.p3{
+  left:75%;
+  top:25%;
+}
+
+.p4{
+  left:25%;
+  top:50%;
+}
+
+.p5{
+  left:50%;
+  top:50%;
+}
+
+.p6{
+  left:75%;
+  top:50%;
+}
+
+.p7{
+  left:25%;
+  top:75%;
+}
+
+.p8{
+  left:50%;
+  top:75%;
+}
+
+.p9{
+  left:75%;
+  top:75%;
+}
 
 .selected{
-  outline:4px solid var(--accent);
-  transform:translateY(-4px);
+  outline:
+    4px solid var(--accent);
+
+  transform:
+    translateY(-4px);
 }
 
 /* =========================
@@ -415,37 +609,64 @@ summary{
 
 .history-panel{
   margin:0;
+
   min-width:0;
-  border-left:2px solid #3b2114;
-  background:linear-gradient(180deg,#102321,#071816);
+
+  border-left:
+    2px solid #3b2114;
+
+  background:
+    linear-gradient(
+      180deg,
+      #102321,
+      #071816
+    );
+
   overflow:auto;
 }
 
 .history-panel summary{
   position:sticky;
+
   top:0;
+
   z-index:4;
+
   padding:14px;
+
   background:#0b1e1c;
+
   font-size:16px;
   font-weight:700;
 }
 
 .history-list{
-  padding:6px 12px 20px;
+  padding:
+    6px
+    12px
+    20px;
 }
 
 .history-item{
-  padding:9px 4px;
-  border-bottom:1px solid #ffffff16;
+  padding:
+    9px
+    4px;
+
+  border-bottom:
+    1px solid #ffffff16;
+
   font-size:13px;
+
   line-height:1.3;
 }
 
 .history-time{
   display:block;
+
   margin-top:2px;
+
   font-size:10px;
+
   opacity:.55;
 }
 
@@ -455,34 +676,63 @@ summary{
 
 .hand-zone{
   position:relative;
-  background:linear-gradient(180deg,#0003,#0004);
-  padding:7px 10px 10px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #0003,
+      #0004
+    );
+
+  padding:
+    7px
+    10px
+    10px;
 }
 
 .you-label{
   width:max-content;
+
   max-width:90%;
-  margin:0 auto 4px;
-  padding:4px 12px;
+
+  margin:
+    0 auto 4px;
+
+  padding:
+    4px 12px;
+
   border-radius:14px;
+
   background:#061d1bbb;
+
   font-size:12px;
   font-weight:700;
 }
 
 .hand-rack{
   width:max-content;
+
   max-width:100%;
+
   margin:auto;
-  padding:9px 12px 11px;
-  border:2px solid #3b2113;
+
+  padding:
+    9px
+    12px
+    11px;
+
+  border:
+    2px solid #3b2113;
+
   border-radius:12px;
+
   background:
     linear-gradient(
       180deg,
       #9b6032,
       #75431f
     );
+
   box-shadow:
     inset 0 1px 2px #ffffff28,
     0 3px 10px #0007;
@@ -490,12 +740,18 @@ summary{
 
 .hand{
   min-height:62px;
+
   display:flex;
+
   align-items:center;
+
   gap:6px;
+
   overflow-x:auto;
   overflow-y:visible;
-  -webkit-overflow-scrolling:touch;
+
+  -webkit-overflow-scrolling:
+    touch;
 }
 
 /* =========================
@@ -504,13 +760,21 @@ summary{
 
 .controls{
   display:flex;
+
   justify-content:center;
+
   flex-wrap:wrap;
+
   gap:6px;
+
   padding:
     8px
     8px
-    max(8px,env(safe-area-inset-bottom));
+    max(
+      8px,
+      env(safe-area-inset-bottom)
+    );
+
   background:#092f24;
 }
 
@@ -526,30 +790,48 @@ summary{
 
   .app{
     display:block;
+
     width:100%;
     height:100dvh;
   }
 
   .side{
     position:fixed;
+
     left:0;
     top:0;
+
     width:min(86vw,320px);
     height:100dvh;
+
     z-index:40;
-    box-shadow:8px 0 20px #0007;
+
+    box-shadow:
+      8px 0 20px #0007;
   }
 
   .side.closed{
-    transform:translateX(-100%);
+    transform:
+      translateX(-100%);
   }
 
   .toggle{
-    top:max(10px,env(safe-area-inset-top));
-    left:min(calc(86vw - 52px),268px);
+    top:
+      max(
+        10px,
+        env(safe-area-inset-top)
+      );
+
+    left:
+      min(
+        calc(86vw - 52px),
+        268px
+      );
   }
 
-  .side.closed ~ .main .toggle{
+  .side.closed ~
+  .main
+  .toggle{
     left:10px;
   }
 
@@ -560,8 +842,12 @@ summary{
 
   .top{
     min-height:54px;
+
     padding:
-      max(13px,env(safe-area-inset-top))
+      max(
+        13px,
+        env(safe-area-inset-top)
+      )
       55px
       8px;
   }
@@ -572,8 +858,11 @@ summary{
 
   .game-content{
     display:block;
+
     position:relative;
+
     min-height:0;
+
     overflow:hidden;
   }
 
@@ -583,10 +872,11 @@ summary{
   }
 
   .board{
-    left:8%;
-    right:8%;
-    top:18%;
-    bottom:18%;
+    left:5%;
+    right:5%;
+
+    top:12%;
+    bottom:12%;
   }
 
   .tile-half{
@@ -599,9 +889,27 @@ summary{
     height:6px;
   }
 
+  .board-domino{
+    border-radius:5px;
+    border-width:1px;
+  }
+
+  .board-half +
+  .board-half{
+    border-left-width:1px;
+  }
+
+  .board-domino .pip{
+    width:5px;
+    height:5px;
+  }
+
   .opponent-name{
     font-size:10px;
-    padding:3px 6px;
+
+    padding:
+      3px
+      6px;
   }
 
   .seat-top{
@@ -629,76 +937,123 @@ summary{
 
   .wood-rack{
     gap:2px;
-    padding:5px 6px 7px;
+
+    padding:
+      5px
+      6px
+      7px;
   }
 
   .seat-left .wood-rack,
   .seat-right .wood-rack{
-    padding:6px 5px;
+    padding:
+      6px
+      5px;
   }
 
   .history-panel{
     position:absolute;
+
     left:8px;
     right:8px;
     bottom:6px;
+
     max-height:42%;
+
     z-index:18;
-    border:1px solid #ffffff20;
+
+    border:
+      1px solid #ffffff20;
+
     border-radius:10px;
-    box-shadow:0 3px 14px #0008;
+
+    box-shadow:
+      0 3px 14px #0008;
   }
 
   .history-panel:not([open]){
     width:max-content;
+
     left:auto;
     right:8px;
+
     background:#0b1e1ce8;
   }
 
   .history-panel summary{
-    padding:8px 10px;
+    padding:
+      8px
+      10px;
+
     font-size:12px;
   }
 
   .history-list{
     max-height:150px;
+
     overflow:auto;
-    padding:3px 10px 10px;
+
+    padding:
+      3px
+      10px
+      10px;
   }
 
   .history-item{
     font-size:11px;
-    padding:6px 2px;
+
+    padding:
+      6px
+      2px;
   }
 
   .hand-zone{
-    padding:5px 6px 6px;
+    padding:
+      5px
+      6px
+      6px;
   }
 
   .hand-rack{
-    padding:6px 7px 7px;
+    padding:
+      6px
+      7px
+      7px;
+
     max-width:100%;
   }
 
   .hand{
     min-height:48px;
+
     gap:4px;
   }
 
   .controls{
     display:grid;
-    grid-template-columns:1fr 1fr;
+
+    grid-template-columns:
+      1fr
+      1fr;
+
     gap:5px;
+
     padding:
       6px
       6px
-      max(8px,env(safe-area-inset-bottom));
+      max(
+        8px,
+        env(safe-area-inset-bottom)
+      );
   }
 
   .controls button{
     min-height:38px;
-    padding:8px 4px;
+
+    padding:
+      8px
+      4px;
+
     font-size:11px;
   }
 }
@@ -706,16 +1061,24 @@ summary{
 </style>
 </head>
 
+
 <body>
 
 <div class="app">
+
+<!-- =========================
+     SIDEBAR
+========================= -->
 
 <aside
   class="side"
   id="side"
 >
 
-<h2>🁣 Dominó Online</h2>
+<h2>
+🁣 Dominó Online
+</h2>
+
 
 <div id="lobby">
 
@@ -726,6 +1089,7 @@ summary{
 
 <br>
 
+
 <label>
 Jugadores
 
@@ -733,12 +1097,26 @@ Jugadores
   id="max"
   onchange="updateBotOptions()"
 >
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="4" selected>4</option>
+
+<option value="2">
+2
+</option>
+
+<option value="3">
+3
+</option>
+
+<option
+  value="4"
+  selected
+>
+4
+</option>
+
 </select>
 
 </label>
+
 
 <div class="bot-options">
 
@@ -746,30 +1124,59 @@ Jugadores
 Bots
 
 <select id="botCount">
-<option value="0">0 bots</option>
-<option value="1">1 bot</option>
-<option value="2">2 bots</option>
-<option value="3">3 bots</option>
+
+<option value="0">
+0 bots
+</option>
+
+<option value="1">
+1 bot
+</option>
+
+<option value="2">
+2 bots
+</option>
+
+<option value="3">
+3 bots
+</option>
+
 </select>
 
 </label>
+
 
 <label>
 Dificultad
 
 <select id="botDifficulty">
-<option value="easy">Fácil</option>
-<option value="normal" selected>Normal</option>
-<option value="hard">Difícil</option>
+
+<option value="easy">
+Fácil
+</option>
+
+<option
+  value="normal"
+  selected
+>
+Normal
+</option>
+
+<option value="hard">
+Difícil
+</option>
+
 </select>
 
 </label>
 
 </div>
 
+
 <button onclick="create()">
 Crear sala
 </button>
+
 
 <div class="row">
 
@@ -786,18 +1193,27 @@ Unirme
 
 </div>
 
+
+<!-- ROOM -->
+
 <div
   id="room"
   hidden
 >
 
 <h3>
-Sala <b id="roomCode"></b>
+
+Sala
+
+<b id="roomCode"></b>
+
 </h3>
+
 
 <button onclick="copyLink()">
 Copiar URL
 </button>
+
 
 <button
   id="start"
@@ -805,6 +1221,7 @@ Copiar URL
 >
 Iniciar partida
 </button>
+
 
 <button
   id="newRound"
@@ -814,10 +1231,12 @@ Iniciar partida
 Nueva ronda
 </button>
 
+
 <div
   class="players"
   id="players"
 ></div>
+
 
 <p
   id="msg"
@@ -826,6 +1245,9 @@ Nueva ronda
 
 </div>
 
+
+<!-- RULES -->
+
 <details>
 
 <summary>
@@ -833,19 +1255,35 @@ Reglas
 </summary>
 
 <p class="small">
+
 28 fichas, valores 0 a 6.
+
 De 2 a 4 jugadores.
+
 Cada jugador recibe 7 fichas.
+
 Comienza quien tenga el doble más alto.
+
 La ficha inicial se coloca automáticamente.
-En cada turno se juega una ficha que coincida con uno de los extremos.
-Si no puedes jugar y quedan fichas en el pozo, debes robar.
-Si el pozo está vacío y no puedes jugar, debes pasar.
+
+En cada turno se juega una ficha que coincida
+con uno de los extremos.
+
+Si no puedes jugar y quedan fichas en el pozo,
+debes robar.
+
+Si el pozo está vacío y no puedes jugar,
+debes pasar.
+
 Con cuatro jugadores se juega por equipos:
 jugadores 1 y 3 contra jugadores 2 y 4.
+
 </p>
 
 </details>
+
+
+<!-- SETTINGS -->
 
 <details>
 
@@ -853,42 +1291,65 @@ jugadores 1 y 3 contra jugadores 2 y 4.
 Settings
 </summary>
 
+
 <label>
+
 Color mesa
 
 <input
   type="color"
   value="#0d6b4d"
   oninput="
-    document.documentElement
+    document
+    .documentElement
     .style
-    .setProperty('--felt',this.value)
+    .setProperty(
+      '--felt',
+      this.value
+    )
   "
 >
 
 </label>
 
+
 <br>
 
+
 <label>
+
 Música
 
 <input
   id="music"
   type="checkbox"
-  onchange="toggleMusic(this.checked)"
+  onchange="
+    toggleMusic(
+      this.checked
+    )
+  "
 >
 
 </label>
 
+
 <br>
 
+
 <label>
+
 Meta
 
 <select id="target">
-<option value="100">100</option>
-<option value="150">150</option>
+
+<option value="100">
+100
+</option>
+
+<option value="150">
+150
+</option>
+
 </select>
 
 </label>
@@ -898,7 +1359,12 @@ Meta
 </aside>
 
 
+<!-- =========================
+     MAIN
+========================= -->
+
 <main class="main">
+
 
 <button
   class="toggle"
@@ -920,6 +1386,7 @@ Crea o únete a una sala
 
 
 <div class="game-content">
+
 
 <section
   class="table-zone"
@@ -956,6 +1423,8 @@ Crea o únete a una sala
 </div>
 
 
+<!-- YOUR HAND -->
+
 <section class="hand-zone">
 
 <div
@@ -964,6 +1433,7 @@ Crea o únete a una sala
 >
 Tus fichas
 </div>
+
 
 <div class="hand-rack">
 
@@ -977,6 +1447,8 @@ Tus fichas
 </section>
 
 
+<!-- CONTROLS -->
+
 <div class="controls">
 
 <button
@@ -986,6 +1458,7 @@ Tus fichas
 ← Colocar izquierda
 </button>
 
+
 <button
   id="rightButton"
   onclick="play('right')"
@@ -993,12 +1466,14 @@ Tus fichas
 Colocar derecha →
 </button>
 
+
 <button
   id="drawButton"
   onclick="act('draw')"
 >
 Robar del pozo
 </button>
+
 
 <button
   id="passButton"
@@ -1021,17 +1496,28 @@ Pasar
 ========================= */
 
 let game;
+
 let pid;
-let selected = null;
+
+let selected =
+  null;
+
 let poll;
 
-let botTimer = null;
-let botStepInFlight = false;
+let botTimer =
+  null;
 
-let audioContext = null;
-let oscillator = null;
+let botStepInFlight =
+  false;
 
-const BOT_DELAY = 1500;
+let audioContext =
+  null;
+
+let oscillator =
+  null;
+
+const BOT_DELAY =
+  1500;
 
 
 /* =========================
@@ -1043,12 +1529,16 @@ const qs =
     location.search
   );
 
-if(qs.get('room')){
+if(
+  qs.get('room')
+){
 
   document
-    .getElementById('code')
+    .getElementById(
+      'code'
+    )
     .value =
-    qs.get('room');
+      qs.get('room');
 }
 
 
@@ -1065,16 +1555,27 @@ function isMobile(){
     .matches;
 }
 
-if(isMobile()){
+
+if(
+  isMobile()
+){
 
   document
-    .getElementById('side')
+    .getElementById(
+      'side'
+    )
     .classList
-    .add('closed');
+    .add(
+      'closed'
+    );
 
   document
-    .getElementById('historyPanel')
-    .removeAttribute('open');
+    .getElementById(
+      'historyPanel'
+    )
+    .removeAttribute(
+      'open'
+    );
 }
 
 
@@ -1085,9 +1586,13 @@ if(isMobile()){
 function toggleSide(){
 
   document
-    .getElementById('side')
+    .getElementById(
+      'side'
+    )
     .classList
-    .toggle('closed');
+    .toggle(
+      'closed'
+    );
 }
 
 
@@ -1099,42 +1604,63 @@ async function api(body){
 
   const response =
     await fetch(
+
       '/api/game',
+
       {
-        method:'POST',
+
+        method:
+          'POST',
 
         headers:{
+
           'content-type':
-          'application/json'
+            'application/json'
+
         },
 
         body:
-          JSON.stringify(body)
+          JSON.stringify(
+            body
+          )
+
       }
     );
 
+
   let data;
+
 
   try{
 
     data =
-      await response.json();
+      await response
+      .json();
 
   }
+
   catch{
 
     throw new Error(
       'El servidor devolvió una respuesta inválida'
     );
+
   }
 
-  if(!response.ok){
+
+  if(
+    !response.ok
+  ){
 
     throw new Error(
+
       data.error ||
       'Error del servidor'
+
     );
+
   }
+
 
   return data;
 }
@@ -1148,52 +1674,87 @@ function updateBotOptions(){
 
   const total =
     Number(
+
       document
-        .getElementById('max')
-        .value
+      .getElementById(
+        'max'
+      )
+      .value
+
     );
+
 
   const select =
     document
-      .getElementById('botCount');
+    .getElementById(
+      'botCount'
+    );
+
 
   const current =
     Number(
-      select.value || 0
+
+      select.value ||
+      0
+
     );
 
-  select.innerHTML = '';
+
+  select.innerHTML =
+    '';
+
 
   for(
+
     let i=0;
+
     i<=total-1;
+
     i++
+
   ){
 
     const option =
       document
-        .createElement('option');
+      .createElement(
+        'option'
+      );
 
-    option.value = i;
+
+    option.value =
+      i;
+
 
     option.textContent =
-      i===0
-        ? '0 bots'
-        : i===1
-          ? '1 bot'
-          : `${i} bots`;
 
-    select.appendChild(
-      option
-    );
+      i===0
+
+      ? '0 bots'
+
+      : i===1
+
+        ? '1 bot'
+
+        : `${i} bots`;
+
+
+    select
+      .appendChild(
+        option
+      );
   }
+
 
   select.value =
     Math.min(
+
       current,
+
       total-1
+
     );
 }
+
 
 updateBotOptions();
 
@@ -1209,43 +1770,71 @@ async function create(){
     const r =
       await api({
 
-        action:'create',
+        action:
+          'create',
 
         name:
+
           document
-            .getElementById('name')
-            .value,
+          .getElementById(
+            'name'
+          )
+          .value,
 
         maxPlayers:
+
           document
-            .getElementById('max')
-            .value,
+          .getElementById(
+            'max'
+          )
+          .value,
 
         botCount:
+
           document
-            .getElementById('botCount')
-            .value,
+          .getElementById(
+            'botCount'
+          )
+          .value,
 
         botDifficulty:
+
           document
-            .getElementById('botDifficulty')
-            .value,
+          .getElementById(
+            'botDifficulty'
+          )
+          .value,
 
         target:
+
           document
-            .getElementById('target')
-            .value
+          .getElementById(
+            'target'
+          )
+          .value
+
       });
 
-    pid = r.playerId;
-    game = r.game;
+
+    pid =
+      r.playerId;
+
+
+    game =
+      r.game;
+
 
     enter();
 
   }
+
+
   catch(e){
 
-    alert(e.message);
+    alert(
+      e.message
+    );
+
   }
 }
 
@@ -1259,41 +1848,66 @@ async function join(){
   try{
 
     const roomCode =
-      document
-        .getElementById('code')
-        .value
-        .trim()
-        .toUpperCase();
 
-    if(!roomCode){
+      document
+      .getElementById(
+        'code'
+      )
+      .value
+      .trim()
+      .toUpperCase();
+
+
+    if(
+      !roomCode
+    ){
 
       return alert(
         'Introduce el código de la sala'
       );
+
     }
+
 
     const r =
       await api({
 
-        action:'join',
+        action:
+          'join',
 
-        code:roomCode,
+        code:
+          roomCode,
 
         name:
+
           document
-            .getElementById('name')
-            .value
+          .getElementById(
+            'name'
+          )
+          .value
+
       });
 
-    pid = r.playerId;
-    game = r.game;
+
+    pid =
+      r.playerId;
+
+
+    game =
+      r.game;
+
 
     enter();
 
   }
+
+
   catch(e){
 
-    alert(e.message);
+    alert(
+      e.message
+    );
+
   }
 }
 
@@ -1305,40 +1919,73 @@ async function join(){
 function enter(){
 
   document
-    .getElementById('room')
-    .hidden = false;
+    .getElementById(
+      'room'
+    )
+    .hidden =
+      false;
+
 
   document
-    .getElementById('lobby')
-    .hidden = true;
+    .getElementById(
+      'lobby'
+    )
+    .hidden =
+      true;
+
 
   document
-    .getElementById('roomCode')
+    .getElementById(
+      'roomCode'
+    )
     .textContent =
-    game.code;
+      game.code;
 
-  history.replaceState(
-    null,
-    '',
-    '?room=' + game.code
-  );
 
-  if(isMobile()){
+  history
+    .replaceState(
+
+      null,
+
+      '',
+
+      '?room=' +
+      game.code
+
+    );
+
+
+  if(
+    isMobile()
+  ){
 
     document
-      .getElementById('side')
+      .getElementById(
+        'side'
+      )
       .classList
-      .add('closed');
+      .add(
+        'closed'
+      );
+
   }
+
 
   render();
 
-  clearInterval(poll);
+
+  clearInterval(
+    poll
+  );
+
 
   poll =
     setInterval(
+
       refresh,
+
       900
+
     );
 }
 
@@ -1353,34 +2000,58 @@ async function refresh(){
     !game ||
     !game.code
   ){
+
     return;
+
   }
+
 
   try{
 
     const response =
       await fetch(
+
         '/api/game?code=' +
-        encodeURIComponent(game.code) +
+
+        encodeURIComponent(
+          game.code
+        ) +
+
         '&playerId=' +
-        encodeURIComponent(pid || '')
+
+        encodeURIComponent(
+          pid || ''
+        )
+
       );
 
-    if(response.ok){
+
+    if(
+      response.ok
+    ){
 
       game =
-        await response.json();
+        await response
+        .json();
+
 
       render();
+
     }
 
   }
+
+
   catch(e){
 
     console.log(
+
       'Refresh error',
+
       e
+
     );
+
   }
 }
 
@@ -1398,19 +2069,30 @@ async function act(action){
 
         action,
 
-        code:game.code,
+        code:
+          game.code,
 
-        playerId:pid
+        playerId:
+          pid
+
       });
 
-    selected = null;
+
+    selected =
+      null;
+
 
     render();
 
   }
+
+
   catch(e){
 
-    alert(e.message);
+    alert(
+      e.message
+    );
+
   }
 }
 
@@ -1419,39 +2101,59 @@ async function act(action){
    PLAY
 ========================= */
 
-async function play(sideToPlay){
+async function play(
+  sideToPlay
+){
 
-  if(selected === null){
+  if(
+    selected === null
+  ){
 
     return alert(
       'Selecciona una ficha'
     );
+
   }
+
 
   try{
 
     game =
       await api({
 
-        action:'play',
+        action:
+          'play',
 
-        code:game.code,
+        code:
+          game.code,
 
-        playerId:pid,
+        playerId:
+          pid,
 
-        tileIndex:selected,
+        tileIndex:
+          selected,
 
-        side:sideToPlay
+        side:
+          sideToPlay
+
       });
 
-    selected = null;
+
+    selected =
+      null;
+
 
     render();
 
   }
+
+
   catch(e){
 
-    alert(e.message);
+    alert(
+      e.message
+    );
+
   }
 }
 
@@ -1463,87 +2165,138 @@ async function play(sideToPlay){
 function scheduleBotStep(){
 
   if(
+
     !game ||
-    game.status !== 'playing' ||
+
+    game.status !==
+      'playing' ||
+
     !game.isHost ||
-    !game.currentPlayerIsBot
+
+    !game
+      .currentPlayerIsBot
+
   ){
 
-    if(botTimer){
+    if(
+      botTimer
+    ){
 
       clearTimeout(
         botTimer
       );
 
-      botTimer = null;
+      botTimer =
+        null;
+
     }
 
     return;
   }
 
+
   if(
+
     botTimer ||
+
     botStepInFlight
+
   ){
+
     return;
   }
+
 
   const expectedTurn =
     game.turn;
 
+
   botTimer =
     setTimeout(
+
       async()=>{
 
-        botTimer = null;
+
+        botTimer =
+          null;
+
 
         if(
+
           !game ||
-          game.status !== 'playing' ||
+
+          game.status !==
+            'playing' ||
+
           !game.isHost ||
-          !game.currentPlayerIsBot ||
-          game.turn !== expectedTurn
+
+          !game
+            .currentPlayerIsBot ||
+
+          game.turn !==
+            expectedTurn
+
         ){
 
           scheduleBotStep();
+
           return;
         }
 
-        botStepInFlight = true;
+
+        botStepInFlight =
+          true;
+
 
         try{
 
           game =
             await api({
 
-              action:'botStep',
+              action:
+                'botStep',
 
-              code:game.code,
+              code:
+                game.code,
 
-              playerId:pid
+              playerId:
+                pid
+
             });
+
 
           render();
 
         }
+
+
         catch(e){
 
           console.error(
+
             'Error ejecutando bot:',
+
             e
+
           );
 
         }
+
+
         finally{
 
-          botStepInFlight = false;
+          botStepInFlight =
+            false;
+
 
           scheduleBotStep();
+
         }
 
       },
 
       BOT_DELAY
+
     );
 }
 
@@ -1552,7 +2305,9 @@ function scheduleBotStep(){
    PIPS
 ========================= */
 
-function pipHTML(number){
+function pipHTML(
+  number
+){
 
   const maps={
 
@@ -1596,42 +2351,69 @@ function pipHTML(number){
       'p7',
       'p9'
     ]
+
   };
 
+
   return (
-    maps[number] || []
+
+    maps[number] ||
+    []
+
   )
+
   .map(
+
     position =>
+
       `<i class="pip ${position}"></i>`
+
   )
+
   .join('');
+
 }
 
 
 /* =========================
-   TILE
+   PLAYER TILE
 ========================= */
 
 function tileElement(
+
   tile,
+
   index=null,
+
   clickable=false
+
 ){
 
   const el =
     document
-      .createElement('div');
-
-  el.className =
-    'tile' +
-    (
-      index === selected
-        ? ' selected'
-        : ''
+    .createElement(
+      'div'
     );
 
+
+  el.className =
+
+    'tile' +
+
+    (
+
+      index ===
+      selected
+
+      ? ' selected'
+
+      : ''
+
+    );
+
+
   el.innerHTML =
+
     `
     <span class="tile-half">
       ${pipHTML(tile[0])}
@@ -1642,333 +2424,551 @@ function tileElement(
     </span>
     `;
 
-  if(clickable){
+
+  if(
+    clickable
+  ){
 
     el.onclick =
       ()=>{
 
         selected =
-          selected === index
-            ? null
-            : index;
+
+          selected ===
+          index
+
+          ? null
+
+          : index;
+
 
         render();
+
       };
+
   }
+
 
   return el;
 }
 
 
-/* =========================
-   NEW BOARD ENGINE
-   SERPENTINE DOMINO CHAIN
-========================= */
+/* =========================================================
+   SERPENTINE BOARD
+========================================================= */
 
 function renderBoard(){
 
   const board =
     document
-      .getElementById('board');
+    .getElementById(
+      'board'
+    );
 
-  board.innerHTML = '';
+
+  board.innerHTML =
+    '';
+
 
   const pieces =
-    game.board || [];
+    game.board ||
+    [];
 
-  if(!pieces.length){
+
+  if(
+    !pieces.length
+  ){
+
     return;
+
   }
 
-  /*
-    The virtual board uses a grid.
-
-    Horizontal domino:
-      2 grid units wide
-      1 grid unit high
-
-    Vertical domino:
-      1 grid unit wide
-      2 grid units high
-
-    The route follows:
-
-          → → → →
-                ↓
-          ← ← ← ←
-          ↓
-          → → → →
-
-    producing the classic domino
-    snake / square pattern.
-  */
 
   const mobile =
     isMobile();
 
-  const cell =
-    mobile
-      ? 25
-      : 35;
-
-  const horizontalStep =
-    cell * 2;
-
-  const verticalStep =
-    cell * 2;
-
-  const rect =
-    board
-      .getBoundingClientRect();
-
-  const usableWidth =
-    Math.max(
-      rect.width,
-      300
-    );
 
   /*
-    Number of horizontal dominoes
-    before making a turn.
+    Board pieces are intentionally
+    smaller and slimmer than the
+    player's hand pieces.
   */
+
+  const TILE_W =
+    mobile
+      ? 48
+      : 62;
+
+
+  const TILE_H =
+    mobile
+      ? 26
+      : 34;
+
+
+  const GAP =
+    mobile
+      ? 2
+      : 3;
+
+
+  /*
+    More vertical breathing room
+    between snake rows.
+  */
+
+  const ROW_GAP =
+    mobile
+      ? 42
+      : 58;
+
+
+  const boardWidth =
+    board.clientWidth;
+
+
+  const boardHeight =
+    board.clientHeight;
+
+
+  const SIDE_MARGIN =
+    mobile
+      ? 22
+      : 45;
+
+
+  const TOP_MARGIN =
+    mobile
+      ? 20
+      : 35;
+
 
   let rowCapacity =
     Math.floor(
-      usableWidth /
-      horizontalStep
-    ) - 1;
+
+      (
+        boardWidth -
+        SIDE_MARGIN * 2
+      )
+
+      /
+
+      (
+        TILE_W +
+        GAP
+      )
+
+    );
+
 
   rowCapacity =
     Math.max(
-      mobile ? 4 : 6,
+
+      mobile
+        ? 5
+        : 7,
+
       Math.min(
+
         rowCapacity,
-        mobile ? 6 : 9
+
+        mobile
+          ? 8
+          : 11
+
       )
+
     );
 
-  /*
-    Build the route.
 
-    First piece begins in the
-    upper-left portion of the
-    virtual chain.
+  const positions =
+    [];
+
+
+  let x =
+    0;
+
+
+  let y =
+    0;
+
+
+  let direction =
+    1;
+
+
+  let countInRow =
+    0;
+
+
+  /*
+    Snake:
+
+    → → → → →
+              ↓
+    ← ← ← ← ←
+    ↓
+    → → → → →
   */
 
-  const positions=[];
-
-  let x=0;
-  let y=0;
-
-  let direction=1;
-
-  let piecesInRow=0;
 
   for(
+
     let i=0;
+
     i<pieces.length;
+
     i++
+
   ){
 
     const tile =
       pieces[i];
 
+
     const isDouble =
-      tile[0] === tile[1];
+      tile[0] ===
+      tile[1];
 
-    /*
-      At the end of a row,
-      make a vertical corner.
-    */
 
-    const shouldTurn =
-      i>0 &&
-      piecesInRow>=rowCapacity;
-
-    if(shouldTurn){
-
-      positions.push({
-        x,
-        y,
-        rotation:
-          direction===1
-            ? 90
-            : -90,
-        double:isDouble
-      });
-
-      y += verticalStep;
-
-      direction *= -1;
-
-      piecesInRow=0;
-
-      continue;
-    }
-
-    /*
-      Normal horizontal tile.
-    */
-
-    positions.push({
-      x,
-      y,
+    if(
+      countInRow >=
+      rowCapacity
+    ){
 
       /*
-        Doubles are displayed
-        perpendicular to the
-        direction of the chain.
+        Turn piece.
       */
 
-      rotation:
-        isDouble
-          ? 90
-          : direction===1
-            ? 0
-            : 180,
+      x +=
+        direction *
+        (
+          TILE_W *
+          .25
+        );
 
-      double:isDouble
+
+      positions.push({
+
+        x,
+
+        y:
+          y +
+          ROW_GAP / 2,
+
+        rotation:
+          90,
+
+        turn:
+          true,
+
+        double:
+          isDouble
+
+      });
+
+
+      y +=
+        ROW_GAP +
+        TILE_H;
+
+
+      direction *=
+        -1;
+
+
+      x +=
+        direction *
+        (
+          TILE_W *
+          .75
+        );
+
+
+      countInRow =
+        0;
+
+
+      continue;
+
+    }
+
+
+    positions.push({
+
+      x,
+
+      y,
+
+      rotation:
+
+        isDouble
+
+        ? 90
+
+        : 0,
+
+      turn:
+        false,
+
+      double:
+        isDouble
+
     });
 
-    x +=
-      horizontalStep *
-      direction;
 
-    piecesInRow++;
+    x +=
+
+      direction *
+
+      (
+        TILE_W +
+        GAP
+      );
+
+
+    countInRow++;
+
   }
 
-  /*
-    Find the dimensions occupied
-    by the virtual chain.
-  */
 
   const xs =
     positions.map(
       p=>p.x
     );
 
+
   const ys =
     positions.map(
       p=>p.y
     );
 
+
   const minX =
-    Math.min(...xs);
+    Math.min(
+      ...xs
+    );
+
 
   const maxX =
-    Math.max(...xs);
+    Math.max(
+      ...xs
+    );
+
 
   const minY =
-    Math.min(...ys);
+    Math.min(
+      ...ys
+    );
+
 
   const maxY =
-    Math.max(...ys);
+    Math.max(
+      ...ys
+    );
 
-  const chainWidth =
+
+  const contentWidth =
+
     maxX -
     minX +
-    horizontalStep;
+    TILE_W;
 
-  const chainHeight =
+
+  const contentHeight =
+
     maxY -
     minY +
-    verticalStep;
+    TILE_H;
 
-  /*
-    Scale the complete chain
-    if it becomes too large.
-  */
 
   const availableWidth =
-    Math.max(
-      board.clientWidth - 20,
-      100
-    );
+
+    boardWidth -
+    SIDE_MARGIN * 2;
+
 
   const availableHeight =
-    Math.max(
-      board.clientHeight - 20,
-      100
-    );
 
-  const scale =
+    boardHeight -
+    TOP_MARGIN * 2;
+
+
+  let scale =
     Math.min(
+
       1,
+
       availableWidth /
-      chainWidth,
+      contentWidth,
+
       availableHeight /
-      chainHeight
+      contentHeight
+
     );
 
-  /*
-    Center the entire chain.
-  */
 
-  const offsetX =
-    (
-      board.clientWidth -
-      chainWidth * scale
-    ) / 2;
+  scale =
+    Math.max(
 
-  const offsetY =
+      mobile
+        ? .68
+        : .74,
+
+      scale
+
+    );
+
+
+  const scaledWidth =
+    contentWidth *
+    scale;
+
+
+  const scaledHeight =
+    contentHeight *
+    scale;
+
+
+  const centerX =
+
     (
-      board.clientHeight -
-      chainHeight * scale
-    ) / 2;
+      boardWidth -
+      scaledWidth
+    )
+
+    /
+    2;
+
+
+  const centerY =
+
+    (
+      boardHeight -
+      scaledHeight
+    )
+
+    /
+    2;
+
 
   pieces.forEach(
-    (tile,index)=>{
 
-      const position =
+    (
+      tile,
+      index
+    )=>{
+
+
+      const p =
         positions[index];
+
 
       const wrapper =
         document
-          .createElement('div');
+        .createElement(
+          'div'
+        );
+
 
       wrapper.className =
         'board-piece';
 
+
       wrapper.style.left =
+
         (
-          offsetX +
+
+          centerX +
+
           (
-            position.x -
+            p.x -
             minX
-          ) * scale
-        ) +
+          )
+
+          *
+          scale
+
+        )
+
+        +
         'px';
+
 
       wrapper.style.top =
+
         (
-          offsetY +
+
+          centerY +
+
           (
-            position.y -
+            p.y -
             minY
-          ) * scale
-        ) +
+          )
+
+          *
+          scale
+
+        )
+
+        +
         'px';
 
+
+      wrapper.style.width =
+        TILE_W +
+        'px';
+
+
+      wrapper.style.height =
+        TILE_H +
+        'px';
+
+
       wrapper.style.transform =
-        `
-        scale(${scale})
-        rotate(${position.rotation}deg)
-        `;
+
+        `scale(${scale}) rotate(${p.rotation}deg)`;
+
 
       const domino =
-        tileElement(
-          tile
+        document
+        .createElement(
+          'div'
         );
 
-      wrapper.appendChild(
-        domino
-      );
 
-      board.appendChild(
-        wrapper
-      );
+      domino.className =
+        'board-domino';
+
+
+      domino.innerHTML =
+
+        `
+        <span class="board-half">
+          ${pipHTML(tile[0])}
+        </span>
+
+        <span class="board-half">
+          ${pipHTML(tile[1])}
+        </span>
+        `;
+
+
+      wrapper
+        .appendChild(
+          domino
+        );
+
+
+      board
+        .appendChild(
+          wrapper
+        );
+
     }
+
   );
+
 }
 
 
@@ -1980,10 +2980,14 @@ function backTile(){
 
   const el =
     document
-      .createElement('div');
+    .createElement(
+      'div'
+    );
+
 
   el.className =
     'back-tile';
+
 
   return el;
 }
@@ -1997,137 +3001,249 @@ function renderOpponents(){
 
   const container =
     document
-      .getElementById('opponents');
+    .getElementById(
+      'opponents'
+    );
 
-  container.innerHTML = '';
+
+  container.innerHTML =
+    '';
+
 
   if(
+
     !game ||
-    game.myIndex < 0
+
+    game.myIndex <
+    0
+
   ){
+
     return;
   }
+
 
   const total =
     game.players.length;
 
-  game.players.forEach(
-    (player,index)=>{
 
-      if(player.isMe){
+  game.players
+  .forEach(
+
+    (
+      player,
+      index
+    )=>{
+
+
+      if(
+        player.isMe
+      ){
+
         return;
       }
 
+
       const offset =
+
         (
+
           index -
+
           game.myIndex +
+
           total
-        ) % total;
+
+        )
+
+        %
+
+        total;
+
 
       let seatClass =
         'seat-top';
 
-      if(total===2){
+
+      if(
+        total ===
+        2
+      ){
 
         seatClass =
           'seat-top';
+
       }
 
-      else if(total===3){
+
+      else if(
+        total ===
+        3
+      ){
 
         seatClass =
-          offset===1
-            ? 'seat-right'
-            : 'seat-left';
+
+          offset ===
+          1
+
+          ? 'seat-right'
+
+          : 'seat-left';
+
       }
 
-      else if(total===4){
 
-        if(offset===1){
+      else if(
+        total ===
+        4
+      ){
+
+        if(
+          offset ===
+          1
+        ){
 
           seatClass =
             'seat-right';
+
         }
 
-        else if(offset===2){
+
+        else if(
+          offset ===
+          2
+        ){
 
           seatClass =
             'seat-top';
+
         }
+
 
         else{
 
           seatClass =
             'seat-left';
+
         }
+
       }
+
 
       const opponent =
         document
-          .createElement('div');
+        .createElement(
+          'div'
+        );
+
 
       opponent.className =
+
         'opponent ' +
+
         seatClass +
+
         (
-          index===game.turn &&
-          game.status==='playing'
-            ? ' turn'
-            : ''
+
+          index ===
+            game.turn &&
+
+          game.status ===
+            'playing'
+
+          ? ' turn'
+
+          : ''
+
         );
+
 
       const name =
         document
-          .createElement('div');
+        .createElement(
+          'div'
+        );
+
 
       name.className =
         'opponent-name';
 
+
       const bot =
+
         player.isBot
-          ? ' 🤖'
-          : '';
+
+        ? ' 🤖'
+
+        : '';
+
 
       const team =
+
         player.team
-          ? ` · Equipo ${player.team}`
-          : '';
+
+        ? ` · Equipo ${player.team}`
+
+        : '';
+
 
       name.textContent =
+
         `${player.name}${bot}${team} · ${player.handCount}`;
+
 
       const rack =
         document
-          .createElement('div');
+        .createElement(
+          'div'
+        );
+
 
       rack.className =
         'wood-rack';
 
+
       for(
+
         let i=0;
+
         i<player.handCount;
+
         i++
+
       ){
 
-        rack.appendChild(
+        rack
+        .appendChild(
+
           backTile()
+
         );
+
       }
 
-      opponent.appendChild(
+
+      opponent
+      .appendChild(
         name
       );
 
-      opponent.appendChild(
+
+      opponent
+      .appendChild(
         rack
       );
 
-      container.appendChild(
+
+      container
+      .appendChild(
         opponent
       );
+
     }
+
   );
+
 }
 
 
@@ -2139,38 +3255,54 @@ function renderHistory(){
 
   const list =
     document
-      .getElementById(
-        'historyList'
-      );
+    .getElementById(
+      'historyList'
+    );
+
 
   const historyItems =
-    game.history || [];
+    game.history ||
+    [];
 
-  if(!historyItems.length){
+
+  if(
+    !historyItems.length
+  ){
 
     list.innerHTML =
+
       `
       <div class="history-item">
         La partida todavía no tiene jugadas.
       </div>
       `;
 
+
     return;
   }
 
+
   list.innerHTML =
+
     historyItems
-      .slice()
-      .reverse()
-      .map(
-        item=>{
 
-          const time =
-            new Date(
-              item.time
-            );
+    .slice()
 
-          return `
+    .reverse()
+
+    .map(
+
+      item=>{
+
+
+        const time =
+          new Date(
+            item.time
+          );
+
+
+        return `
+
           <div class="history-item">
 
             ${item.text}
@@ -2178,23 +3310,39 @@ function renderHistory(){
             <span class="history-time">
 
               ${
-                time.toLocaleTimeString(
+                time
+                .toLocaleTimeString(
+
                   [],
+
                   {
-                    hour:'2-digit',
-                    minute:'2-digit',
-                    second:'2-digit'
+
+                    hour:
+                      '2-digit',
+
+                    minute:
+                      '2-digit',
+
+                    second:
+                      '2-digit'
+
                   }
+
                 )
               }
 
             </span>
 
           </div>
-          `;
-        }
-      )
-      .join('');
+
+        `;
+
+      }
+
+    )
+
+    .join('');
+
 }
 
 
@@ -2204,85 +3352,107 @@ function renderHistory(){
 
 function render(){
 
-  if(!game){
+  if(
+    !game
+  ){
+
     return;
   }
 
+
   const statusEl =
     document
-      .getElementById('status');
+    .getElementById(
+      'status'
+    );
+
 
   const subStatus =
     document
-      .getElementById(
-        'subStatus'
-      );
+    .getElementById(
+      'subStatus'
+    );
+
 
   const playersEl =
     document
-      .getElementById(
-        'players'
-      );
+    .getElementById(
+      'players'
+    );
+
 
   const handEl =
     document
-      .getElementById(
-        'hand'
-      );
+    .getElementById(
+      'hand'
+    );
+
 
   const msg =
     document
-      .getElementById(
-        'msg'
-      );
+    .getElementById(
+      'msg'
+    );
+
 
   const start =
     document
-      .getElementById(
-        'start'
-      );
+    .getElementById(
+      'start'
+    );
+
 
   const newRound =
     document
-      .getElementById(
-        'newRound'
-      );
+    .getElementById(
+      'newRound'
+    );
+
 
   const leftButton =
     document
-      .getElementById(
-        'leftButton'
-      );
+    .getElementById(
+      'leftButton'
+    );
+
 
   const rightButton =
     document
-      .getElementById(
-        'rightButton'
-      );
+    .getElementById(
+      'rightButton'
+    );
+
 
   const drawButton =
     document
-      .getElementById(
-        'drawButton'
-      );
+    .getElementById(
+      'drawButton'
+    );
+
 
   const passButton =
     document
-      .getElementById(
-        'passButton'
-      );
+    .getElementById(
+      'passButton'
+    );
 
 
   /* STATUS */
 
   statusEl.textContent =
+
     game.message ||
+
     game.status ||
+
     '';
 
+
   if(
+
     game.status ===
     'playing'
+
   ){
 
     const current =
@@ -2290,147 +3460,244 @@ function render(){
         game.turn
       ];
 
+
     subStatus.textContent =
+
       `Turno: ${current?.name || ''}` +
+
       `${current?.isBot ? ' 🤖' : ''}` +
+
       ` · Pozo: ${game.boneyardCount} fichas`;
+
   }
+
 
   else{
 
     subStatus.textContent =
       '';
+
   }
 
 
   /* PLAYERS */
 
   playersEl.innerHTML =
+
     game.players
-      .map(
-        (player,index)=>{
 
-          const arrow =
-            index===game.turn &&
-            game.status==='playing'
-              ? '▶ '
-              : '';
+    .map(
 
-          const bot =
-            player.isBot
-              ? ' 🤖'
-              : '';
+      (
+        player,
+        index
+      )=>{
 
-          const you =
-            player.isMe
-              ? ' (Tú)'
-              : '';
 
-          const team =
-            player.team
-              ? ` · Equipo ${player.team}`
-              : '';
+        const arrow =
 
-          const score =
-            player.score !== null &&
-            player.score !== undefined
-              ? ` · ${player.score} pts`
-              : '';
+          index ===
+            game.turn &&
 
-          return `
+          game.status ===
+            'playing'
+
+          ? '▶ '
+
+          : '';
+
+
+        const bot =
+
+          player.isBot
+
+          ? ' 🤖'
+
+          : '';
+
+
+        const you =
+
+          player.isMe
+
+          ? ' (Tú)'
+
+          : '';
+
+
+        const team =
+
+          player.team
+
+          ? ` · Equipo ${player.team}`
+
+          : '';
+
+
+        const score =
+
+          player.score !==
+            null &&
+
+          player.score !==
+            undefined
+
+          ? ` · ${player.score} pts`
+
+          : '';
+
+
+        return `
+
           <div>
+
             ${arrow}
+
             ${player.name}
+
             ${bot}
+
             ${you}
+
             ${team}
+
             · ${player.handCount} fichas
+
             ${score}
+
           </div>
-          `;
-        }
-      )
-      .join('');
+
+        `;
+
+      }
+
+    )
+
+    .join('');
 
 
-  /* TEAM SCORES */
+  /* SCORE */
 
   if(
+
     game.teamScores &&
-    game.players.length===4
+
+    game.players.length ===
+    4
+
   ){
 
     playersEl.innerHTML +=
+
       `
       <div>
+
         <b>
+
         Equipo A:
         ${game.teamScores.A} pts
+
         ·
+
         Equipo B:
         ${game.teamScores.B} pts
+
         </b>
+
       </div>
       `;
+
   }
 
 
   /* MESSAGE */
 
   if(
-    game.status==='lobby'
+
+    game.status ===
+    'lobby'
+
   ){
 
     msg.textContent =
+
       `${game.humanSlots} puesto(s) humano(s) · ${game.botCount} bot(s)`;
+
   }
+
 
   else{
 
     msg.textContent =
+
       `Ronda ${game.roundNumber} · Meta ${game.target}`;
+
   }
 
 
-  /* NEW SERPENTINE BOARD */
+  /* BOARD */
 
   renderBoard();
 
 
   /* HAND */
 
-  handEl.innerHTML = '';
-
-  (game.myHand || [])
-    .forEach(
-      (tile,index)=>{
-
-        handEl.appendChild(
-          tileElement(
-            tile,
-            index,
-            true
-          )
-        );
-      }
-    );
+  handEl.innerHTML =
+    '';
 
 
-  /* PLAYER LABEL */
+  (
+    game.myHand ||
+    []
+  )
+
+  .forEach(
+
+    (
+      tile,
+      index
+    )=>{
+
+
+      handEl
+      .appendChild(
+
+        tileElement(
+
+          tile,
+
+          index,
+
+          true
+
+        )
+
+      );
+
+    }
+
+  );
+
+
+  /* YOU */
 
   const me =
     game.players[
       game.myIndex
     ];
 
+
   document
     .getElementById(
       'youLabel'
     )
     .textContent =
+
       me
-        ? `${me.name} (Tú) · ${game.myHand.length} fichas`
-        : 'Tus fichas';
+
+      ? `${me.name} (Tú) · ${game.myHand.length} fichas`
+
+      : 'Tus fichas';
 
 
   /* OPPONENTS */
@@ -2446,36 +3713,56 @@ function render(){
   /* START */
 
   start.style.display =
+
     game.isHost &&
-    game.status==='lobby'
-      ? 'inline-block'
-      : 'none';
+
+    game.status ===
+      'lobby'
+
+    ? 'inline-block'
+
+    : 'none';
 
 
   /* NEW ROUND */
 
   newRound.style.display =
+
     game.isHost &&
-    game.status==='finished'
-      ? 'inline-block'
-      : 'none';
+
+    game.status ===
+      'finished'
+
+    ? 'inline-block'
+
+    : 'none';
 
 
   /* CONTROLS */
 
   const myTurn =
-    game.status==='playing' &&
-    game.myIndex===game.turn &&
-    !game.currentPlayerIsBot;
+
+    game.status ===
+      'playing' &&
+
+    game.myIndex ===
+      game.turn &&
+
+    !game
+      .currentPlayerIsBot;
+
 
   leftButton.disabled =
     !myTurn;
 
+
   rightButton.disabled =
     !myTurn;
 
+
   drawButton.disabled =
     !myTurn;
+
 
   passButton.disabled =
     !myTurn;
@@ -2484,35 +3771,52 @@ function render(){
   /* BOT */
 
   scheduleBotStep();
+
 }
 
 
 /* =========================
-   RESIZE BOARD
+   RESIZE
 ========================= */
 
 let resizeTimer;
 
-window.addEventListener(
+
+window
+.addEventListener(
+
   'resize',
+
   ()=>{
+
 
     clearTimeout(
       resizeTimer
     );
 
+
     resizeTimer =
       setTimeout(
+
         ()=>{
 
-          if(game){
+
+          if(
+            game
+          ){
+
             renderBoard();
+
           }
 
         },
+
         150
+
       );
+
   }
+
 );
 
 
@@ -2523,28 +3827,42 @@ window.addEventListener(
 async function copyLink(){
 
   const url =
+
     location.origin +
+
     '/?room=' +
+
     game.code;
+
 
   try{
 
     await navigator
       .clipboard
-      .writeText(url);
+      .writeText(
+        url
+      );
+
 
     alert(
       'URL copiada'
     );
 
   }
+
+
   catch{
 
     prompt(
+
       'Copia esta URL:',
+
       url
+
     );
+
   }
+
 }
 
 
@@ -2554,67 +3872,108 @@ async function copyLink(){
 
 function toggleMusic(on){
 
-  if(on){
+  if(
+    on
+  ){
 
     audioContext =
+
       new(
+
         window.AudioContext ||
+
         window.webkitAudioContext
+
       )();
 
+
     oscillator =
+
       audioContext
-        .createOscillator();
+      .createOscillator();
+
 
     const gain =
+
       audioContext
-        .createGain();
+      .createGain();
+
 
     oscillator
       .frequency
       .value =
       110;
 
+
     gain
       .gain
       .value =
       .015;
 
+
     oscillator
-      .connect(gain)
       .connect(
-        audioContext.destination
+        gain
+      )
+      .connect(
+        audioContext
+        .destination
       );
 
-    oscillator.start();
+
+    oscillator
+      .start();
 
   }
+
 
   else{
 
-    if(oscillator){
+    if(
+      oscillator
+    ){
 
       try{
-        oscillator.stop();
+
+        oscillator
+          .stop();
+
       }
+
       catch{}
 
-      oscillator=null;
+
+      oscillator =
+        null;
+
     }
 
-    if(audioContext){
+
+    if(
+      audioContext
+    ){
 
       try{
-        audioContext.close();
+
+        audioContext
+          .close();
+
       }
+
       catch{}
 
-      audioContext=null;
+
+      audioContext =
+        null;
+
     }
+
   }
+
 }
 
 </script>
 
 </body>
+
 </html>
