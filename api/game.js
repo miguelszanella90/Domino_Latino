@@ -726,8 +726,17 @@ function publicGame(
     history:
       g.history || [],
 
-    chat:
+chat:
       g.chat || [],
+
+    humanPlayerIds:
+      g.players
+        .filter(
+          player => !player.isBot
+        )
+        .map(
+          player => player.id
+        ),
 
     signals:
       (g.signals || []).filter(
