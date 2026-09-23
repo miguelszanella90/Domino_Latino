@@ -1138,6 +1138,25 @@ summary{
 }
 
 </style>
+
+<style id="side-labels-vertical-only">
+/* Bot 3 (left) and Bot 1 (right): vertical titles only */
+#seatLeft .seat-name,
+#seatRight .seat-name,
+.seat-left .seat-name,
+.seat-right .seat-name,
+.player-left .player-name,
+.player-right .player-name,
+[data-seat="left"] .player-name,
+[data-seat="right"] .player-name,
+[data-position="left"] .player-name,
+[data-position="right"] .player-name {
+  writing-mode: vertical-rl !important;
+  text-orientation: mixed !important;
+  white-space: nowrap !important;
+}
+</style>
+
 </head>
 
 
