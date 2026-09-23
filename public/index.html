@@ -2,10 +2,14 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
 <title>Dominó Online</title>
 
 <style>
+
 :root{
   --felt:#0d6b4d;
   --accent:#ffd166;
@@ -17,14 +21,21 @@
   box-sizing:border-box;
 }
 
-html,body{
+html,
+body{
   margin:0;
   width:100%;
   height:100%;
 }
 
 body{
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
   background:var(--felt);
   color:var(--ink);
   overflow:hidden;
@@ -36,10 +47,6 @@ body{
   width:100%;
   height:100dvh;
 }
-
-/* =========================
-   PANEL LATERAL
-   ========================= */
 
 .side{
   background:var(--panel);
@@ -54,15 +61,13 @@ body{
   left:270px;
   top:14px;
   z-index:30;
+
   width:42px;
   height:42px;
   padding:0;
+
   font-size:20px;
 }
-
-/* =========================
-   CONTROLES
-   ========================= */
 
 button,
 input,
@@ -79,6 +84,11 @@ button{
   background:var(--accent);
   color:#111;
   font-weight:700;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
 }
 
 input{
@@ -106,9 +116,13 @@ details{
   border-radius:7px;
 }
 
-/* =========================
-   JUEGO
-   ========================= */
+.scoreBox{
+  background:#ffffff10;
+  padding:10px;
+  margin:10px 0;
+  border-radius:8px;
+  font-size:14px;
+}
 
 .main{
   position:relative;
@@ -128,48 +142,60 @@ details{
 .board{
   flex:1 1 auto;
   min-height:0;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   gap:5px;
   overflow:auto;
   padding:30px;
   flex-wrap:wrap;
 }
 
-/* =========================
-   FICHAS
-   ========================= */
-
 .tile{
   display:flex;
   flex:0 0 auto;
+
   background:#fff;
   color:#111;
+
   border-radius:8px;
   border:2px solid #222;
-  box-shadow:0 3px 8px #0005;
+
+  box-shadow:
+    0 3px 8px #0005;
+
   cursor:pointer;
 }
 
 .tile .face{
   width:48px;
   height:60px;
+
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(3,1fr);
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  grid-template-rows:
+    repeat(3,1fr);
+
   padding:7px;
+
   align-items:center;
   justify-items:center;
 }
 
 .tile .face+.face{
-  border-left:2px solid #222;
+  border-left:
+    2px solid #222;
 }
 
 .tile .face i{
   width:9px;
   height:9px;
+
   border-radius:50%;
 }
 
@@ -178,44 +204,52 @@ details{
 }
 
 .selected{
-  outline:4px solid var(--accent);
+  outline:
+    4px solid var(--accent);
 }
-
-/* =========================
-   MANO
-   ========================= */
 
 .hand{
   flex:0 0 auto;
+
   min-height:105px;
+
   background:#0003;
+
   padding:12px;
+
   display:flex;
+
   gap:8px;
+
   align-items:center;
+
   overflow-x:auto;
   overflow-y:hidden;
 }
 
-/* =========================
-   BOTONES INFERIORES
-   ========================= */
-
 .actions{
   flex:0 0 auto;
+
   text-align:center;
+
   padding:8px;
-  padding-bottom:max(8px,env(safe-area-inset-bottom));
+
+  padding-bottom:
+    max(
+      8px,
+      env(safe-area-inset-bottom)
+    );
+
   background:var(--felt);
+
   display:flex;
+
   justify-content:center;
+
   gap:6px;
+
   flex-wrap:wrap;
 }
-
-/* =========================
-   MÓVIL
-   ========================= */
 
 @media(max-width:700px){
 
@@ -226,47 +260,71 @@ details{
   .app{
     display:block;
     position:relative;
+
     width:100%;
     height:100dvh;
   }
 
-  /* El menú ocupa casi toda la pantalla,
-     pero empieza cerrado */
-
   .side{
     position:fixed;
+
     top:0;
     left:0;
+
     width:min(88vw,340px);
     height:100dvh;
+
     padding:
-      max(18px,env(safe-area-inset-top))
+      max(
+        18px,
+        env(safe-area-inset-top)
+      )
       18px
-      max(24px,env(safe-area-inset-bottom))
+      max(
+        24px,
+        env(safe-area-inset-bottom)
+      )
       18px;
 
-    transform:translateX(-100%);
-    box-shadow:8px 0 25px #0006;
+    transform:
+      translateX(-100%);
+
+    box-shadow:
+      8px 0 25px #0006;
   }
 
   .side.open{
-    transform:translateX(0);
+    transform:
+      translateX(0);
   }
-
-  /* Botón menú */
 
   .toggle{
     position:fixed;
-    top:max(10px,env(safe-area-inset-top));
+
+    top:
+      max(
+        10px,
+        env(safe-area-inset-top)
+      );
+
     left:10px;
+
     width:44px;
     height:44px;
+
     z-index:40;
+
     margin:0;
   }
 
-  .side.open + .main .toggle{
-    left:min(calc(88vw - 54px),286px);
+  .side.open +
+  .main
+  .toggle{
+    left:
+      min(
+        calc(88vw - 54px),
+        286px
+      );
   }
 
   .main{
@@ -276,25 +334,32 @@ details{
 
   .top{
     min-height:58px;
+
     padding:
-      max(16px,env(safe-area-inset-top))
+      max(
+        16px,
+        env(safe-area-inset-top)
+      )
       60px
       8px
       60px;
+
     font-size:14px;
   }
 
   .board{
-    padding:15px 10px;
+    padding:
+      15px 10px;
+
     gap:4px;
+
     align-content:center;
   }
-
-  /* Fichas un poco más pequeñas */
 
   .tile .face{
     width:36px;
     height:48px;
+
     padding:5px;
   }
 
@@ -303,44 +368,55 @@ details{
     height:7px;
   }
 
-  /* Mano siempre visible */
-
   .hand{
     width:100%;
-    min-height:74px;
-    padding:8px;
-    gap:6px;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-  }
 
-  /* Botones accesibles encima de Safari */
+    min-height:74px;
+
+    padding:8px;
+
+    gap:6px;
+
+    overflow-x:auto;
+
+    -webkit-overflow-scrolling:
+      touch;
+  }
 
   .actions{
     width:100%;
+
     display:grid;
-    grid-template-columns:1fr 1fr;
+
+    grid-template-columns:
+      1fr 1fr;
+
     gap:6px;
-    padding:7px 7px max(10px,env(safe-area-inset-bottom));
+
+    padding:
+      7px
+      7px
+      max(
+        10px,
+        env(safe-area-inset-bottom)
+      );
   }
 
   .actions button{
     margin:0;
-    padding:10px 5px;
+
+    padding:
+      10px 5px;
+
     font-size:12px;
+
     min-height:40px;
   }
 
   .side h2{
     margin-top:50px;
   }
-
-  #room button{
-    font-size:14px;
-  }
 }
-
-/* Teléfonos muy pequeños */
 
 @media(max-width:390px){
 
@@ -359,6 +435,7 @@ details{
     font-size:11px;
   }
 }
+
 </style>
 </head>
 
@@ -366,40 +443,93 @@ details{
 
 <div class="app">
 
-<aside class="side" id="side">
+<aside
+  class="side"
+  id="side"
+>
 
-<h2>🁣 Dominó Online</h2>
+<h2>
+🁣 Dominó Online
+</h2>
 
 <div id="lobby">
 
-<input id="name" placeholder="Tu nombre">
+<input
+  id="name"
+  placeholder="Tu nombre"
+>
 
 <select id="max">
-<option>2</option>
-<option>3</option>
-<option selected>4</option>
+  <option>2</option>
+  <option>3</option>
+  <option selected>
+    4
+  </option>
 </select>
 
-<button onclick="create()">Crear sala</button>
+<button
+  onclick="create()"
+>
+Crear sala
+</button>
 
 <div class="row">
-<input id="code" placeholder="Código">
-<button onclick="join()">Unirme</button>
-</div>
+
+<input
+  id="code"
+  placeholder="Código"
+>
+
+<button
+  onclick="join()"
+>
+Unirme
+</button>
 
 </div>
 
-<div id="room" hidden>
+</div>
 
-<h3>Sala <b id="roomCode"></b></h3>
+<div
+  id="room"
+  hidden
+>
 
-<button onclick="copyLink()">Copiar URL</button>
+<h3>
+Sala
+<b id="roomCode"></b>
+</h3>
 
-<button id="start" onclick="act('start')">
+<button
+  onclick="copyLink()"
+>
+Copiar URL
+</button>
+
+<button
+  id="start"
+  onclick="act('start')"
+>
 Iniciar partida
 </button>
 
-<div class="players" id="players"></div>
+<button
+  id="newRound"
+  onclick="act('newRound')"
+  style="display:none"
+>
+Nueva ronda
+</button>
+
+<div
+  class="scoreBox"
+  id="scoreBox"
+></div>
+
+<div
+  class="players"
+  id="players"
+></div>
 
 <p id="msg"></p>
 
@@ -407,54 +537,114 @@ Iniciar partida
 
 <details open>
 
-<summary>Reglas</summary>
+<summary>
+Reglas
+</summary>
 
 <p class="small">
-28 fichas, valores 0 a 6. De 2 a 4 jugadores.
+
+28 fichas, valores 0 a 6.
+De 2 a 4 jugadores.
+
 Cada jugador recibe 7 fichas.
-Comienza quien tenga el doble más alto.
-En cada turno coloca una ficha que coincida con un extremo.
-Si no puedes jugar, roba del pozo mientras haya fichas.
-Si el pozo está vacío, pasa.
-La ronda termina cuando alguien se queda sin fichas.
-En cierre, gana la menor suma.
-Meta sugerida: 100 o 150 puntos.
+
+La partida comienza con el
+doble más alto disponible.
+
+La ficha inicial se coloca
+automáticamente.
+
+En cada turno se juega una
+ficha que coincida con uno
+de los extremos.
+
+Si no puedes jugar y quedan
+fichas en el pozo, debes robar.
+
+Si no puedes jugar y el pozo
+está vacío, debes pasar.
+
+No puedes robar si ya tienes
+una ficha válida.
+
+No puedes pasar si puedes
+jugar o todavía quedan fichas
+en el pozo.
+
+Con 4 jugadores se juega por
+parejas:
+
+Jugador 1 y Jugador 3 =
+Equipo A.
+
+Jugador 2 y Jugador 4 =
+Equipo B.
+
+La ronda termina cuando un
+jugador se queda sin fichas
+o cuando todos quedan
+bloqueados.
+
+La meta puede ser 100 o
+150 puntos.
+
 </p>
 
 </details>
 
 <details>
 
-<summary>Settings</summary>
+<summary>
+Settings
+</summary>
 
 <label>
+
 Color mesa
+
 <input
-type="color"
-value="#0d6b4d"
-oninput="document.documentElement.style.setProperty('--felt',this.value)"
+  type="color"
+  value="#0d6b4d"
+  oninput="
+    document
+    .documentElement
+    .style
+    .setProperty(
+      '--felt',
+      this.value
+    )
+  "
 >
+
 </label>
 
 <br>
 
 <label>
+
 Música
+
 <input
-id="music"
-type="checkbox"
-onchange="music(this.checked)"
+  id="music"
+  type="checkbox"
+  onchange="
+    music(this.checked)
+  "
 >
+
 </label>
 
 <br>
 
 <label>
+
 Meta
+
 <select id="target">
-<option>100</option>
-<option>150</option>
+  <option>100</option>
+  <option>150</option>
 </select>
+
 </label>
 
 </details>
@@ -464,43 +654,62 @@ Meta
 <main class="main">
 
 <button
-class="toggle"
-id="menuButton"
-onclick="toggleMenu()">
+  class="toggle"
+  onclick="toggleMenu()"
+>
 ☰
 </button>
 
 <div class="top">
+
 <b id="status">
 Crea o únete a una sala
 </b>
+
+<div
+  id="boneyardInfo"
+  class="small"
+></div>
+
 </div>
 
 <section
-class="board"
-id="board">
-</section>
+  class="board"
+  id="board"
+></section>
 
 <div
-class="hand"
-id="hand">
-</div>
+  class="hand"
+  id="hand"
+></div>
 
 <div class="actions">
 
-<button onclick="play('left')">
+<button
+  id="leftButton"
+  onclick="play('left')"
+>
 ← Colocar izquierda
 </button>
 
-<button onclick="play('right')">
+<button
+  id="rightButton"
+  onclick="play('right')"
+>
 Colocar derecha →
 </button>
 
-<button onclick="act('draw')">
+<button
+  id="drawButton"
+  onclick="act('draw')"
+>
 Robar del pozo
 </button>
 
-<button onclick="act('pass')">
+<button
+  id="passButton"
+  onclick="act('pass')"
+>
 Pasar
 </button>
 
@@ -512,243 +721,265 @@ Pasar
 
 <script>
 
-let game,
-    pid,
-    selected=null,
-    poll;
+let game;
+let pid;
+let selected = null;
+let poll;
 
-const qs=new URLSearchParams(location.search);
-
-if(qs.get('room')){
-  code.value=qs.get('room');
-}
-
-
-/* =========================
-   MENÚ RESPONSIVE
-   ========================= */
-
-function isMobile(){
-  return window.matchMedia('(max-width:700px)').matches;
-}
-
-function toggleMenu(){
-
-  if(isMobile()){
-    side.classList.toggle('open');
-  }else{
-    side.classList.toggle('closed');
-  }
-}
-
-function closeMobileMenu(){
-
-  if(isMobile()){
-    side.classList.remove('open');
-  }
-}
-
-
-/* =========================
-   API
-   ========================= */
-
-const api=async body=>{
-
-  let r=await fetch(
-    '/api/game',
-    {
-      method:'POST',
-      headers:{
-        'content-type':'application/json'
-      },
-      body:JSON.stringify(body)
-    }
+const qs =
+  new URLSearchParams(
+    location.search
   );
 
-  let j=await r.json();
+if (qs.get('room')) {
+  code.value =
+    qs.get('room');
+}
 
-  if(!r.ok){
-    throw Error(j.error);
+function isMobile() {
+  return window
+    .matchMedia(
+      '(max-width:700px)'
+    )
+    .matches;
+}
+
+function toggleMenu() {
+  if (isMobile()) {
+    side.classList
+      .toggle('open');
+  } else {
+    side.classList
+      .toggle('closed');
+  }
+}
+
+function closeMobileMenu() {
+  if (isMobile()) {
+    side.classList
+      .remove('open');
+  }
+}
+
+const api =
+async body => {
+
+  const r =
+    await fetch(
+      '/api/game',
+      {
+        method:'POST',
+
+        headers:{
+          'content-type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify(body)
+      }
+    );
+
+  let j;
+
+  try {
+    j = await r.json();
+  } catch {
+    throw Error(
+      'El servidor devolvió una respuesta inválida'
+    );
+  }
+
+  if (!r.ok) {
+    throw Error(
+      j.error ||
+      'Error del servidor'
+    );
   }
 
   return j;
 };
 
+async function create() {
 
-/* =========================
-   CREAR SALA
-   ========================= */
+  try {
 
-async function create(){
+    const r =
+      await api({
+        action:'create',
+        name:name.value,
+        maxPlayers:max.value,
+        target:target.value
+      });
 
-  try{
+    pid =
+      r.playerId;
 
-    let r=await api({
-      action:'create',
-      name:name.value,
-      maxPlayers:max.value,
-      target:target.value
-    });
-
-    pid=r.playerId;
-    game=r.game;
+    game =
+      r.game;
 
     enter();
 
-  }catch(e){
+  } catch(e) {
 
     alert(e.message);
 
   }
 }
 
+async function join() {
 
-/* =========================
-   UNIRSE
-   ========================= */
+  try {
 
-async function join(){
+    const r =
+      await api({
+        action:'join',
+        code:
+          code.value
+          .trim()
+          .toUpperCase(),
 
-  try{
+        name:
+          name.value
+      });
 
-    let r=await api({
-      action:'join',
-      code:code.value.toUpperCase(),
-      name:name.value
-    });
+    pid =
+      r.playerId;
 
-    pid=r.playerId;
-    game=r.game;
+    game =
+      r.game;
 
     enter();
 
-  }catch(e){
+  } catch(e) {
 
     alert(e.message);
 
   }
 }
 
+function enter() {
 
-/* =========================
-   ENTRAR A SALA
-   ========================= */
+  room.hidden =
+    false;
 
-function enter(){
+  lobby.hidden =
+    true;
 
-  room.hidden=false;
-  lobby.hidden=true;
+  roomCode.textContent =
+    game.code;
 
-  roomCode.textContent=game.code;
-
-  history.replaceState(
-    null,
-    '',
-    '?room='+game.code
-  );
+  history
+    .replaceState(
+      null,
+      '',
+      '?room=' +
+      game.code
+    );
 
   render();
 
-  poll=setInterval(
-    refresh,
-    1500
-  );
+  if (poll) {
+    clearInterval(poll);
+  }
 
-  /* En teléfono cerramos automáticamente
-     el panel para mostrar el tablero */
+  poll =
+    setInterval(
+      refresh,
+      1200
+    );
 
   closeMobileMenu();
 }
 
+async function refresh() {
 
-/* =========================
-   ACTUALIZAR
-   ========================= */
+  try {
 
-async function refresh(){
+    const r =
+      await fetch(
+        '/api/game?code=' +
+        encodeURIComponent(
+          game.code
+        ) +
+        '&playerId=' +
+        encodeURIComponent(
+          pid
+        )
+      );
 
-  try{
+    if (r.ok) {
 
-    let r=await fetch(
-      '/api/game?code='+game.code
-    );
-
-    if(r.ok){
-
-      game=await r.json();
+      game =
+        await r.json();
 
       render();
-
     }
 
-  }catch{}
+  } catch {}
 }
 
+async function act(action) {
 
-/* =========================
-   ACCIONES
-   ========================= */
+  try {
 
-async function act(action){
+    game =
+      await api({
+        action,
+        code:game.code,
+        playerId:pid
+      });
 
-  try{
-
-    game=await api({
-      action,
-      code:game.code,
-      playerId:pid
-    });
+    selected =
+      null;
 
     render();
 
-  }catch(e){
+  } catch(e) {
 
     alert(e.message);
 
   }
 }
 
+async function play(
+  sideToPlay
+) {
 
-/* =========================
-   JUGAR FICHA
-   ========================= */
-
-async function play(sideToPlay){
-
-  if(selected===null){
-    return alert('Selecciona una ficha');
+  if (
+    selected === null
+  ) {
+    return alert(
+      'Selecciona una ficha'
+    );
   }
 
-  try{
+  try {
 
-    game=await api({
-      action:'play',
-      code:game.code,
-      playerId:pid,
-      tileIndex:selected,
-      side:sideToPlay
-    });
+    game =
+      await api({
+        action:'play',
+        code:game.code,
+        playerId:pid,
+        tileIndex:selected,
+        side:sideToPlay
+      });
 
-    selected=null;
+    selected =
+      null;
 
     render();
 
-  }catch(e){
+  } catch(e) {
 
     alert(e.message);
 
   }
 }
 
+function pipFace(n) {
 
-/* =========================
-   PUNTOS DEL DOMINÓ
-   ========================= */
-
-function pipFace(n){
-
-  const layouts={
+  const layouts = {
     0:[],
     1:[5],
     2:[1,9],
@@ -758,152 +989,250 @@ function pipFace(n){
     6:[1,3,4,6,7,9]
   };
 
-  let dots='';
+  let dots = '';
 
-  for(let pos=1;pos<=9;pos++){
+  for (
+    let pos = 1;
+    pos <= 9;
+    pos++
+  ) {
 
-    dots+=`
-      <i class="${layouts[n].includes(pos) ? 'pip' : ''}"></i>
-    `;
-
+    dots +=
+      `<i class="${
+        layouts[n]
+        .includes(pos)
+        ? 'pip'
+        : ''
+      }"></i>`;
   }
 
-  return `
-    <span class="face">
-      ${dots}
-    </span>
-  `;
+  return (
+    `<span class="face">` +
+    dots +
+    `</span>`
+  );
 }
 
+function tile(
+  t,
+  i,
+  click
+) {
 
-/* =========================
-   CREAR FICHA
-   ========================= */
+  const d =
+    document
+    .createElement('div');
 
-function tile(t,i,click){
+  d.className =
+    'tile' +
+    (
+      i === selected
+      ? ' selected'
+      : ''
+    );
 
-  let d=document.createElement('div');
-
-  d.className=
-    'tile'+
-    (i===selected?' selected':'');
-
-  d.innerHTML=
-    pipFace(t[0])+
+  d.innerHTML =
+    pipFace(t[0]) +
     pipFace(t[1]);
 
-  if(click){
+  if (click) {
 
-    d.onclick=()=>{
+    d.onclick =
+      () => {
 
-      selected=i;
+        selected = i;
 
-      render();
-
-    };
-
+        render();
+      };
   }
 
   return d;
 }
 
+function render() {
 
-/* =========================
-   RENDER
-   ========================= */
-
-function render(){
-
-  status.textContent=
-    game.message||
+  status.textContent =
+    game.message ||
     game.status;
 
-  players.innerHTML=
-    game.players.map(
-      (p,i)=>
-      `<div>
-      ${i===game.turn?'▶ ':''}
-      ${p.name} ·
-      ${p.hand.length} fichas ·
-      ${game.scores[p.id]||0} pts
-      </div>`
-    ).join('');
+  boneyardInfo.textContent =
+    game.status ===
+    'playing'
+      ? `Pozo: ${game.boneyardCount} fichas`
+      : '';
 
-  board.innerHTML='';
+  players.innerHTML =
+    game.players
+    .map(
+      (p,i) => {
 
-  game.board.forEach(
-    t=>board.append(tile(t))
-  );
+        const arrow =
+          i === game.turn &&
+          game.status ===
+          'playing'
+            ? '▶ '
+            : '';
 
-  hand.innerHTML='';
+        const team =
+          p.team
+            ? ` · Equipo ${p.team}`
+            : '';
 
-  let me=
-    game.players.find(
-      p=>p.id===pid
+        const score =
+          p.score !== null &&
+          p.score !== undefined
+            ? ` · ${p.score} pts`
+            : '';
+
+        const me =
+          p.isMe
+            ? ' (Tú)'
+            : '';
+
+        return (
+          `<div>` +
+          arrow +
+          p.name +
+          me +
+          team +
+          ` · ${p.handCount} fichas` +
+          score +
+          `</div>`
+        );
+      }
+    )
+    .join('');
+
+  if (
+    game.teamScores
+  ) {
+
+    scoreBox.style.display =
+      'block';
+
+    scoreBox.innerHTML =
+      `<b>Marcador por equipos</b><br>` +
+      `Equipo A: ${game.teamScores.A} pts<br>` +
+      `Equipo B: ${game.teamScores.B} pts`;
+
+  } else {
+
+    scoreBox.style.display =
+      'none';
+  }
+
+  board.innerHTML =
+    '';
+
+  game.board
+    .forEach(
+      t =>
+        board.append(
+          tile(t)
+        )
     );
 
-  (me?.hand||[]).forEach(
-    (t,i)=>
-    hand.append(
-      tile(t,i,true)
-    )
-  );
+  hand.innerHTML =
+    '';
 
-  start.style.display=
-    pid===game.host &&
-    game.status==='lobby'
-    ?'inline-block'
-    :'none';
+  (game.myHand || [])
+    .forEach(
+      (t,i) =>
+        hand.append(
+          tile(
+            t,
+            i,
+            true
+          )
+        )
+    );
+
+  start.style.display =
+    game.isHost &&
+    game.status ===
+    'lobby'
+      ? 'inline-block'
+      : 'none';
+
+  newRound.style.display =
+    game.isHost &&
+    game.status ===
+    'finished'
+      ? 'inline-block'
+      : 'none';
+
+  const myTurn =
+    game.status ===
+    'playing' &&
+    game.myIndex ===
+    game.turn;
+
+  leftButton.disabled =
+    !myTurn;
+
+  rightButton.disabled =
+    !myTurn;
+
+  drawButton.disabled =
+    !myTurn;
+
+  passButton.disabled =
+    !myTurn;
 }
 
+function copyLink() {
 
-/* =========================
-   COPIAR URL
-   ========================= */
+  navigator
+    .clipboard
+    .writeText(
+      location.origin +
+      '/?room=' +
+      game.code
+    );
 
-function copyLink(){
-
-  navigator.clipboard.writeText(
-    location.origin+
-    '/?room='+
-    game.code
+  alert(
+    'URL copiada'
   );
-
-  alert('URL copiada');
 }
-
-
-/* =========================
-   MÚSICA
-   ========================= */
 
 let ac;
 
-function music(on){
+function music(on) {
 
-  if(on){
+  if (on) {
 
-    ac=new AudioContext();
+    ac =
+      new AudioContext();
 
-    let o=ac.createOscillator(),
-        g=ac.createGain();
+    const o =
+      ac.createOscillator();
 
-    o.frequency.value=110;
-    g.gain.value=.02;
+    const g =
+      ac.createGain();
+
+    o.frequency.value =
+      110;
+
+    g.gain.value =
+      .02;
 
     o.connect(g)
-     .connect(ac.destination);
+      .connect(
+        ac.destination
+      );
 
     o.start();
 
-    window._o=o;
+    window._o = o;
 
-  }else if(window._o){
+  } else if (
+    window._o
+  ) {
 
     window._o.stop();
 
-    window._o=null;
-
+    window._o =
+      null;
   }
 }
 
