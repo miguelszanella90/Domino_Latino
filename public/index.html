@@ -1139,19 +1139,16 @@ summary{
 
 </style>
 
-<style id="side-badges-rotated-v7">
-/* SOLO Bot 3 y Bot 1.
-   Reservamos un pequeño gutter lateral para que el nombre vertical
-   quede visible completo y no sea cortado por el tablero. */
+<style id="side-badges-rotated-v8">
+/* Bot 1 / Bot 3: atriles hacia afuera, títulos verticales hacia adentro.
+   No modifica la geometría del dominó. */
 @media (min-width:701px){
-
-  /* Dejamos espacio real entre el borde del tablero y cada atril. */
   .seat-left{
-    left:92px !important;
+    left:28px !important;
   }
 
   .seat-right{
-    right:92px !important;
+    right:28px !important;
   }
 
   .seat-left .opponent-name,
@@ -1167,20 +1164,25 @@ summary{
     transform-origin:center center !important;
   }
 
-  /* Bot 3: bloque completo vertical, a la IZQUIERDA del atril. */
+  /* Nombre de Bot 3 entre su atril y el centro de la mesa */
   .seat-left .opponent-name{
-    left:-92px !important;
+    left:78px !important;
     right:auto !important;
     transform:translate(-50%,-50%) rotate(-90deg) !important;
   }
 
-  /* Bot 1: bloque completo vertical, a la DERECHA del atril. */
+  /* Nombre de Bot 1 entre su atril y el centro de la mesa */
   .seat-right .opponent-name{
-    right:-92px !important;
+    right:78px !important;
     left:auto !important;
     transform:translate(50%,-50%) rotate(90deg) !important;
   }
 }
+
+/* Preparación visual para la próxima fase social.
+   Se mantiene oculta para no fingir que chat/cámara ya están conectados
+   al backend o a WebRTC. */
+.social-feature-placeholder{display:none}
 </style>
 
 </head>
