@@ -1059,7 +1059,7 @@ summary{
 }
 
 
-/* V20.2: V20 geometry restored; targeted corner continuity fix.
+/* V18: layout desktop fijo dentro del viewport.
    La mano y los controles SIEMPRE tienen espacio reservado. */
 @media (min-width:701px){
   .main{
@@ -2552,36 +2552,40 @@ function renderBoard(){
   const boardH = board.clientHeight;
 
   /*
-    V10 - TABLERO POR CARRILES
+    V23 - V19 REFINADO
 
-    En vez de calcular las curvas pegadas al borde, reservamos zonas
-    específicas del tablero para la cadena.
+    Conserva la idea de V19:
+      izquierda -> sube
+      derecha   -> baja
 
-    Centro: ficha de apertura.
-    Extremo izquierdo: sube.
-    Extremo derecho: baja.
-
-    Esto aprovecha el espacio libre superior e inferior sin invadir
-    los atriles de los jugadores laterales ni el historial.
+    Cambios:
+      - usa mucho más ancho antes de doblar;
+      - reserva una franja real para los atriles laterales;
+      - las esquinas y la siguiente fila se calculan borde con borde;
+      - arriba y abajo son geometrías espejo;
+      - los dobles siguen perpendiculares en las rectas, pero en la esquina
+        se mantienen horizontales para formar una curva limpia.
   */
 
   const CENTER_X = boardW / 2;
   const CENTER_Y = boardH / 2;
 
-  // Límites seguros. Dejamos libres las zonas de los jugadores laterales.
-  const SIDE_GAP = mobile ? 72 : 220;
-  const SAFE_LEFT  = SIDE_GAP;
+  // El .board ya vive dentro de la zona central. Aquí sólo dejamos el colchón
+  // necesario para que las fichas no alcancen los atriles de Bot 1 y Bot 3.
+  const SIDE_GAP = mobile ? 28 : 64;
+  const SAFE_LEFT = SIDE_GAP;
   const SAFE_RIGHT = boardW - SIDE_GAP;
 
-  // Filas superiores e inferiores disponibles.
-  // Se calculan con el alto real para que el tablero permanezca estable.
-  const TOP_LANE = Math.max(mobile ? 34 : 42, CENTER_Y - (mobile ? 185 : 300));
-  const BOTTOM_LANE = Math.min(boardH - (mobile ? 34 : 42), CENTER_Y + (mobile ? 185 : 300));
+  // La rama izquierda dispone de toda la mitad superior y la derecha de toda
+  // la mitad inferior. Así nunca intentan encontrarse entre sí.
+  const TOP_LIMIT = mobile ? 24 : 30;
+  const BOTTOM_LIMIT = boardH - (mobile ? 24 : 30);
 
   const isDouble = tile => tile[0] === tile[1];
-  const visualLength = tile => isDouble(tile) ? H : W;
 
-  // Localizamos la ficha que abrió la partida.
+  // En una fila normal el doble está atravesado, por lo que consume H de ancho.
+  const rowLength = tile => isDouble(tile) ? H : W;
+
   const history = game.history || [];
   let openingIndex = history.filter(item =>
     typeof item.text === 'string' && item.text.includes('←')
@@ -2590,7 +2594,7 @@ function renderBoard(){
   openingIndex = Math.max(0, Math.min(openingIndex, pieces.length - 1));
 
   const openingTile = pieces[openingIndex];
-  const openingLen = visualLength(openingTile);
+  const openingLen = rowLength(openingTile);
   const positions = new Array(pieces.length);
 
   positions[openingIndex] = {
@@ -2599,149 +2603,117 @@ function renderBoard(){
     rot: isDouble(openingTile) ? 90 : 0
   };
 
-  /*
-    Cada rama tiene un recorrido independiente.
-
-    DERECHA:
-      centro -> derecha -> ABAJO -> izquierda -> ABAJO -> derecha...
-
-    IZQUIERDA:
-      centro -> izquierda -> ARRIBA -> derecha -> ARRIBA -> izquierda...
-
-    Las filas están separadas por ROW_STEP y nunca comparten la misma
-    zona inicial.
-  */
   function layoutBranch(indices, branchSign){
 
-    const goesDown = branchSign === 1;
+    // branchSign +1 = rama derecha, que baja.
+    // branchSign -1 = rama izquierda, que sube.
+    const verticalSign = branchSign === 1 ? 1 : -1;
+
     let dir = branchSign;
     let y = CENTER_Y;
 
+    // cursor siempre representa EL BORDE desde el que debe salir la próxima
+    // ficha horizontal. No es un centro, por eso desaparecen los huecos.
     let cursor = branchSign === 1
       ? CENTER_X + openingLen / 2
       : CENTER_X - openingLen / 2;
-
-    // Distancia entre filas. Suficiente para una ficha vertical completa.
-    const ROW_STEP = W + H;
 
     for(const index of indices){
 
       const tile = pieces[index];
       const dbl = isDouble(tile);
-      const len = visualLength(tile);
+      const len = rowLength(tile);
 
-      const fits = dir === 1
-        ? cursor + len <= SAFE_RIGHT
-        : cursor - len >= SAFE_LEFT;
+      const roomToEdge = dir === 1
+        ? SAFE_RIGHT - cursor
+        : cursor - SAFE_LEFT;
 
-      if(fits){
+      /*
+        Sólo ponemos la ficha en la fila si cabe COMPLETA.
+        Si no cabe, ESA MISMA ficha se convierte en la esquina. Esto evita
+        piezas medio montadas sobre la curva.
+      */
+      if(roomToEdge >= len){
 
         const cx = dir === 1
           ? cursor + len / 2
           : cursor - len / 2;
 
-        let rot;
-        if(dbl){
-          rot = 90;
-        }else{
-          // La ficha gira 180° únicamente cuando la fila regresa.
-          rot = dir === branchSign ? 0 : 180;
-        }
+        positions[index] = {
+          cx,
+          cy: y,
+          rot: dbl ? 90 : (dir === branchSign ? 0 : 180)
+        };
 
-        positions[index] = { cx, cy:y, rot };
         cursor += dir * len;
         continue;
       }
 
-      /*
-        CURVA CUADRADA
-
-        La ficha que provoca el giro se convierte en la pieza vertical
-        de la esquina. La siguiente fila comienza después de ella.
-      */
-      // V20: ampliamos mucho la zona de seguridad antes de los atriles laterales.
-      // Una ficha normal que dobla se coloca vertical. Si la ficha que llega
-      // a la curva es doble, permanece horizontal y actúa como la pieza
-      // cuadrada de la esquina; la bajada/subida comienza inmediatamente
-      // después de su borde exterior.
-      const edgeX = dir === 1
-        ? SAFE_RIGHT - (dbl ? W / 2 : H / 2)
-        : SAFE_LEFT + (dbl ? W / 2 : H / 2);
-
-      let nextY = y + (goesDown ? ROW_STEP : -ROW_STEP);
-
-      // Si alcanzamos la última fila disponible, seguimos alternando
-      // dentro de la zona libre en vez de salir del tablero.
-      if(goesDown && nextY > BOTTOM_LANE){
-        nextY = BOTTOM_LANE;
-      }
-      if(!goesDown && nextY < TOP_LANE){
-        nextY = TOP_LANE;
-      }
-
-      /*
-        La pieza de la esquina debe tocar las filas por LOS BORDES,
-        no cruzarlas.
-
-        Para una ficha vertical de alto visual W:
-        - su borde superior toca el borde inferior de la fila anterior
-        - su borde inferior toca el borde superior de la fila siguiente
-
-        Por eso el centro queda exactamente a W/2 desde la fila actual,
-        en la dirección de la curva.
-      */
-      const verticalSign = nextY >= y ? 1 : -1;
-
-      let cornerCy;
-      let cornerRot;
+      const edgeX = dir === 1 ? SAFE_RIGHT : SAFE_LEFT;
 
       if(dbl){
         /*
-          En una curva la continuidad manda: un doble horizontal no puede
-          unir geométricamente dos filas distintas sin dejar un hueco.
-          Por eso, SOLO cuando el doble es exactamente la pieza de esquina,
-          se muestra vertical como conector. Así ambos extremos tocan las
-          fichas vecinas borde con borde.
+          DOBLE EN LA CURVA
+          Se deja horizontal, pegado al extremo de la fila. La próxima ficha
+          hará la subida/bajada desde su borde exterior.
         */
-        cornerCy = y + verticalSign * (H / 2 + W / 2);
-        cornerRot = branchSign === -1 ? 270 : 90;
+        const cx = dir === 1
+          ? edgeX - W / 2
+          : edgeX + W / 2;
 
         positions[index] = {
-          cx: edgeX,
-          cy: cornerCy,
-          rot: cornerRot
+          cx,
+          cy: y,
+          rot: dir === branchSign ? 0 : 180
         };
 
-        y = cornerCy + verticalSign * (W / 2 + H / 2);
+        // La próxima fila queda exactamente una ficha vertical + media altura
+        // de fila más arriba/abajo. El cursor parte del mismo borde de esquina.
+        y += verticalSign * (W + H);
         dir *= -1;
 
-        // Continue exactly from the outer edge of the vertical connector.
-        cursor = edgeX + dir * (H / 2);
+        cursor = dir === -1
+          ? edgeX - W
+          : edgeX + W;
+
       }else{
-        cornerCy = y + verticalSign * (H / 2 + W / 2);
+        /*
+          FICHA NORMAL EN LA CURVA
 
-        if(verticalSign === 1){
-          cornerRot = dir === 1 ? 90 : 270;
-        }else{
-          cornerRot = dir === 1 ? 90 : 270;
-        }
+          Al rotarla, su tamaño visual es H de ancho por W de alto.
+          Su borde cercano toca exactamente la fila actual. El borde lejano
+          toca exactamente la siguiente fila.
+        */
+        const cx = dir === 1
+          ? edgeX - H / 2
+          : edgeX + H / 2;
 
+        const cy = y + verticalSign * (H / 2 + W / 2);
+
+        let rot = dir === 1 ? 90 : 270;
         if(branchSign === -1){
-          cornerRot = (cornerRot + 180) % 360;
+          rot = (rot + 180) % 360;
         }
 
-        positions[index] = {
-          cx: edgeX,
-          cy: cornerCy,
-          rot: cornerRot
-        };
+        positions[index] = { cx, cy, rot };
 
-        // La fila siguiente toca exactamente el borde de la pieza vertical.
-        y = cornerCy + verticalSign * (W / 2 + H / 2);
+        // Centro de la nueva fila: borde lejano de la vertical + H/2.
+        y = cy + verticalSign * (W / 2 + H / 2);
         dir *= -1;
 
-        // Continue exactly from the outer edge of the vertical connector.
-        cursor = edgeX + dir * (H / 2);
+        // La siguiente ficha comienza EXACTAMENTE en el borde interior de la
+        // pieza vertical, sin separación y sin solape.
+        cursor = dir === -1
+          ? cx - H / 2
+          : cx + H / 2;
+      }
+
+      // Protección: nunca permitimos que una rama abandone su mitad del tablero.
+      if(verticalSign < 0 && y < TOP_LIMIT){
+        y = TOP_LIMIT;
+      }
+      if(verticalSign > 0 && y > BOTTOM_LIMIT){
+        y = BOTTOM_LIMIT;
       }
     }
   }
