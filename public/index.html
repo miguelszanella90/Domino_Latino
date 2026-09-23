@@ -1139,17 +1139,10 @@ summary{
 
 </style>
 
-<style id="side-badges-rotated-v8">
-/* Bot 1 / Bot 3: atriles hacia afuera, títulos verticales hacia adentro.
-   No modifica la geometría del dominó. */
+<style id="side-badges-rotated-v9">
 @media (min-width:701px){
-  .seat-left{
-    left:28px !important;
-  }
-
-  .seat-right{
-    right:28px !important;
-  }
+  .seat-left{ left:28px !important; }
+  .seat-right{ right:28px !important; }
 
   .seat-left .opponent-name,
   .seat-right .opponent-name{
@@ -1164,25 +1157,179 @@ summary{
     transform-origin:center center !important;
   }
 
-  /* Nombre de Bot 3 entre su atril y el centro de la mesa */
+  /* Racks stay put. Labels move farther toward the center. */
   .seat-left .opponent-name{
-    left:78px !important;
+    left:108px !important;
     right:auto !important;
     transform:translate(-50%,-50%) rotate(-90deg) !important;
   }
 
-  /* Nombre de Bot 1 entre su atril y el centro de la mesa */
   .seat-right .opponent-name{
-    right:78px !important;
+    right:108px !important;
     left:auto !important;
     transform:translate(50%,-50%) rotate(90deg) !important;
   }
 }
+</style>
 
-/* Preparación visual para la próxima fase social.
-   Se mantiene oculta para no fingir que chat/cámara ya están conectados
-   al backend o a WebRTC. */
-.social-feature-placeholder{display:none}
+<style id="social-ui-v1">
+.social-panel{
+  margin:0;
+  min-width:0;
+  border-left:2px solid #3b2114;
+  background:linear-gradient(180deg,#102321,#071816);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.social-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:#0b1e1c;
+}
+.social-tab{
+  margin:0;
+  border-radius:0;
+  padding:13px 6px;
+  background:#0b1e1c;
+  color:#fff;
+  font-size:14px;
+}
+.social-tab.active{
+  background:#173c37;
+  color:var(--accent);
+}
+.social-view{
+  min-height:0;
+  flex:1;
+  overflow:auto;
+}
+.social-view[hidden]{display:none !important;}
+.chat-list{
+  padding:8px 10px 90px;
+}
+.chat-item{
+  padding:8px 4px;
+  border-bottom:1px solid #ffffff16;
+  font-size:13px;
+  line-height:1.35;
+}
+.chat-name{
+  font-weight:800;
+  color:var(--accent);
+}
+.chat-time{
+  display:block;
+  margin-top:2px;
+  font-size:10px;
+  opacity:.55;
+}
+.chat-compose{
+  position:sticky;
+  bottom:0;
+  display:flex;
+  gap:5px;
+  padding:8px;
+  background:#0b1e1cf5;
+  border-top:1px solid #ffffff18;
+}
+.chat-compose input{
+  min-width:0;
+  flex:1;
+  margin:0;
+  padding:9px;
+}
+.chat-compose button{
+  margin:0;
+  padding:8px 10px;
+}
+.media-controls{
+  position:absolute;
+  left:50%;
+  bottom:8px;
+  transform:translateX(-50%);
+  z-index:24;
+  display:flex;
+  gap:5px;
+}
+.media-controls button{
+  margin:0;
+  padding:7px 10px;
+  font-size:12px;
+  box-shadow:0 2px 7px #0006;
+}
+.player-video{
+  position:absolute;
+  z-index:7;
+  width:112px;
+  height:76px;
+  object-fit:cover;
+  border:2px solid #ffffffaa;
+  border-radius:10px;
+  background:#061d1b;
+  box-shadow:0 3px 10px #0008;
+}
+.player-video.local{
+  right:10px;
+  bottom:10px;
+}
+.remote-video-wrap{
+  position:absolute;
+  z-index:7;
+  width:112px;
+  height:76px;
+}
+.remote-video-wrap video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border:2px solid #ffffffaa;
+  border-radius:10px;
+  background:#061d1b;
+  box-shadow:0 3px 10px #0008;
+}
+.remote-video-name{
+  position:absolute;
+  left:4px;
+  bottom:4px;
+  max-width:104px;
+  padding:2px 5px;
+  border-radius:8px;
+  background:#061d1bcc;
+  font-size:9px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.remote-video-wrap.seat-top{top:82px;left:50%;transform:translateX(-50%);}
+.remote-video-wrap.seat-left{left:105px;top:50%;transform:translateY(-50%);}
+.remote-video-wrap.seat-right{right:105px;top:50%;transform:translateY(-50%);}
+
+@media(max-width:700px){
+  .social-panel{
+    position:absolute;
+    left:8px;
+    right:8px;
+    bottom:6px;
+    max-height:42%;
+    z-index:18;
+    border:1px solid #ffffff20;
+    border-radius:10px;
+    box-shadow:0 3px 14px #0008;
+  }
+  .social-tab{font-size:11px;padding:8px 4px;}
+  .chat-list{max-height:150px;padding-bottom:70px;}
+  .media-controls{bottom:4px;}
+  .media-controls button{padding:6px 7px;font-size:10px;}
+  .player-video,.remote-video-wrap{width:78px;height:54px;}
+  .player-video.local{right:5px;bottom:5px;}
+  .remote-video-wrap.seat-top{top:48px;}
+  .remote-video-wrap.seat-left{left:52px;}
+  .remote-video-wrap.seat-right{right:52px;}
+}
 </style>
 
 </head>
@@ -1521,6 +1668,14 @@ Crea o únete a una sala
 
 <div id="opponents"></div>
 
+<div id="remoteVideos"></div>
+<video id="localVideo" class="player-video local" autoplay muted playsinline hidden></video>
+
+<div class="media-controls" id="mediaControls">
+  <button id="cameraButton" onclick="toggleCamera()">🎥 Cámara</button>
+  <button id="micButton" onclick="toggleMic()">🎙️ Micrófono</button>
+</div>
+
 <div
   class="board"
   id="board"
@@ -1529,22 +1684,25 @@ Crea o únete a una sala
 </section>
 
 
-<details
-  class="history-panel"
-  id="historyPanel"
-  open
->
+<aside class="social-panel" id="historyPanel">
+  <div class="social-tabs">
+    <button class="social-tab active" id="historyTab" onclick="showSocialTab('history')">📜 Jugadas</button>
+    <button class="social-tab" id="chatTab" onclick="showSocialTab('chat')">💬 Chat</button>
+  </div>
 
-<summary>
-📜 Historial de jugadas
-</summary>
+  <div class="social-view" id="historyView">
+    <div class="history-list" id="historyList"></div>
+  </div>
 
-<div
-  class="history-list"
-  id="historyList"
-></div>
-
-</details>
+  <div class="social-view" id="chatView" hidden>
+    <div class="chat-list" id="chatList"></div>
+    <div class="chat-compose">
+      <input id="chatInput" maxlength="300" placeholder="Escribe un mensaje..."
+             onkeydown="if(event.key==='Enter'){event.preventDefault();sendChat();}">
+      <button onclick="sendChat()">Enviar</button>
+    </div>
+  </div>
+</aside>
 
 </div>
 
@@ -1645,6 +1803,21 @@ let oscillator =
 const BOT_DELAY =
   1500;
 
+let activeSocialTab = 'history';
+let localStream = null;
+let cameraEnabled = false;
+let micEnabled = false;
+const peerConnections = new Map();
+const remoteStreams = new Map();
+const handledSignalIds = new Set();
+
+const RTC_CONFIG = {
+  iceServers:[
+    { urls:'stun:stun.l.google.com:19302' },
+    { urls:'stun:stun1.l.google.com:19302' }
+  ]
+};
+
 
 /* =========================
    ROOM URL
@@ -1695,13 +1868,7 @@ if(
       'closed'
     );
 
-  document
-    .getElementById(
-      'historyPanel'
-    )
-    .removeAttribute(
-      'open'
-    );
+  showSocialTab('history');
 }
 
 
@@ -2162,6 +2329,8 @@ async function refresh(){
 
 
       render();
+      handleSignals();
+      connectToHumanPlayers();
 
     }
 
@@ -2426,6 +2595,388 @@ function scheduleBotStep(){
     );
 }
 
+
+
+/* =========================
+   CHAT + VIDEO
+========================= */
+
+function escapeHTML(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+function showSocialTab(tab){
+  activeSocialTab = tab === 'chat' ? 'chat' : 'history';
+
+  const historyView = document.getElementById('historyView');
+  const chatView = document.getElementById('chatView');
+  const historyTab = document.getElementById('historyTab');
+  const chatTab = document.getElementById('chatTab');
+
+  if(!historyView || !chatView) return;
+
+  historyView.hidden = activeSocialTab !== 'history';
+  chatView.hidden = activeSocialTab !== 'chat';
+
+  historyTab?.classList.toggle('active', activeSocialTab === 'history');
+  chatTab?.classList.toggle('active', activeSocialTab === 'chat');
+
+  if(activeSocialTab === 'chat'){
+    requestAnimationFrame(()=>{
+      const list = document.getElementById('chatList');
+      if(list) list.scrollTop = list.scrollHeight;
+    });
+  }
+}
+
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  if(!game || !pid || !input) return;
+
+  const text = input.value.trim();
+  if(!text) return;
+
+  try{
+    game = await api({
+      action:'chat',
+      code:game.code,
+      playerId:pid,
+      text
+    });
+
+    input.value = '';
+    render();
+    showSocialTab('chat');
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+function renderChat(){
+  const list = document.getElementById('chatList');
+  if(!list || !game) return;
+
+  const items = game.chat || [];
+
+  if(!items.length){
+    list.innerHTML = '<div class="chat-item">Todavía no hay mensajes.</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(item=>{
+    const time = new Date(item.time);
+    return `
+      <div class="chat-item">
+        <span class="chat-name">${escapeHTML(item.name)}</span>
+        <div>${escapeHTML(item.text)}</div>
+        <span class="chat-time">${time.toLocaleTimeString([],{
+          hour:'2-digit',
+          minute:'2-digit'
+        })}</span>
+      </div>
+    `;
+  }).join('');
+
+  if(activeSocialTab === 'chat'){
+    list.scrollTop = list.scrollHeight;
+  }
+}
+
+async function ensureLocalMedia(){
+  if(localStream) return localStream;
+
+  if(!navigator.mediaDevices?.getUserMedia){
+    throw new Error('Este navegador no permite cámara/micrófono.');
+  }
+
+  localStream = await navigator.mediaDevices.getUserMedia({
+    video:true,
+    audio:true
+  });
+
+  cameraEnabled = true;
+  micEnabled = true;
+
+  const video = document.getElementById('localVideo');
+  video.srcObject = localStream;
+  video.hidden = false;
+
+  updateMediaButtons();
+  await connectToHumanPlayers();
+
+  return localStream;
+}
+
+async function toggleCamera(){
+  try{
+    if(!localStream){
+      await ensureLocalMedia();
+      return;
+    }
+
+    cameraEnabled = !cameraEnabled;
+    localStream.getVideoTracks().forEach(track=>{
+      track.enabled = cameraEnabled;
+    });
+
+    document.getElementById('localVideo').hidden = !cameraEnabled;
+    updateMediaButtons();
+  }catch(e){
+    alert('No se pudo activar la cámara: ' + e.message);
+  }
+}
+
+async function toggleMic(){
+  try{
+    if(!localStream){
+      await ensureLocalMedia();
+      return;
+    }
+
+    micEnabled = !micEnabled;
+    localStream.getAudioTracks().forEach(track=>{
+      track.enabled = micEnabled;
+    });
+
+    updateMediaButtons();
+  }catch(e){
+    alert('No se pudo activar el micrófono: ' + e.message);
+  }
+}
+
+function updateMediaButtons(){
+  const cam = document.getElementById('cameraButton');
+  const mic = document.getElementById('micButton');
+
+  if(cam){
+    cam.textContent = cameraEnabled ? '🎥 Cámara ON' : '🚫 Cámara OFF';
+  }
+
+  if(mic){
+    mic.textContent = micEnabled ? '🎙️ Mic ON' : '🔇 Mic OFF';
+  }
+}
+
+function humanPeers(){
+  return (game?.players || []).filter(
+    player => !player.isBot && !player.isMe && player.id
+  );
+}
+
+function seatClassForPlayerId(playerId){
+  if(!game || game.myIndex < 0) return 'seat-top';
+
+  const index = game.players.findIndex(p=>p.id === playerId);
+  if(index < 0) return 'seat-top';
+
+  const total = game.players.length;
+  const offset = (index - game.myIndex + total) % total;
+
+  if(total === 2) return 'seat-top';
+  if(total === 3) return offset === 1 ? 'seat-right' : 'seat-left';
+  if(total === 4){
+    if(offset === 1) return 'seat-right';
+    if(offset === 2) return 'seat-top';
+    return 'seat-left';
+  }
+
+  return 'seat-top';
+}
+
+function renderRemoteVideos(){
+  const container = document.getElementById('remoteVideos');
+  if(!container || !game) return;
+
+  const peers = humanPeers();
+
+  container.innerHTML = '';
+
+  peers.forEach(player=>{
+    const stream = remoteStreams.get(player.id);
+    if(!stream) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = `remote-video-wrap ${seatClassForPlayerId(player.id)}`;
+
+    const video = document.createElement('video');
+    video.autoplay = true;
+    video.playsInline = true;
+    video.srcObject = stream;
+
+    const label = document.createElement('div');
+    label.className = 'remote-video-name';
+    label.textContent = player.name;
+
+    wrap.appendChild(video);
+    wrap.appendChild(label);
+    container.appendChild(wrap);
+  });
+}
+
+async function sendSignal(to, signal){
+  if(!game || !pid || !to) return;
+
+  await api({
+    action:'signal',
+    code:game.code,
+    playerId:pid,
+    to,
+    signal
+  });
+}
+
+function createPeerConnection(remoteId){
+  if(peerConnections.has(remoteId)){
+    return peerConnections.get(remoteId);
+  }
+
+  const pc = new RTCPeerConnection(RTC_CONFIG);
+  peerConnections.set(remoteId, pc);
+
+  if(localStream){
+    localStream.getTracks().forEach(track=>{
+      pc.addTrack(track, localStream);
+    });
+  }
+
+  pc.onicecandidate = event=>{
+    if(event.candidate){
+      sendSignal(remoteId,{
+        type:'candidate',
+        candidate:event.candidate
+      }).catch(console.error);
+    }
+  };
+
+  pc.ontrack = event=>{
+    const stream = event.streams[0];
+    if(stream){
+      remoteStreams.set(remoteId, stream);
+      renderRemoteVideos();
+    }
+  };
+
+  pc.onconnectionstatechange = ()=>{
+    if(['failed','closed','disconnected'].includes(pc.connectionState)){
+      if(pc.connectionState !== 'disconnected'){
+        peerConnections.delete(remoteId);
+        remoteStreams.delete(remoteId);
+        renderRemoteVideos();
+      }
+    }
+  };
+
+  return pc;
+}
+
+async function makeOffer(remoteId){
+  const pc = createPeerConnection(remoteId);
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  await sendSignal(remoteId,{
+    type:'offer',
+    sdp:pc.localDescription
+  });
+}
+
+async function connectToHumanPlayers(){
+  if(!localStream || !game) return;
+
+  for(const player of humanPeers()){
+    /*
+      Only one side initiates. This avoids both browsers creating offers
+      at exactly the same time.
+    */
+    if(String(pid) < String(player.id) && !peerConnections.has(player.id)){
+      try{
+        await makeOffer(player.id);
+      }catch(e){
+        console.error('WebRTC offer error', e);
+      }
+    }
+  }
+}
+
+async function handleSignals(){
+  if(!game || !pid) return;
+
+  const signals = (game.signals || []).filter(
+    signal => signal?.id && !handledSignalIds.has(signal.id)
+  );
+
+  if(!signals.length) return;
+
+  const ack = [];
+
+  for(const item of signals){
+    try{
+      const remoteId = item.from;
+      const signal = item.signal || {};
+      const pc = createPeerConnection(remoteId);
+
+      if(signal.type === 'offer'){
+        await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+
+        if(localStream){
+          const existing = pc.getSenders().map(sender=>sender.track).filter(Boolean);
+          localStream.getTracks().forEach(track=>{
+            if(!existing.includes(track)){
+              pc.addTrack(track, localStream);
+            }
+          });
+        }
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        await sendSignal(remoteId,{
+          type:'answer',
+          sdp:pc.localDescription
+        });
+      }
+
+      else if(signal.type === 'answer'){
+        await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+      }
+
+      else if(signal.type === 'candidate' && signal.candidate){
+        await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+      }
+
+      else if(signal.type === 'hangup'){
+        pc.close();
+        peerConnections.delete(remoteId);
+        remoteStreams.delete(remoteId);
+        renderRemoteVideos();
+      }
+
+      handledSignalIds.add(item.id);
+      ack.push(item.id);
+    }catch(e){
+      console.error('WebRTC signal error', e);
+    }
+  }
+
+  if(ack.length){
+    try{
+      await api({
+        action:'ackSignals',
+        code:game.code,
+        playerId:pid,
+        signalIds:ack
+      });
+    }catch(e){
+      console.error('Signal ACK error', e);
+    }
+  }
+}
 
 /* =========================
    PIPS
@@ -3523,6 +4074,9 @@ function render(){
   /* HISTORY */
 
   renderHistory();
+  renderChat();
+  renderRemoteVideos();
+  showSocialTab(activeSocialTab);
 
 
   /* START */
