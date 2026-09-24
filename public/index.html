@@ -2005,8 +2005,8 @@ Crea o únete a una sala
 <aside class="social-panel" id="historyPanel">
   <button class="social-drawer-toggle" id="socialDrawerToggle" type="button" onclick="toggleSocialDrawer()" aria-label="Abrir o cerrar chat e historial">◀</button>
   <div class="social-tabs">
-    <button class="social-tab active" id="historyTab" onclick="showSocialTab('history')">📜 Jugadas</button>
-    <button class="social-tab" id="chatTab" onclick="showSocialTab('chat')">💬 Chat</button>
+    <button class="social-tab active" id="historyTab" onclick="openSocialTab('history')">📜 Jugadas</button>
+    <button class="social-tab" id="chatTab" onclick="openSocialTab('chat')">💬 Chat</button>
   </div>
 
   <div class="social-view" id="historyView">
@@ -4887,6 +4887,49 @@ function toggleMusic(on){
   };
   window.addEventListener('popstate',closeOnRoomEntry);
   window.addEventListener('DOMContentLoaded',closeOnRoomEntry);
+})();
+</script>
+
+
+<script id="ux-v8-drawer-user-control-only">
+(function(){
+  // Rendering may call showSocialTab() every poll. This function now ONLY
+  // changes the selected tab and can never change drawer open/closed state.
+  window.showSocialTab=function(tab){
+    const wanted=tab==='chat'?'chat':'history';
+    const panel=document.getElementById('historyPanel');
+    const historyView=document.getElementById('historyView');
+    const chatView=document.getElementById('chatView');
+    const historyTab=document.getElementById('historyTab');
+    const chatTab=document.getElementById('chatTab');
+    activeSocialTab=wanted;
+    if(historyView) historyView.hidden=wanted!=='history';
+    if(chatView) chatView.hidden=wanted!=='chat';
+    if(historyTab) historyTab.classList.toggle('active',wanted==='history');
+    if(chatTab) chatTab.classList.toggle('active',wanted==='chat');
+    if(panel) panel.dataset.openTab=wanted;
+  };
+
+  // Only a real tap on Chat/Jugadas is allowed to open the drawer.
+  window.openSocialTab=function(tab){
+    window.showSocialTab(tab);
+    const panel=document.getElementById('historyPanel');
+    if(panel && window.innerWidth<=700) panel.classList.add('mobile-open');
+  };
+
+  // Handle is the only control that explicitly closes/opens the drawer.
+  window.toggleSocialDrawer=function(forceOpen){
+    const panel=document.getElementById('historyPanel');
+    if(!panel) return;
+    if(window.innerWidth>700){ panel.classList.add('mobile-open'); return; }
+    const open=(typeof forceOpen==='boolean') ? forceOpen : !panel.classList.contains('mobile-open');
+    panel.classList.toggle('mobile-open',open);
+  };
+
+  // Mobile room starts closed. Polling/rendering will preserve this choice.
+  if(window.innerWidth<=700){
+    document.getElementById('historyPanel')?.classList.remove('mobile-open');
+  }
 })();
 </script>
 
