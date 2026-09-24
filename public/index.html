@@ -5374,6 +5374,153 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 })();
 </script>
 
+
+<style id="domino-music-style">
+  #musicToggle{
+    position:fixed;
+    left:10px;
+    bottom:10px;
+    z-index:1200;
+    border:1px solid rgba(255,255,255,.24);
+    border-radius:999px;
+    padding:7px 11px;
+    background:rgba(8,35,23,.82);
+    color:#fff;
+    font:700 11px/1 system-ui,sans-serif;
+    box-shadow:0 4px 14px rgba(0,0,0,.2);
+    backdrop-filter:blur(6px);
+    cursor:pointer;
+  }
+  body:not(.in-room) #musicToggle{display:none}
+  @media (max-width:700px){
+    #musicToggle{left:6px;bottom:5px;padding:6px 8px;font-size:9px}
+  }
+  @media (max-width:950px) and (orientation:landscape) and (max-height:500px){
+    #musicToggle{left:42px;bottom:4px;padding:5px 7px;font-size:8px}
+  }
+</style>
+
+<button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 Música ON</button>
+
+<script id="domino-background-music">
+(function(){
+  let musicOn = true;
+  let ctx = null;
+  let master = null;
+  let timer = null;
+  let step = 0;
+
+  // Short original Latin/caribbean-inspired loop synthesized in the browser.
+  // No external audio file or copyrighted recording is used.
+  const bass = [110,110,146.83,110,164.81,146.83,130.81,98];
+  const lead = [440,523.25,587.33,523.25,659.25,587.33,523.25,440];
+
+  function tone(freq, start, duration, volume, type='sine'){
+    if(!ctx || !master) return;
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.type=type;
+    osc.frequency.setValueAtTime(freq,start);
+    gain.gain.setValueAtTime(.0001,start);
+    gain.gain.exponentialRampToValueAtTime(volume,start+.012);
+    gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
+    osc.connect(gain);
+    gain.connect(master);
+    osc.start(start);
+    osc.stop(start+duration+.02);
+  }
+
+  function percussion(start){
+    if(!ctx || !master) return;
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.type='triangle';
+    osc.frequency.setValueAtTime(step%2 ? 180 : 230,start);
+    gain.gain.setValueAtTime(.018,start);
+    gain.gain.exponentialRampToValueAtTime(.0001,start+.055);
+    osc.connect(gain);
+    gain.connect(master);
+    osc.start(start);
+    osc.stop(start+.06);
+  }
+
+  function tick(){
+    if(!musicOn || !ctx || ctx.state!=='running') return;
+    const now=ctx.currentTime+.03;
+    const i=step%bass.length;
+
+    tone(bass[i],now,.28,.026,'triangle');
+    if(step%2===0) tone(lead[i],now+.04,.16,.012,'sine');
+    percussion(now);
+
+    step++;
+  }
+
+  function startLoop(){
+    if(timer) return;
+    tick();
+    timer=setInterval(tick,360);
+  }
+
+  async function ensureMusic(){
+    if(!musicOn) return;
+    try{
+      if(!ctx){
+        const AC=window.AudioContext||window.webkitAudioContext;
+        if(!AC) return;
+        ctx=new AC();
+        master=ctx.createGain();
+        master.gain.value=.42;
+        master.connect(ctx.destination);
+      }
+      if(ctx.state==='suspended') await ctx.resume();
+      startLoop();
+    }catch(e){
+      console.warn('No se pudo iniciar la música.',e);
+    }
+  }
+
+  function stopLoop(){
+    if(timer){
+      clearInterval(timer);
+      timer=null;
+    }
+  }
+
+  function updateButton(){
+    const b=document.getElementById('musicToggle');
+    if(!b) return;
+    b.textContent=musicOn?'🎵 Música ON':'🔇 Música OFF';
+    b.setAttribute('aria-pressed',musicOn?'true':'false');
+  }
+
+  window.toggleDominoMusic=async function(){
+    musicOn=!musicOn;
+    if(musicOn) await ensureMusic();
+    else stopLoop();
+    updateButton();
+  };
+
+  document.getElementById('musicToggle')?.addEventListener('click',window.toggleDominoMusic);
+
+  // Browsers require a user gesture before sound can begin.
+  const unlock=()=>{
+    if(document.body.classList.contains('in-room')) ensureMusic();
+  };
+  document.addEventListener('pointerdown',unlock,{passive:true});
+  document.addEventListener('keydown',unlock);
+
+  // Start as soon as the user enters/creates a room after an interaction.
+  const observer=new MutationObserver(()=>{
+    if(document.body.classList.contains('in-room')) ensureMusic();
+    else stopLoop();
+  });
+  observer.observe(document.body,{attributes:true,attributeFilter:['class']});
+
+  updateButton();
+})();
+</script>
+
 </body>
 
 </html>
