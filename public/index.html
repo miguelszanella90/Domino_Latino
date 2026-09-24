@@ -1177,6 +1177,24 @@ summary{
   }
 }
 
+
+/* Local player: name belongs below the visible hand. */
+.you-label-bottom{
+  order:3;
+  margin:6px auto 0!important;
+  position:relative!important;
+  left:auto!important; right:auto!important; top:auto!important; bottom:auto!important;
+  transform:none!important;
+  width:max-content;
+  max-width:calc(100% - 16px);
+  text-align:center;
+  z-index:8;
+}
+.hand-zone .hand-rack{order:2;}
+.hand-zone{display:flex;flex-direction:column;align-items:center;}
+@media(max-width:700px){
+  .you-label-bottom{font-size:12px!important;margin-top:4px!important;}
+}
 </style>
 
 <style id="side-badges-rotated-v9">
@@ -1956,16 +1974,16 @@ body.in-room .controls{grid-template-columns:repeat(3,1fr)!important}
         <label for="musicChoice">Música</label>
         <div class="music-settings-controls">
           <select id="musicChoice" title="Escoger música" aria-label="Escoger música">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
+            <option value="1">🕹️ Retrogame</option>
+            <option value="2">⚡ Monstruos de Bolsillo</option>
+            <option value="3">✨ Luciérnaga</option>
+            <option value="4">🌴 Malecón Funk</option>
+            <option value="5">🌙 Noche de Dominó</option>
+            <option value="6">🚀 Órbita 86</option>
+            <option value="7">🍹 Brisa Caribe</option>
+            <option value="8">💿 Pixel Disco</option>
+            <option value="9">🌆 Neón Tropical</option>
+            <option value="10">🎲 Última Mano</option>
           </select>
           <button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 ON</button>
         </div>
@@ -2077,14 +2095,6 @@ Crea o únete a una sala
 
 <section class="hand-zone">
 
-<div
-  class="you-label"
-  id="youLabel"
->
-Tus fichas
-</div>
-
-
 <div class="hand-rack">
 
 <div
@@ -2092,6 +2102,13 @@ Tus fichas
   id="hand"
 ></div>
 
+</div>
+
+<div
+  class="you-label you-label-bottom"
+  id="youLabel"
+>
+Tus fichas
 </div>
 
 </section>
@@ -3894,8 +3911,11 @@ function renderOpponents(){
     )=>{
 
 
+      // Never render the local player as an opponent.
+      // Checking the index too prevents duplicate local racks if isMe is stale.
       if(
-        player.isMe
+        player.isMe ||
+        index === game.myIndex
       ){
 
         return;
