@@ -1868,6 +1868,83 @@ body.in-room .controls{grid-template-columns:repeat(3,1fr)!important}
   body.in-room .controls{grid-template-columns:repeat(3,1fr)!important}
 }
 </style>
+
+<style id="menu-music-landscape-final-fix">
+/* Music: selector first, ON/OFF button below it on both desktop and mobile. */
+.music-settings-row{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:7px!important;
+}
+.music-settings-row > label{
+  width:100%!important;
+  margin:0!important;
+}
+.music-settings-controls{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  width:100%!important;
+  min-width:0!important;
+  gap:6px!important;
+}
+#musicChoice,
+#musicToggle{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+#musicChoice{height:36px!important;}
+#musicToggle{height:34px!important;}
+
+/* iPhone/mobile landscape: the left menu becomes an overlay instead of being
+   permanently forced off-screen. The hamburger remains available to open it. */
+@media (max-width:950px) and (orientation:landscape) and (max-height:500px){
+  body.in-room .app,
+  body.in-room .app.sidebar-collapsed{
+    grid-template-columns:0 minmax(0,1fr)!important;
+  }
+
+  body.in-room .side{
+    position:fixed!important;
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    z-index:120!important;
+    width:min(330px,78vw)!important;
+    min-width:min(330px,78vw)!important;
+    max-width:78vw!important;
+    height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    pointer-events:auto!important;
+    transform:translateX(0)!important;
+    transition:transform .22s ease!important;
+    box-shadow:8px 0 24px #0008!important;
+    padding-top:max(8px,env(safe-area-inset-top))!important;
+    padding-bottom:max(10px,env(safe-area-inset-bottom))!important;
+  }
+
+  body.in-room .side.closed{
+    transform:translateX(-105%)!important;
+    width:min(330px,78vw)!important;
+    min-width:min(330px,78vw)!important;
+    pointer-events:none!important;
+    box-shadow:none!important;
+  }
+
+  body.in-room .main .toggle{
+    position:fixed!important;
+    left:8px!important;
+    top:max(8px,env(safe-area-inset-top))!important;
+    z-index:130!important;
+  }
+}
+</style>
+
 </head>
 
 
