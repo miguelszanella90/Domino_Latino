@@ -2007,7 +2007,7 @@ Crea o únete a una sala
 
 <div id="subStatus"></div>
 <div id="roomShareActions" class="room-share-actions" hidden>
-  <button id="shareRoomButton" type="button" onclick="shareRoomLink()" title="Copiar o compartir enlace de la sala">🔗 Invitar / compartir</button>
+  <button id="shareRoomButton" type="button" onclick="shareRoomLink()" title="Copiar o enviar enlace de la sala">🔗 Copiar / enviar link</button>
 </div>
 <div id="scoreBar" class="score-bar" aria-live="polite"></div>
 
@@ -5289,100 +5289,6 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 
 
 
-<style id="room-share-link-style">
-.room-share-actions{
-  margin-top:6px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-.room-share-actions[hidden]{display:none!important}
-#shareRoomButton{
-  border:1px solid rgba(255,255,255,.35);
-  border-radius:999px;
-  padding:7px 13px;
-  background:#ffd166;
-  color:#102b27;
-  font-weight:900;
-  cursor:pointer;
-  box-shadow:0 3px 10px rgba(0,0,0,.18);
-}
-#shareRoomButton:active{transform:translateY(1px)}
-@media(max-width:700px){
-  #shareRoomButton{font-size:12px;padding:6px 10px}
-  .room-share-actions{margin-top:4px}
-}
-</style>
-<script id="room-share-link-js">
-(function(){
-  function roomUrl(){
-    if(typeof game==='undefined'||!game||!game.code) return '';
-    const u=new URL(window.location.href);
-    u.search='';
-    u.hash='';
-    u.searchParams.set('room',game.code);
-    return u.toString();
-  }
-
-  window.shareRoomLink=async function(){
-    const url=roomUrl();
-    if(!url) return;
-    const roomLabel=(typeof game!=='undefined'&&game&&game.roomName) ? game.roomName : 'Dominó Latino';
-    const shareData={
-      title:'Dominó Latino',
-      text:`Únete a mi sala ${roomLabel}`,
-      url
-    };
-    try{
-      if(navigator.share){
-        await navigator.share(shareData);
-        return;
-      }
-      if(navigator.clipboard&&window.isSecureContext){
-        await navigator.clipboard.writeText(url);
-      }else{
-        const ta=document.createElement('textarea');
-        ta.value=url; ta.setAttribute('readonly','');
-        ta.style.position='fixed'; ta.style.opacity='0';
-        document.body.appendChild(ta); ta.select();
-        document.execCommand('copy'); ta.remove();
-      }
-      const b=document.getElementById('shareRoomButton');
-      if(b){
-        const old=b.textContent;
-        b.textContent='✓ Link copiado';
-        setTimeout(()=>b.textContent=old,1800);
-      }
-    }catch(e){
-      if(e&&e.name==='AbortError') return;
-      try{
-        await navigator.clipboard.writeText(url);
-        const b=document.getElementById('shareRoomButton');
-        if(b){ const old=b.textContent; b.textContent='✓ Link copiado'; setTimeout(()=>b.textContent=old,1800); }
-      }catch(_e){ prompt('Copia este enlace para invitar:',url); }
-    }
-  };
-
-  function updateShareButton(){
-    const wrap=document.getElementById('roomShareActions');
-    if(!wrap) return;
-    const active=(typeof game!=='undefined'&&game&&game.code&&document.body.classList.contains('in-room'));
-    wrap.hidden=!active;
-  }
-
-  const previousRender=window.render;
-  if(typeof previousRender==='function'){
-    window.render=function(){
-      const r=previousRender.apply(this,arguments);
-      updateShareButton();
-      return r;
-    };
-  }
-  window.addEventListener('DOMContentLoaded',updateShareButton);
-  window.addEventListener('popstate',updateShareButton);
-})();
-</script>
-
 <script id="domino-background-music">
 (function(){
   let musicOn = true;
@@ -5538,6 +5444,45 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 })();
 </script>
 
+
+<style id="room-share-link-style">
+.room-share-actions{margin-top:6px;display:flex;justify-content:center;align-items:center}
+.room-share-actions[hidden]{display:none!important}
+#shareRoomButton{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:7px 13px;background:#ffd166;color:#102b27;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+#shareRoomButton:active{transform:translateY(1px)}
+@media(max-width:700px){#shareRoomButton{font-size:12px;padding:6px 10px}.room-share-actions{margin-top:4px}}
+</style>
+<script id="room-share-link-js">
+(function(){
+  function roomUrl(){
+    if(typeof game==='undefined'||!game||!game.code) return '';
+    const u=new URL(window.location.href);
+    u.search=''; u.hash=''; u.searchParams.set('room',game.code);
+    return u.toString();
+  }
+  window.shareRoomLink=async function(){
+    const url=roomUrl(); if(!url) return;
+    const roomLabel=(typeof game!=='undefined'&&game&&game.roomName)?game.roomName:'Dominó Latino';
+    try{
+      if(navigator.share){await navigator.share({title:'Dominó Latino',text:`Únete a mi sala ${roomLabel}`,url});return;}
+      if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url);}
+      else{const ta=document.createElement('textarea');ta.value=url;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+      const b=document.getElementById('shareRoomButton');if(b){const old=b.textContent;b.textContent='✓ Link copiado';setTimeout(()=>b.textContent=old,1800);}
+    }catch(e){
+      if(e&&e.name==='AbortError') return;
+      try{await navigator.clipboard.writeText(url);const b=document.getElementById('shareRoomButton');if(b){const old=b.textContent;b.textContent='✓ Link copiado';setTimeout(()=>b.textContent=old,1800);}}catch(_e){prompt('Copia este enlace para invitar:',url);}
+    }
+  };
+  function updateShareButton(){
+    const wrap=document.getElementById('roomShareActions'); if(!wrap) return;
+    wrap.hidden=!(typeof game!=='undefined'&&game&&game.code&&document.body.classList.contains('in-room'));
+  }
+  const previousRender=window.render;
+  if(typeof previousRender==='function'){window.render=function(){const r=previousRender.apply(this,arguments);updateShareButton();return r;};}
+  window.addEventListener('DOMContentLoaded',updateShareButton);
+  window.addEventListener('popstate',updateShareButton);
+})();
+</script>
 </body>
 
 </html>
