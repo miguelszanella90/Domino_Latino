@@ -2018,6 +2018,7 @@ body.in-room .controls{grid-template-columns:repeat(3,1fr)!important}
       <div class="game-mode-box friendly-mode-box">
         <label><input type="radio" name="gameMode" value="classic" checked onchange="updateGameMode()"> Partida clásica</label>
         <label><input type="radio" name="gameMode" value="rotation" onchange="updateGameMode()"> Mesa rotativa</label>
+        <label><input type="radio" name="gameMode" value="mexican" onchange="updateGameMode()"> 🚂 Tren Mexicano</label>
         <div class="game-mode-help" id="gameModeHelp">La partida termina al llegar a la meta.</div>
       </div>
     </div>
@@ -2567,11 +2568,22 @@ function updateGameMode(){
   const max=document.getElementById('max');
   const bots=document.getElementById('botCount');
   const help=document.getElementById('gameModeHelp');
+  if(max){
+    const current=Number(max.value)||4;
+    const limit=mode==='mexican'?8:4;
+    max.innerHTML='';
+    for(let i=2;i<=limit;i++){const o=document.createElement('option');o.value=i;o.textContent=i;max.appendChild(o);}
+    max.value=String(Math.min(current,limit));
+  }
   if(mode==='rotation'){
-    if(max) max.value='4';
-    if(max) max.disabled=true;
+    if(max){max.value='4';max.disabled=true;}
     if(bots){bots.value='0';bots.disabled=true;}
-    if(help) help.textContent='4 juegan y los demás esperan. Después de cada ronda, un jugador del equipo perdedor rota con la siguiente persona en cola. El puntaje es individual y dura hasta cerrar la sala.';
+    if(help) help.textContent='4 juegan y los demás esperan. Después de cada ronda rota un jugador del equipo perdedor.';
+  }else if(mode==='mexican'){
+    if(max) max.disabled=false;
+    if(bots) bots.disabled=false;
+    if(help) help.textContent='🚂 2–8 jugadores · doble 12 al doble 0 · 13 rondas · gana quien termine con menos puntos.';
+    updateBotOptions();
   }else{
     if(max) max.disabled=false;
     if(bots) bots.disabled=false;
@@ -3623,6 +3635,8 @@ function pipHTML(
   };
 
 
+  if(number > 6){ return `<b class="pip-number">${number}</b>`; }
+
   return (
 
     maps[number] ||
@@ -3725,7 +3739,44 @@ function tileElement(
    SERPENTINE BOARD
 ========================================================= */
 
+
+function mtTrainLabel(key){
+  if(key==='mexican') return '🚂 Tren Mexicano';
+  const i=Number(key.slice(1)); const p=game.players?.[i];
+  return `${p?.name||'Jugador'}${i===game.myIndex?' (Tú)':''}`;
+}
+function mtCanTarget(key){
+  if(!game||game.gameMode!=='mexican'||selected===null||game.myIndex!==game.turn) return false;
+  const mt=game.mexicanTrain||{};
+  if(mt.pendingDouble && mt.pendingDouble!==key) return false;
+  if(key!=='mexican'){
+    const owner=Number(key.slice(1));
+    if(owner!==game.myIndex && !mt.open?.[owner]) return false;
+  }
+  const train=mt.trains?.[key]||[]; const end=train.length?train[train.length-1][1]:mt.engine;
+  const tile=game.myHand?.[selected]; return !!tile&&(tile[0]===end||tile[1]===end);
+}
+async function mtPlay(train){
+  if(selected===null) return alert('Selecciona una ficha');
+  try{game=await api({action:'mtPlay',code:game.code,playerId:pid,tileIndex:selected,train});selected=null;render();}
+  catch(e){alert(e.message);}
+}
+function renderMexicanBoard(){
+  const board=document.getElementById('board'); const mt=game.mexicanTrain||{}; board.innerHTML='';
+  const wrap=document.createElement('div');wrap.className='mt-board';
+  wrap.innerHTML=`<div class="mt-station"><span>ESTACIÓN</span><strong>${mt.engine}|${mt.engine}</strong><small>Ronda ${(mt.roundIndex??0)+1}/13</small></div>`;
+  const trains=document.createElement('div');trains.className='mt-trains';
+  const keys=['mexican',...(game.players||[]).map((_,i)=>`p${i}`)];
+  keys.forEach(key=>{const owner=key==='mexican'?-1:Number(key.slice(1));const arr=mt.trains?.[key]||[];const el=document.createElement('div');el.className='mt-train'+(owner>=0&&mt.open?.[owner]?' open':'')+(mt.pendingDouble===key?' mt-pending':'')+(mtCanTarget(key)?' allowed':'');
+    el.onclick=()=>{if(mtCanTarget(key))mtPlay(key)};
+    const chain=arr.length?arr.map(t=>`<div class="mt-mini"><span>${t[0]}</span><span>${t[1]}</span></div>`).join(''):'<span class="mt-empty">Toca aquí para iniciar este tren</span>';
+    el.innerHTML=`<div class="mt-train-title">${mtTrainLabel(key)}</div><div class="mt-chain"><div class="mt-mini mt-engine"><span>${mt.engine}</span><span>${mt.engine}</span></div>${chain}</div>`;trains.appendChild(el);});
+  wrap.appendChild(trains);board.appendChild(wrap);
+}
+
 function renderBoard(){
+
+  if(game?.gameMode==='mexican'){ renderMexicanBoard(); return; }
 
   const board = document.getElementById('board');
   board.innerHTML = '';
@@ -3951,6 +4002,8 @@ function backTile(){
 ========================= */
 
 function renderOpponents(){
+
+  if(game?.gameMode==='mexican'){ const c=document.getElementById('opponents'); if(c)c.innerHTML=''; return; }
 
   const container =
     document
@@ -4328,6 +4381,12 @@ function cycleHandOrder(){
 ========================= */
 
 function renderScoreboard(){
+  if(game?.gameMode==='mexican'){
+    const el=document.getElementById('scoreBar'); if(!el)return;
+    const rows=(game.players||[]).map(p=>`${p.name}${p.isMe?' (Tú)':''}: ${Number(p.score||0)}`);
+    el.innerHTML=rows.map(x=>`<span class="score-player">${x}</span>`).join('<span class="score-sep">│</span>')+`<span class="score-target">Ronda ${game.round}/13</span>`; return;
+  }
+
   const el=document.getElementById('scoreBar');
   if(!el || !game){ return; }
 
@@ -4360,6 +4419,8 @@ function render(){
 
     return;
   }
+
+  document.body.classList.toggle('mexican-mode',game.gameMode==='mexican');
 
 
   const statusEl =
@@ -4620,7 +4681,7 @@ function render(){
 
     msg.textContent =
 
-      `Ronda ${game.roundNumber} · Meta ${game.target}`;
+      game.gameMode==='mexican' ? `Ronda ${game.round}/13 · Menor puntuación gana` : `Ronda ${game.roundNumber} · Meta ${game.target}`;
 
   }
 
@@ -4723,11 +4784,11 @@ function render(){
   if(rightButton) rightButton.disabled = !myTurn;
   if(leftPlayTarget){
     leftPlayTarget.disabled = !myTurn || selected===null;
-    leftPlayTarget.style.display = myTurn ? 'flex' : 'none';
+    leftPlayTarget.style.display = myTurn && game.gameMode!=='mexican' ? 'flex' : 'none';
   }
   if(rightPlayTarget){
     rightPlayTarget.disabled = !myTurn || selected===null;
-    rightPlayTarget.style.display = myTurn ? 'flex' : 'none';
+    rightPlayTarget.style.display = myTurn && game.gameMode!=='mexican' ? 'flex' : 'none';
   }
   if(reorderButton){
     reorderButton.disabled = !(game.myHand||[]).length;
@@ -5774,4 +5835,19 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     padding:6px 12px!important;
   }
 }
+
+/* Mexican Train mode */
+.pip-number{font-size:18px;line-height:1;font-weight:900;color:#111;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+body.mexican-mode .board-play-target{display:none!important}
+body.mexican-mode #opponents{display:none!important}
+body.mexican-mode .board{left:2%!important;right:2%!important;top:3%!important;bottom:3%!important;overflow:auto!important;transform:none!important}
+.mt-board{min-height:100%;display:flex;flex-direction:column;gap:8px;padding:8px;box-sizing:border-box}
+.mt-station{align-self:center;background:#ffd166;color:#17251f;border:3px solid #fff8;border-radius:50%;width:76px;height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;box-shadow:0 5px 16px #0005;flex:0 0 auto}
+.mt-station strong{font-size:20px}.mt-trains{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.mt-train{background:#003e31aa;border:1px solid #ffffff35;border-radius:10px;padding:6px;min-height:55px;cursor:pointer;color:#fff}
+.mt-train.allowed{outline:2px solid #ffd166}.mt-train.open .mt-train-title:after{content:' 🚂 ABIERTO';color:#ffd166;font-size:10px}.mt-train-title{font-size:11px;font-weight:800;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-chain{display:flex;gap:2px;overflow-x:auto;align-items:center;min-height:34px}.mt-mini{display:flex;background:#fff;color:#111;border-radius:4px;border:1px solid #222;flex:0 0 auto;height:30px}.mt-mini span{width:23px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px}.mt-mini span+span{border-left:1px solid #222}.mt-empty{font-size:10px;opacity:.65;padding:8px}.mt-engine{background:#ffd166!important}.mt-pending{box-shadow:0 0 0 3px #ff6b6b inset}
+body.mexican-mode .tile{transform:scale(.82);margin:-3px}
+body.mexican-mode .back-tile{transform:scale(.72);margin:-5px}
+@media(max-width:700px){.mt-trains{grid-template-columns:1fr}.mt-board{padding:4px;gap:5px}.mt-station{width:58px;height:58px}.mt-station strong{font-size:16px}.mt-train{padding:4px;min-height:45px}.mt-mini{height:25px}.mt-mini span{width:19px;font-size:9px}body.mexican-mode .hand{gap:0!important}body.mexican-mode .tile{transform:scale(.70);margin:-8px}}
 </style>
