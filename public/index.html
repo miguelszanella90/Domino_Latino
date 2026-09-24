@@ -1649,6 +1649,88 @@ body:not(.in-room) .social-panel{display:none!important;}
   }
 }
 </style>
+
+<style id="ux-v9-desktop-mobile-drawers">
+/* Left menu: collapsing it gives all available width back to the table. */
+.app{transition:grid-template-columns .22s ease;}
+.app.sidebar-collapsed{grid-template-columns:0 minmax(0,1fr)!important;}
+.app.sidebar-collapsed .side{overflow:hidden!important;pointer-events:none;}
+.app.sidebar-collapsed .main .toggle{left:12px!important;}
+.menu-nav-actions{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 14px;}
+.menu-nav-actions button{margin:0;padding:7px 10px;font-size:12px;}
+
+/* Chat/Jugadas is an optional right drawer on BOTH desktop and mobile. */
+.game-content{grid-template-columns:minmax(0,1fr)!important;position:relative!important;overflow:hidden!important;}
+body:not(.in-room) .social-panel{display:none!important;}
+body.in-room .social-panel{
+  display:flex!important;
+  position:absolute!important;
+  left:auto!important;
+  right:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:min(300px,30vw)!important;
+  height:auto!important;
+  max-height:none!important;
+  margin:0!important;
+  z-index:45!important;
+  overflow:visible!important;
+  border-radius:14px 0 0 14px!important;
+  transform:translateX(100%)!important;
+  transition:transform .22s ease!important;
+  box-shadow:-7px 0 20px #0007!important;
+}
+body.in-room .social-panel.mobile-open{transform:translateX(0)!important;}
+.social-drawer-toggle{
+  display:flex!important;
+  position:absolute!important;
+  left:-24px!important;
+  top:74%!important;
+  width:24px!important;
+  height:54px!important;
+  margin:0!important;
+  padding:0!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:10px 0 0 10px!important;
+  background:#ffd166cc!important;
+  color:#102a2e!important;
+  font-size:11px!important;
+  opacity:.78!important;
+  box-shadow:0 2px 8px #0005!important;
+  transform:none!important;
+}
+.social-panel.mobile-open .social-drawer-toggle{transform:none!important;}
+.social-panel:not(.mobile-open) .social-tabs,
+.social-panel:not(.mobile-open) .social-view{visibility:hidden!important;pointer-events:none!important;}
+.social-panel.mobile-open .social-tabs,
+.social-panel.mobile-open .social-view{visibility:visible!important;pointer-events:auto!important;}
+
+@media(max-width:700px){
+  .app.sidebar-collapsed{grid-template-columns:0 1fr!important;}
+  .menu-nav-actions{margin-bottom:10px;}
+  .menu-nav-actions button{font-size:11px;padding:6px 9px;}
+  body.in-room .social-panel{
+    top:50%!important;
+    bottom:auto!important;
+    width:min(82vw,340px)!important;
+    height:min(43dvh,330px)!important;
+    max-height:min(43dvh,330px)!important;
+    transform:translate(100%,-50%)!important;
+  }
+  body.in-room .social-panel.mobile-open{transform:translate(0,-50%)!important;}
+  .social-drawer-toggle{
+    left:-20px!important;
+    top:76%!important;
+    width:20px!important;
+    height:46px!important;
+    border-radius:9px 0 0 9px!important;
+    font-size:9px!important;
+    opacity:.68!important;
+  }
+}
+</style>
+
 </head>
 
 
@@ -1668,6 +1750,11 @@ body:not(.in-room) .social-panel{display:none!important;}
 <h2>
 🁣 Dominó Online
 </h2>
+
+<div class="menu-nav-actions">
+  <button type="button" onclick="goBackMenu()">← Regresar</button>
+  <button type="button" onclick="goHomeMenu()">⌂ Inicio</button>
+</div>
 
 
 <div id="lobby">
@@ -2003,7 +2090,7 @@ Crea o únete a una sala
 
 
 <aside class="social-panel" id="historyPanel">
-  <button class="social-drawer-toggle" id="socialDrawerToggle" type="button" onclick="toggleSocialDrawer()" aria-label="Abrir o cerrar chat e historial">◀</button>
+  <button class="social-drawer-toggle" id="socialDrawerToggle" type="button" onclick="toggleSocialDrawer()" aria-label="Abrir o cerrar Jugadas y Chat">‹</button>
   <div class="social-tabs">
     <button class="social-tab active" id="historyTab" onclick="openSocialTab('history')">📜 Jugadas</button>
     <button class="social-tab" id="chatTab" onclick="openSocialTab('chat')">💬 Chat</button>
@@ -2196,15 +2283,36 @@ if(
 ========================= */
 
 function toggleSide(){
+  const side=document.getElementById('side');
+  const app=document.querySelector('.app');
+  const closed=side.classList.toggle('closed');
+  if(app) app.classList.toggle('sidebar-collapsed',closed);
+}
 
-  document
-    .getElementById(
-      'side'
-    )
-    .classList
-    .toggle(
-      'closed'
-    );
+function goHomeMenu(){
+  try{ clearInterval(poll); }catch(e){}
+  game=null;
+  pid=null;
+  selected=null;
+  document.body.classList.remove('in-room','dragging-domino');
+  const room=document.getElementById('room');
+  const lobby=document.getElementById('lobby');
+  const side=document.getElementById('side');
+  const app=document.querySelector('.app');
+  if(room) room.hidden=true;
+  if(lobby) lobby.hidden=false;
+  if(side) side.classList.remove('closed');
+  if(app) app.classList.remove('sidebar-collapsed');
+  document.getElementById('historyPanel')?.classList.remove('mobile-open');
+  history.replaceState(null,'',location.pathname);
+}
+
+function goBackMenu(){
+  if(history.length>1){
+    history.back();
+  }else{
+    goHomeMenu();
+  }
 }
 
 
@@ -4930,6 +5038,43 @@ function toggleMusic(on){
   if(window.innerWidth<=700){
     document.getElementById('historyPanel')?.classList.remove('mobile-open');
   }
+})();
+</script>
+
+
+<script id="ux-v9-unified-drawer-js">
+(function(){
+  window.showSocialTab=function(tab){
+    const wanted=tab==='chat'?'chat':'history';
+    const panel=document.getElementById('historyPanel');
+    const historyView=document.getElementById('historyView');
+    const chatView=document.getElementById('chatView');
+    const historyTab=document.getElementById('historyTab');
+    const chatTab=document.getElementById('chatTab');
+    activeSocialTab=wanted;
+    if(historyView) historyView.hidden=wanted!=='history';
+    if(chatView) chatView.hidden=wanted!=='chat';
+    if(historyTab) historyTab.classList.toggle('active',wanted==='history');
+    if(chatTab) chatTab.classList.toggle('active',wanted==='chat');
+    if(panel) panel.dataset.openTab=wanted;
+  };
+
+  window.openSocialTab=function(tab){
+    window.showSocialTab(tab);
+    document.getElementById('historyPanel')?.classList.add('mobile-open');
+  };
+
+  window.toggleSocialDrawer=function(forceOpen){
+    const panel=document.getElementById('historyPanel');
+    if(!panel) return;
+    const open=(typeof forceOpen==='boolean')?forceOpen:!panel.classList.contains('mobile-open');
+    panel.classList.toggle('mobile-open',open);
+    const handle=document.getElementById('socialDrawerToggle');
+    if(handle) handle.textContent=open?'›':'‹';
+  };
+
+  const closeDrawer=()=>document.getElementById('historyPanel')?.classList.remove('mobile-open');
+  window.addEventListener('DOMContentLoaded',closeDrawer);
 })();
 </script>
 
