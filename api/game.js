@@ -1194,9 +1194,12 @@ function publicGame(
           'finished'
       ),
 
-    isHost:
-      g.hostId ===
-      playerId
+  isHost:
+   g.hostId ===
+   playerId,
+
+currentPlayerIsBot:
+   !!g.players[g.turn]?.isBot
   };
 }
 
@@ -2081,7 +2084,7 @@ module.exports = async (req, res) => {
 
       prepareRound(g);
 
-      await runBots(g);
+      // Los bots avanzan uno por uno desde el frontend.
 
       await save(g);
 
@@ -2128,7 +2131,7 @@ module.exports = async (req, res) => {
 
       prepareRound(g);
 
-      await runBots(g);
+      // Los bots avanzan uno por uno desde el frontend.
 
       await save(g);
 
@@ -2139,7 +2142,185 @@ module.exports = async (req, res) => {
         )
       );
     }
+/* =========================
+   BOT STEP
+   Ejecuta una sola jugada de bot
+========================= */
 
+if (
+  action === 'botStep'
+) {
+  if (
+    b.playerId !==
+    g.hostId
+  ) {
+    return res
+      .status(403)
+      .json({
+        error:
+          'Solo el anfitrión puede avanzar los bots'
+      });
+  }
+
+  if (
+    g.status !==
+    'playing'
+  ) {
+    return res
+      .status(400)
+      .json({
+        error:
+          'La partida no está activa'
+      });
+  }
+
+  const botIndex =
+    g.turn;
+
+  const bot =
+    g.players[botIndex];
+
+  if (
+    !bot ||
+    !bot.isBot
+  ) {
+    return res.json(
+      publicGame(
+        g,
+        b.playerId
+      )
+    );
+  }
+
+  let moves =
+    getValidMoves(
+      bot,
+      g.board
+    );
+
+  while (
+    !moves.length &&
+    g.boneyard.length
+  ) {
+    const drawn =
+      g.boneyard.pop();
+
+    bot.hand.push(
+      drawn
+    );
+
+    addHistory(
+      g,
+      `🤖 ${bot.name} robó una ficha`
+    );
+
+    moves =
+      getValidMoves(
+        bot,
+        g.board
+      );
+  }
+
+  if (!moves.length) {
+    g.passCount =
+      (g.passCount || 0) + 1;
+
+    addHistory(
+      g,
+      `🤖 ${bot.name} pasó`
+    );
+
+    if (
+      g.passCount >=
+      g.players.length
+    ) {
+      finishBlockedRound(g);
+    } else {
+      nextTurn(g);
+    }
+
+    await save(g);
+
+    return res.json(
+      publicGame(
+        g,
+        b.playerId
+      )
+    );
+  }
+
+  g.passCount = 0;
+
+  const move =
+    chooseBotMove(
+      g,
+      botIndex
+    );
+
+  if (!move) {
+    nextTurn(g);
+
+    await save(g);
+
+    return res.json(
+      publicGame(
+        g,
+        b.playerId
+      )
+    );
+  }
+
+  const playedTile =
+    bot.hand[
+      move.index
+    ].slice();
+
+  const placed =
+    placeTile(
+      g,
+      botIndex,
+      move.index,
+      move.side
+    );
+
+  if (!placed) {
+    nextTurn(g);
+
+    await save(g);
+
+    return res.json(
+      publicGame(
+        g,
+        b.playerId
+      )
+    );
+  }
+
+  addHistory(
+    g,
+    `🤖 ${bot.name} jugó ${playedTile[0]}|${playedTile[1]} ${move.side === 'left' ? '←' : '→'}`
+  );
+
+  if (
+    bot.hand.length === 0
+  ) {
+    finishDominoRound(
+      g,
+      botIndex
+    );
+  } else {
+    nextTurn(g);
+  }
+
+  await save(g);
+
+  return res.json(
+    publicGame(
+      g,
+      b.playerId
+    )
+  );
+}
 
     /* =========================
        PLAYER VALIDATION
@@ -2309,7 +2490,7 @@ module.exports = async (req, res) => {
 
       nextTurn(g);
 
-      await runBots(g);
+      // Los bots avanzan uno por uno desde el frontend.
 
       await save(g);
 
@@ -2439,7 +2620,7 @@ module.exports = async (req, res) => {
 
       nextTurn(g);
 
-      await runBots(g);
+      // Los bots avanzan uno por uno desde el frontend.
 
       await save(g);
 
