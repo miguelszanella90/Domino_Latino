@@ -27,7 +27,98 @@ async function save(g) {
     { ex: 86400 }
   );
 }
+function normalizeRoomLookup(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
 
+async function findGameByCodeOrName(value) {
+  const raw = String(value || '').trim();
+
+  if (!raw) return null;
+
+  const directCode = raw.toUpperCase();
+
+  const directGame =
+    await kv.get(
+      `domino:${directCode}`
+    );
+
+  if (directGame) {
+    return directGame;
+  }
+
+  const normalizedName =
+    normalizeRoomLookup(raw);
+
+  if (!normalizedName) {
+    return null;
+  }
+
+  const mappedCode =
+    await kv.get(
+      `domino-room-name:${normalizedName}`
+    );
+
+  if (!mappedCode) {
+    return null;
+  }
+
+  return await kv.get(
+    `domino:${mappedCode}`
+  );
+}
+
+async function reserveRoomName(
+  roomName,
+  code
+) {
+  const normalizedName =
+    normalizeRoomLookup(
+      roomName
+    );
+
+  if (!normalizedName) {
+    return true;
+  }
+
+  const existingCode =
+    await kv.get(
+      `domino-room-name:${normalizedName}`
+    );
+
+  if (existingCode) {
+    return false;
+  }
+
+  const possibleGameCode =
+    String(roomName || '')
+      .trim()
+      .toUpperCase();
+
+  const existingDirectGame =
+    possibleGameCode
+      ? await kv.get(
+          `domino:${possibleGameCode}`
+        )
+      : null;
+
+  if (existingDirectGame) {
+    return false;
+  }
+
+  await kv.set(
+    `domino-room-name:${normalizedName}`,
+    code,
+    { ex: 86400 }
+  );
+
+  return true;
+}
 function pipTotal(hand = []) {
   return hand.reduce(
     (sum, tile) => sum + tile[0] + tile[1],
@@ -1324,10 +1415,10 @@ module.exports = async (req, res) => {
           });
       }
 
-      const g =
-        await kv.get(
-          `domino:${code}`
-        );
+     const g =
+      await findGameByCodeOrName(
+        req.query.code
+      );
 
       if (!g) {
         return res
@@ -1532,7 +1623,22 @@ module.exports = async (req, res) => {
 
         signals: []
       };
+      if (roomName) {
+  const roomNameAvailable =
+    await reserveRoomName(
+      roomName,
+      code
+    );
 
+  if (!roomNameAvailable) {
+    return res
+      .status(409)
+      .json({
+        error:
+          'Ese nombre de sala ya está en uso. Elige otro.'
+      });
+  }
+}
       await save(g);
 
       return res.json({
@@ -1570,9 +1676,9 @@ module.exports = async (req, res) => {
     }
 
     const g =
-      await kv.get(
-        `domino:${code}`
-      );
+      await findGameByCodeOrName(
+      b.code
+    );
 
     if (!g) {
       return res
