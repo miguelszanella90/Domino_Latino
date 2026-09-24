@@ -1177,6 +1177,24 @@ summary{
   }
 }
 
+
+/* Local player: name belongs below the visible hand. */
+.you-label-bottom{
+  order:3;
+  margin:6px auto 0!important;
+  position:relative!important;
+  left:auto!important; right:auto!important; top:auto!important; bottom:auto!important;
+  transform:none!important;
+  width:max-content;
+  max-width:calc(100% - 16px);
+  text-align:center;
+  z-index:8;
+}
+.hand-zone .hand-rack{order:2;}
+.hand-zone{display:flex;flex-direction:column;align-items:center;}
+@media(max-width:700px){
+  .you-label-bottom{font-size:12px!important;margin-top:4px!important;}
+}
 </style>
 
 <style id="side-badges-rotated-v9">
@@ -1805,6 +1823,135 @@ body.in-room .menu-nav-actions{display:flex!important;}
   }
 </style>
 
+
+<style id="friendly-lobby-style">
+  .friendly-lobby{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+  .player-name-row{display:flex;flex-direction:column;gap:5px;margin-bottom:2px}
+  .player-name-row label{font-size:12px;font-weight:800;opacity:.9}
+  .menu-section{margin:0;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.045);overflow:hidden}
+  .menu-section > summary{display:flex;align-items:center;min-height:42px;padding:0 12px;font-size:13px;font-weight:800;cursor:pointer;user-select:none;list-style:none}
+  .menu-section > summary::-webkit-details-marker{display:none}
+  .menu-section > summary::after{content:'⌄';margin-left:auto;font-size:16px;opacity:.7;transition:transform .15s ease}
+  .menu-section[open] > summary::after{transform:rotate(180deg)}
+  .menu-section-body{display:flex;flex-direction:column;gap:10px;padding:2px 12px 12px}
+  .menu-section-body > label,.menu-section-body .bot-options > label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}
+  .menu-section-body select{flex:0 0 auto}
+  .friendly-mode-box{margin:0;padding:0;border:0;background:transparent}
+  .friendly-mode-box label{justify-content:flex-start!important}
+  .join-room-block{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+  .join-room-block input{min-width:0}
+  .join-room-block button,.primary-room-action{white-space:nowrap}
+  .target-setting{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  @media(max-width:700px){
+    .side h2{display:block!important;margin-top:max(8px,env(safe-area-inset-top))!important}
+    .friendly-lobby{gap:7px}
+    .menu-section > summary{min-height:40px;padding:0 10px;font-size:12px}
+    .menu-section-body{padding:2px 10px 10px;gap:8px}
+    .join-room-block{grid-template-columns:1fr}
+    .join-room-block button{width:100%}
+  }
+</style>
+
+
+<style id="play-targets-and-hand-order">
+.board-play-target{position:absolute;top:50%;transform:translateY(-50%);z-index:18;display:none;flex-direction:column;align-items:center;gap:5px;background:rgba(255,209,102,.94);color:#18211d;border:2px solid rgba(255,255,255,.75);border-radius:14px;padding:8px 7px;font-weight:800;font-size:11px;box-shadow:0 5px 18px #0005;cursor:pointer}
+.board-play-target:disabled{opacity:.35;cursor:default}
+.board-play-left{left:10px}.board-play-right{right:10px}
+.play-target-domino{display:flex;background:#fff;border:2px solid #222;border-radius:5px;overflow:hidden;box-shadow:0 2px 4px #0004}
+.play-target-domino i{display:block;width:18px;height:28px}.play-target-domino i+i{border-left:2px solid #222}
+body.in-room .controls{grid-template-columns:repeat(3,1fr)!important}
+#localVideoName{display:none!important}
+@media(max-width:700px){
+  .board-play-target{padding:6px 5px;font-size:8px;border-radius:10px;gap:3px}
+  .board-play-left{left:4px}.board-play-right{right:4px}
+  .play-target-domino i{width:12px;height:20px}
+  body.in-room .controls{grid-template-columns:repeat(3,1fr)!important}
+}
+</style>
+
+<style id="menu-music-landscape-final-fix">
+/* Music: selector first, ON/OFF button below it on both desktop and mobile. */
+.music-settings-row{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:7px!important;
+}
+.music-settings-row > label{
+  width:100%!important;
+  margin:0!important;
+}
+.music-settings-controls{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  width:100%!important;
+  min-width:0!important;
+  gap:6px!important;
+}
+#musicChoice,
+#musicToggle{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+#musicChoice{height:36px!important;}
+#musicToggle{height:34px!important;}
+
+/* iPhone/mobile landscape: the left menu becomes an overlay instead of being
+   permanently forced off-screen. The hamburger remains available to open it. */
+@media (max-width:950px) and (orientation:landscape) and (max-height:500px){
+  body.in-room .app,
+  body.in-room .app.sidebar-collapsed{
+    grid-template-columns:0 minmax(0,1fr)!important;
+  }
+
+  body.in-room .side{
+    position:fixed!important;
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    z-index:120!important;
+    width:min(330px,78vw)!important;
+    min-width:min(330px,78vw)!important;
+    max-width:78vw!important;
+    height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    pointer-events:auto!important;
+    transform:translateX(0)!important;
+    transition:transform .22s ease!important;
+    box-shadow:8px 0 24px #0008!important;
+    padding-top:max(8px,env(safe-area-inset-top))!important;
+    padding-bottom:max(10px,env(safe-area-inset-bottom))!important;
+  }
+
+  body.in-room .side.closed{
+    transform:translateX(-105%)!important;
+    width:min(330px,78vw)!important;
+    min-width:min(330px,78vw)!important;
+    pointer-events:none!important;
+    box-shadow:none!important;
+  }
+
+  body.in-room .main .toggle{
+    position:fixed!important;
+    left:8px!important;
+    top:max(8px,env(safe-area-inset-top))!important;
+    z-index:130!important;
+  }
+}
+</style>
+
+
+<style>
+.room-share-summary{margin-top:12px;}
+.room-share-summary .menu-section-body{padding:10px;}
+.room-share-summary button{width:100%;}
+#shareRoomFeedback{text-align:center;margin-top:6px;}
+</style>
 </head>
 
 
@@ -1830,156 +1977,123 @@ body.in-room .menu-nav-actions{display:flex!important;}
 </div>
 
 
-<div id="lobby">
+<div id="lobby" class="friendly-lobby">
 
-<input
-  id="name"
-  placeholder="Tu nombre"
->
+  <div class="player-name-row">
+    <label for="name">Tu nombre</label>
+    <input id="name" placeholder="Tu nombre">
+  </div>
 
-<br>
+  <details class="menu-section" open>
+    <summary>👥 Set de jugadores</summary>
+    <div class="menu-section-body">
+      <label>
+        Número de jugadores
+        <select id="max" onchange="updateBotOptions()">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+        </select>
+      </label>
 
-<div class="room-name-create">
-  <label class="room-auto-label">
-    <input id="autoRoomName" type="checkbox" checked onchange="toggleRoomNameChoice()">
-    Generar nombre/código automáticamente
-  </label>
-  <input id="customRoomName" maxlength="40" placeholder="Nombre de la sala (ej. Viernes de Dominó)" disabled>
-  <div class="small">El enlace seguirá usando un código privado aunque pongas un nombre.</div>
+      <div class="bot-options">
+        <label>
+          Bots
+          <select id="botCount">
+            <option value="0">0 bots</option>
+            <option value="1">1 bot</option>
+            <option value="2">2 bots</option>
+            <option value="3">3 bots</option>
+          </select>
+        </label>
+
+        <label>
+          Dificultad
+          <select id="botDifficulty">
+            <option value="easy">Fácil</option>
+            <option value="normal" selected>Normal</option>
+            <option value="hard">Difícil</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </details>
+
+  <details class="menu-section">
+    <summary>🎮 Modalidad</summary>
+    <div class="menu-section-body">
+      <div class="game-mode-box friendly-mode-box">
+        <label><input type="radio" name="gameMode" value="classic" checked onchange="updateGameMode()"> Partida clásica</label>
+        <label><input type="radio" name="gameMode" value="rotation" onchange="updateGameMode()"> Mesa rotativa</label>
+        <label><input type="radio" name="gameMode" value="mexican" onchange="updateGameMode()"> 🚂 Tren Mexicano</label>
+        <div class="game-mode-help" id="gameModeHelp">La partida termina al llegar a la meta.</div>
+      </div>
+    </div>
+  </details>
+
+  <details class="menu-section">
+    <summary>🚪 Sala</summary>
+    <div class="menu-section-body">
+      <div class="room-name-create">
+        <label class="room-auto-label">
+          <input id="autoRoomName" type="checkbox" checked onchange="toggleRoomNameChoice()">
+          Generar nombre automáticamente
+        </label>
+        <input id="customRoomName" maxlength="40" placeholder="Nombre de la sala" disabled>
+        <div class="small">El enlace seguirá usando un código privado aunque pongas un nombre.</div>
+      </div>
+
+      <button class="primary-room-action" onclick="create()">Crear sala</button>
+
+      <div class="join-room-block">
+        <input id="code" placeholder="Nombre o código de la sala">
+        <button onclick="join()">Unirme a una sala</button>
+      </div>
+    </div>
+  </details>
+
+  <details class="menu-section">
+    <summary>⚙️ Settings</summary>
+    <div class="menu-section-body">
+      <div class="setting-row music-settings-row">
+        <label for="musicChoice">Música</label>
+        <div class="music-settings-controls">
+          <select id="musicChoice" title="Escoger música" aria-label="Escoger música">
+            <option value="1">🕹️ Retrogame</option>
+            <option value="2">⚡ Monstruos de Bolsillo</option>
+            <option value="3">✨ Luciérnaga</option>
+            <option value="4">🌴 Malecón Funk</option>
+            <option value="5">🌙 Noche de Dominó</option>
+            <option value="6">🚀 Órbita 86</option>
+            <option value="7">🍹 Brisa Caribe</option>
+            <option value="8">💿 Pixel Disco</option>
+            <option value="9">🌆 Neón Tropical</option>
+            <option value="10">🎲 Última Mano</option>
+            <option value="11">💃 Salsa Azúcar</option>
+            <option value="12">🐰 BAD Conejo</option>
+          </select>
+          <button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 ON</button>
+        </div>
+      </div>
+
+      <label class="target-setting">
+        Meta
+        <select id="target">
+          <option value="100">100</option>
+          <option value="150">150</option>
+        </select>
+      </label>
+    </div>
+  </details>
+
 </div>
 
-<label>
-Jugadores
-
-<select
-  id="max"
-  onchange="updateBotOptions()"
->
-
-<option value="2">
-2
-</option>
-
-<option value="3">
-3
-</option>
-
-<option
-  value="4"
-  selected
->
-4
-</option>
-
-</select>
-
-</label>
-
-
-<div class="game-mode-box">
-  <strong>Modalidad</strong>
-  <label><input type="radio" name="gameMode" value="classic" checked onchange="updateGameMode()"> Partida clásica</label>
-  <label><input type="radio" name="gameMode" value="rotation" onchange="updateGameMode()"> Mesa rotativa</label>
-  <div class="game-mode-help" id="gameModeHelp">La partida termina al llegar a la meta.</div>
-</div>
-
-<div class="bot-options">
-
-<label>
-Bots
-
-<select id="botCount">
-
-<option value="0">
-0 bots
-</option>
-
-<option value="1">
-1 bot
-</option>
-
-<option value="2">
-2 bots
-</option>
-
-<option value="3">
-3 bots
-</option>
-
-</select>
-
-</label>
-
-
-<label>
-Dificultad
-
-<select id="botDifficulty">
-
-<option value="easy">
-Fácil
-</option>
-
-<option
-  value="normal"
-  selected
->
-Normal
-</option>
-
-<option value="hard">
-Difícil
-</option>
-
-</select>
-
-</label>
-
-</div>
-
-
-<button onclick="create()">
-Crear sala
-</button>
-
-
-<div class="setting-row music-settings-row">
-  <label for="musicChoice">Música</label>
-  <div class="music-settings-controls">
-    <select id="musicChoice" title="Escoger música" aria-label="Escoger música">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-    </select>
-    <button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 ON</button>
+<div id="roomShareSummary" class="menu-section room-share-summary" hidden>
+  <div class="menu-section-body">
+    <button id="shareRoomButton" class="primary-room-action" type="button" onclick="shareRoomLink()">🔗 Invitar / compartir</button>
+    <div id="shareRoomFeedback" class="small" aria-live="polite"></div>
   </div>
 </div>
-
-
-<br>
-
-
-<label>
-
-Meta
-
-<select id="target">
-
-<option value="100">
-100
-</option>
-
-<option value="150">
-150
-</option>
-
-</select>
-
-</label>
-
-</details>
 
 </aside>
 
@@ -2006,9 +2120,6 @@ Crea o únete a una sala
 </b>
 
 <div id="subStatus"></div>
-<div id="roomShareActions" class="room-share-actions" hidden>
-  <button id="shareRoomButton" type="button" onclick="shareRoomLink()" title="Copiar o enviar enlace de la sala">🔗 Copiar / enviar link</button>
-</div>
 <div id="scoreBar" class="score-bar" aria-live="polite"></div>
 
 </div>
@@ -2031,6 +2142,16 @@ Crea o únete a una sala
   <button id="cameraButton" onclick="toggleCamera()">🎥 Cámara</button>
   <button id="micButton" onclick="toggleMic()">🎙️ Micrófono</button>
 </div>
+
+<button id="leftPlayTarget" class="board-play-target board-play-left" type="button" onclick="play('left')" aria-label="Colocar la ficha en el extremo izquierdo">
+  <span class="play-target-domino"><i></i><i></i></span>
+  <span>Colocar aquí</span>
+</button>
+
+<button id="rightPlayTarget" class="board-play-target board-play-right" type="button" onclick="play('right')" aria-label="Colocar la ficha en el extremo derecho">
+  <span class="play-target-domino"><i></i><i></i></span>
+  <span>Colocar aquí</span>
+</button>
 
 <div
   class="board"
@@ -2068,14 +2189,6 @@ Crea o únete a una sala
 
 <section class="hand-zone">
 
-<div
-  class="you-label"
-  id="youLabel"
->
-Tus fichas
-</div>
-
-
 <div class="hand-rack">
 
 <div
@@ -2083,6 +2196,13 @@ Tus fichas
   id="hand"
 ></div>
 
+</div>
+
+<div
+  class="you-label you-label-bottom"
+  id="youLabel"
+>
+Tus fichas
 </div>
 
 </section>
@@ -2102,18 +2222,11 @@ Tus fichas
 </button>
 
 <button
-  id="leftButton"
-  onclick="play('left')"
+  id="reorderButton"
+  type="button"
+  onclick="cycleHandOrder()"
 >
-← Jugar
-</button>
-
-
-<button
-  id="rightButton"
-  onclick="play('right')"
->
-Jugar →
+↕ Reordenar
 </button>
 
 
@@ -2470,11 +2583,22 @@ function updateGameMode(){
   const max=document.getElementById('max');
   const bots=document.getElementById('botCount');
   const help=document.getElementById('gameModeHelp');
+  if(max){
+    const current=Number(max.value)||4;
+    const limit=mode==='mexican'?8:4;
+    max.innerHTML='';
+    for(let i=2;i<=limit;i++){const o=document.createElement('option');o.value=i;o.textContent=i;max.appendChild(o);}
+    max.value=String(Math.min(current,limit));
+  }
   if(mode==='rotation'){
-    if(max) max.value='4';
-    if(max) max.disabled=true;
+    if(max){max.value='4';max.disabled=true;}
     if(bots){bots.value='0';bots.disabled=true;}
-    if(help) help.textContent='4 juegan y los demás esperan. Después de cada ronda, un jugador del equipo perdedor rota con la siguiente persona en cola. El puntaje es individual y dura hasta cerrar la sala.';
+    if(help) help.textContent='4 juegan y los demás esperan. Después de cada ronda rota un jugador del equipo perdedor.';
+  }else if(mode==='mexican'){
+    if(max) max.disabled=false;
+    if(bots) bots.disabled=false;
+    if(help) help.textContent='🚂 2–8 jugadores · doble 12 al doble 0 · 13 rondas · gana quien termine con menos puntos.';
+    updateBotOptions();
   }else{
     if(max) max.disabled=false;
     if(bots) bots.disabled=false;
@@ -2645,6 +2769,55 @@ async function join(){
 }
 
 
+async function shareRoomLink(){
+  if(!game || !game.code){
+    alert('Primero crea o únete a una sala.');
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('room', game.code);
+
+  const roomLabel = game.roomName || game.code;
+  const shareData = {
+    title: 'Dominó Online',
+    text: `Únete a mi sala de dominó: ${roomLabel}`,
+    url: url.toString()
+  };
+
+  const feedback = document.getElementById('shareRoomFeedback');
+
+  try{
+    if(navigator.share){
+      await navigator.share(shareData);
+      if(feedback) feedback.textContent = 'Enlace listo para compartir.';
+      return;
+    }
+
+    await navigator.clipboard.writeText(url.toString());
+    if(feedback) feedback.textContent = '✓ Link copiado';
+  }catch(err){
+    if(err && err.name === 'AbortError') return;
+
+    try{
+      const temp = document.createElement('textarea');
+      temp.value = url.toString();
+      temp.setAttribute('readonly','');
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+      if(feedback) feedback.textContent = '✓ Link copiado';
+    }catch(copyErr){
+      prompt('Copia este link para invitar a alguien:', url.toString());
+    }
+  }
+}
+
 /* =========================
    ENTER
 ========================= */
@@ -2667,6 +2840,11 @@ function enter(){
 
   if(lobby){
     lobby.hidden = true;
+  }
+
+  const roomShareSummary = document.getElementById('roomShareSummary');
+  if(roomShareSummary){
+    roomShareSummary.hidden = false;
   }
 
 
@@ -3268,12 +3446,12 @@ function renderRemoteVideos(){
 
   container.innerHTML = '';
 
-  peers.forEach(player=>{
+  peers.forEach((player, cameraIndex)=>{
     const stream = remoteStreams.get(player.id);
     if(!stream) return;
 
     const wrap = document.createElement('div');
-    wrap.className = `remote-video-wrap ${seatClassForPlayerId(player.id)}`;
+    wrap.className = `remote-video-wrap ${seatClassForPlayerId(player.id)} mexican-camera-${cameraIndex % 7}`;
 
     const video = document.createElement('video');
     video.autoplay = true;
@@ -3526,6 +3704,12 @@ function pipHTML(
   };
 
 
+  if(number >= 7 && number <= 12 && game?.gameMode === 'mexican'){
+    return `<span class="mt-high-number mt-value-${number}" aria-label="${number}"><b>${number}</b></span>`;
+  }
+
+  if(number > 6){ return `<b class="pip-number">${number}</b>`; }
+
   return (
 
     maps[number] ||
@@ -3628,7 +3812,96 @@ function tileElement(
    SERPENTINE BOARD
 ========================================================= */
 
+
+function mtTrainLabel(key){
+  if(key==='mexican') return '🚂 Tren Mexicano';
+  const i=Number(key.slice(1)); const p=game.players?.[i];
+  return `${p?.name||'Jugador'}${i===game.myIndex?' (Tú)':''}`;
+}
+function mtCanTarget(key){
+  if(!game||game.gameMode!=='mexican'||selected===null||game.myIndex!==game.turn) return false;
+  const mt=game.mexicanTrain||{};
+  if(mt.pendingDouble && mt.pendingDouble!==key) return false;
+  if(key!=='mexican'){
+    const owner=Number(key.slice(1));
+    if(owner!==game.myIndex && !mt.open?.[owner]) return false;
+  }
+  const train=mt.trains?.[key]||[]; const end=train.length?train[train.length-1][1]:mt.engine;
+  const tile=game.myHand?.[selected]; return !!tile&&(tile[0]===end||tile[1]===end);
+}
+async function mtPlay(train){
+  if(selected===null) return alert('Selecciona una ficha');
+  try{game=await api({action:'mtPlay',code:game.code,playerId:pid,tileIndex:selected,train});selected=null;render();}
+  catch(e){alert(e.message);}
+}
+function renderMexicanBoard(){
+  const board=document.getElementById('board');
+  const mt=game.mexicanTrain||{};
+  board.innerHTML='';
+
+  const wrap=document.createElement('div');
+  wrap.className='mt-board';
+  wrap.innerHTML=`<div class="mt-station"><span>🚉 ESTACIÓN</span><strong>${mt.engine ?? 12}|${mt.engine ?? 12}</strong><small>Ronda ${Math.max(1,(mt.roundIndex??-1)+1)}/13</small></div>`;
+
+  const info=document.createElement('div');
+  info.className='mt-player-info';
+  const realPlayers=(game.players||[]);
+  let displayPlayers=realPlayers.map((p,i)=>({name:p.name,isMe:p.isMe,index:i,handCount:p.handCount,score:p.score,isBot:p.isBot,placeholder:false}));
+
+  // En el lobby mostramos también los bots que entrarán al pulsar Iniciar partida.
+  if(game.status==='lobby'){
+    const existingBots=displayPlayers.filter(p=>p.isBot).length;
+    const configuredBots=Math.max(0,Number(game.botCount||0));
+    for(let n=existingBots+1;n<=configuredBots;n++){
+      displayPlayers.push({name:`Bot ${n}`,isMe:false,index:null,handCount:null,score:0,isBot:true,placeholder:true});
+    }
+  }
+
+  info.innerHTML=displayPlayers.map(p=>`<div class="mt-player-chip${p.isMe?' me':''}${p.placeholder?' waiting':''}"><strong>${p.name}${p.isMe?' (Tú)':''}</strong><span>${p.placeholder?'🤖 listo al iniciar':`🁣 ${p.handCount ?? 0} fichas · ${Number(p.score||0)} pts`}</span></div>`).join('');
+  wrap.appendChild(info);
+
+  const trains=document.createElement('div');
+  trains.className='mt-trains';
+  const keys=['mexican',...realPlayers.map((_,i)=>`p${i}`)];
+  keys.forEach(key=>{
+    const owner=key==='mexican'?-1:Number(key.slice(1));
+    const arr=mt.trains?.[key]||[];
+    const player=owner>=0?realPlayers[owner]:null;
+    const el=document.createElement('div');
+    el.className='mt-train'+(owner>=0&&mt.open?.[owner]?' open':'')+(mt.pendingDouble===key?' mt-pending':'')+(mtCanTarget(key)?' allowed':'');
+    if(mtCanTarget(key)) el.onclick=()=>mtPlay(key);
+    const title=key==='mexican'?'🚂 Tren Mexicano':`${player?.name||`Jugador ${owner+1}`}${player?.isMe?' (Tú)':''} · ${player?.handCount ?? 0} fichas`;
+    const chain=arr.length?arr.map(t=>`<div class="mt-mini"><span>${pipHTML(t[0])}</span><span>${pipHTML(t[1])}</span></div>`).join(''):'<span class="mt-empty">Toca aquí para iniciar este tren</span>';
+    el.innerHTML=`<div class="mt-train-title">${title}</div><div class="mt-chain ${arr.length?'has-pieces':'empty-train'}"><div class="mt-mini mt-engine"><span>${pipHTML(mt.engine ?? 12)}</span><span>${pipHTML(mt.engine ?? 12)}</span></div>${chain}</div>`;
+    trains.appendChild(el);
+  });
+
+  // Vista previa de los trenes de bots antes de iniciar.
+  if(game.status==='lobby'){
+    const configuredBots=Math.max(0,Number(game.botCount||0));
+    const existingBots=realPlayers.filter(p=>p.isBot).length;
+    for(let n=existingBots+1;n<=configuredBots;n++){
+      const el=document.createElement('div');
+      el.className='mt-train mt-preview';
+      el.innerHTML=`<div class="mt-train-title">Bot ${n} · fichas al iniciar</div><div class="mt-chain"><span class="mt-empty">🤖 Se añadirá al iniciar la partida</span></div>`;
+      trains.appendChild(el);
+    }
+  }
+
+  wrap.appendChild(trains);
+  board.appendChild(wrap);
+
+  // Cada tren es una pista horizontal independiente. Al añadir fichas,
+  // mantenemos visible automáticamente el extremo más reciente.
+  requestAnimationFrame(()=>{
+    board.querySelectorAll('.mt-chain').forEach(chain=>{
+      chain.scrollLeft = chain.scrollWidth;
+    });
+  });
+}
 function renderBoard(){
+
+  if(game?.gameMode==='mexican'){ renderMexicanBoard(); return; }
 
   const board = document.getElementById('board');
   board.innerHTML = '';
@@ -3855,6 +4128,8 @@ function backTile(){
 
 function renderOpponents(){
 
+  if(game?.gameMode==='mexican'){ const c=document.getElementById('opponents'); if(c)c.innerHTML=''; return; }
+
   const container =
     document
     .getElementById(
@@ -3892,8 +4167,11 @@ function renderOpponents(){
     )=>{
 
 
+      // Never render the local player as an opponent.
+      // Checking the index too prevents duplicate local racks if isMe is stale.
       if(
-        player.isMe
+        player.isMe ||
+        index === game.myIndex
       ){
 
         return;
@@ -4203,10 +4481,37 @@ function renderHistory(){
 
 
 /* =========================
+   HAND ORDER
+========================= */
+let handOrderMode = 0;
+function orderedHandEntries(){
+  const entries=(game?.myHand||[]).map((tile,serverIndex)=>({tile,serverIndex}));
+  if(handOrderMode===1){
+    entries.sort((a,b)=>(a.tile[0]+a.tile[1])-(b.tile[0]+b.tile[1]) || Math.max(a.tile[0],a.tile[1])-Math.max(b.tile[0],b.tile[1]));
+  }else if(handOrderMode===2){
+    entries.sort((a,b)=>{
+      const ad=a.tile[0]===a.tile[1]?0:1, bd=b.tile[0]===b.tile[1]?0:1;
+      return ad-bd || Math.max(b.tile[0],b.tile[1])-Math.max(a.tile[0],a.tile[1]) || Math.min(b.tile[0],b.tile[1])-Math.min(a.tile[0],a.tile[1]);
+    });
+  }
+  return entries;
+}
+function cycleHandOrder(){
+  handOrderMode=(handOrderMode+1)%3;
+  render();
+}
+
+/* =========================
    RENDER
 ========================= */
 
 function renderScoreboard(){
+  if(game?.gameMode==='mexican'){
+    const el=document.getElementById('scoreBar'); if(!el)return;
+    const rows=(game.players||[]).map(p=>`${p.name}${p.isMe?' (Tú)':''}: ${Number(p.score||0)}`);
+    el.innerHTML=rows.map(x=>`<span class="score-player">${x}</span>`).join('<span class="score-sep">│</span>')+`<span class="score-target">Ronda ${game.round}/13</span>`; return;
+  }
+
   const el=document.getElementById('scoreBar');
   if(!el || !game){ return; }
 
@@ -4239,6 +4544,8 @@ function render(){
 
     return;
   }
+
+  document.body.classList.toggle('mexican-mode',game.gameMode==='mexican');
 
 
   const statusEl =
@@ -4282,18 +4589,11 @@ function render(){
     document.createElement('button');
 
 
-  const leftButton =
-    document
-    .getElementById(
-      'leftButton'
-    );
-
-
-  const rightButton =
-    document
-    .getElementById(
-      'rightButton'
-    );
+  const leftButton = document.getElementById('leftButton');
+  const rightButton = document.getElementById('rightButton');
+  const leftPlayTarget = document.getElementById('leftPlayTarget');
+  const rightPlayTarget = document.getElementById('rightPlayTarget');
+  const reorderButton = document.getElementById('reorderButton');
 
 
   const drawButton =
@@ -4506,7 +4806,7 @@ function render(){
 
     msg.textContent =
 
-      `Ronda ${game.roundNumber} · Meta ${game.target}`;
+      game.gameMode==='mexican' ? `Ronda ${game.round}/13 · Menor puntuación gana` : `Ronda ${game.roundNumber} · Meta ${game.target}`;
 
   }
 
@@ -4522,37 +4822,11 @@ function render(){
     '';
 
 
-  (
-    game.myHand ||
-    []
-  )
-
-  .forEach(
-
-    (
-      tile,
-      index
-    )=>{
-
-
-      handEl
-      .appendChild(
-
-        tileElement(
-
-          tile,
-
-          index,
-
-          true
-
-        )
-
-      );
-
-    }
-
-  );
+  orderedHandEntries().forEach(({tile,serverIndex})=>{
+    const el=tileElement(tile,serverIndex,true);
+    el.dataset.serverIndex=String(serverIndex);
+    handEl.appendChild(el);
+  });
 
 
   /* YOU */
@@ -4631,13 +4905,20 @@ function render(){
       .currentPlayerIsBot;
 
 
-  leftButton.disabled =
-    !myTurn;
-
-
-  rightButton.disabled =
-    !myTurn;
-
+  if(leftButton) leftButton.disabled = !myTurn;
+  if(rightButton) rightButton.disabled = !myTurn;
+  if(leftPlayTarget){
+    leftPlayTarget.disabled = !myTurn || selected===null;
+    leftPlayTarget.style.display = myTurn && game.gameMode!=='mexican' ? 'flex' : 'none';
+  }
+  if(rightPlayTarget){
+    rightPlayTarget.disabled = !myTurn || selected===null;
+    rightPlayTarget.style.display = myTurn && game.gameMode!=='mexican' ? 'flex' : 'none';
+  }
+  if(reorderButton){
+    reorderButton.disabled = !(game.myHand||[]).length;
+    reorderButton.textContent = handOrderMode===0 ? '↕ Reordenar' : handOrderMode===1 ? '↕ Por puntos' : '↕ Dobles primero';
+  }
 
   drawButton.disabled =
     !myTurn;
@@ -4902,15 +5183,9 @@ function toggleMusic(on){
 <script id="ux-v3-touch-play">
 (function(){
   // Give the local camera its own compact name label.
-  function ensureLocalLabel(){
-    const video=document.getElementById('localVideo');
-    if(!video || document.getElementById('localVideoName')) return;
-    const label=document.createElement('div');
-    label.id='localVideoName';
-    label.textContent='Tú';
-    video.insertAdjacentElement('afterend',label);
-  }
-  ensureLocalLabel();
+  // El jugador local ya se identifica en su zona inferior con #youLabel.
+  // No creamos un segundo rótulo “Tú” en el lado izquierdo, porque se superpone
+  // con el jugador sentado en ese lado en pantallas móviles.
 
   // On mobile the social panel stays closed until a tab is tapped.
   const oldShow=window.showSocialTab;
@@ -4933,9 +5208,8 @@ function toggleMusic(on){
     if(window.innerWidth>700 || e.touches.length!==1) return;
     const tile=e.target.closest?.('#hand .tile');
     if(!tile) return;
-    const tiles=[...document.querySelectorAll('#hand .tile')];
-    const index=tiles.indexOf(tile);
-    if(index<0) return;
+    const index=Number(tile.dataset.serverIndex);
+    if(!Number.isInteger(index) || index<0) return;
     const t=e.touches[0];
     const ghost=tile.cloneNode(true); ghost.classList.add('drag-ghost');
     ghost.style.left=t.clientX+'px'; ghost.style.top=t.clientY+'px';
@@ -4955,8 +5229,11 @@ function toggleMusic(on){
     clearDrag();
     if(moved<22){ selected=selected===idx?null:idx; render(); return; }
     selected=idx;
-    if(t.clientX < window.innerWidth*.42) play('left');
-    else if(t.clientX > window.innerWidth*.58) play('right');
+    const drop=document.elementFromPoint(t.clientX,t.clientY);
+    if(drop?.closest?.('#leftPlayTarget')) play('left');
+    else if(drop?.closest?.('#rightPlayTarget')) play('right');
+    else if(t.clientX < window.innerWidth*.24) play('left');
+    else if(t.clientX > window.innerWidth*.76) play('right');
     else render();
   },{passive:true});
   document.addEventListener('touchcancel',clearDrag,{passive:true});
@@ -5296,41 +5573,53 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
   let master = null;
   let timer = null;
   let step = 0;
-
-  // Short original Latin/caribbean-inspired loop synthesized in the browser.
-  // No external audio file or copyrighted recording is used.
+  let unlocked = false;
   let musicChoice = 1;
 
   const songs = {
-    1:{
-      bass:[110,110,146.83,110,164.81,146.83,130.81,98],
-      lead:[440,523.25,587.33,523.25,659.25,587.33,523.25,440],
-      beat:360, wave:'sine'
-    },
-    2:{
-      bass:[130.81,164.81,196,164.81,146.83,174.61,196,130.81],
-      lead:[523.25,659.25,783.99,659.25,587.33,698.46,783.99,523.25],
-      beat:315, wave:'triangle'
-    },
-    3:{
-      bass:[98,123.47,146.83,123.47,110,130.81,164.81,110],
-      lead:[392,493.88,587.33,493.88,440,523.25,659.25,440],
-      beat:405, wave:'sine'
-    },
-    4:{
-      bass:[146.83,146.83,174.61,196,174.61,164.81,146.83,123.47],
-      lead:[587.33,698.46,783.99,880,783.99,659.25,587.33,493.88],
-      beat:285, wave:'square'
-    },
-    5:{
-      bass:[110,164.81,146.83,196,174.61,146.83,130.81,98],
-      lead:[659.25,587.33,523.25,783.99,698.46,587.33,523.25,440],
-      beat:340, wave:'triangle'
-    }
+    1:{bass:[110,110,146.83,110,164.81,146.83,130.81,98],lead:[440,523.25,587.33,523.25,659.25,587.33,523.25,440],beat:360,wave:'sine'},
+    2:{bass:[130.81,164.81,196,164.81,146.83,174.61,196,130.81],lead:[523.25,659.25,783.99,659.25,587.33,698.46,783.99,523.25],beat:315,wave:'triangle'},
+    3:{bass:[98,123.47,146.83,123.47,110,130.81,164.81,110],lead:[392,493.88,587.33,493.88,440,523.25,659.25,440],beat:405,wave:'sine'},
+    4:{bass:[146.83,146.83,174.61,196,174.61,164.81,146.83,123.47],lead:[587.33,698.46,783.99,880,783.99,659.25,587.33,493.88],beat:285,wave:'square'},
+    5:{bass:[110,164.81,146.83,196,174.61,146.83,130.81,98],lead:[659.25,587.33,523.25,783.99,698.46,587.33,523.25,440],beat:340,wave:'triangle'},
+    6:{bass:[123.47,146.83,185,164.81,146.83,123.47,110,123.47],lead:[493.88,587.33,739.99,659.25,587.33,493.88,440,493.88],beat:330,wave:'sine'},
+    7:{bass:[98,130.81,164.81,196,164.81,130.81,110,98],lead:[392,523.25,659.25,783.99,659.25,523.25,440,392],beat:390,wave:'triangle'},
+    8:{bass:[146.83,185,220,185,164.81,196,174.61,146.83],lead:[587.33,739.99,880,739.99,659.25,783.99,698.46,587.33],beat:300,wave:'sine'},
+    9:{bass:[110,138.59,164.81,207.65,185,164.81,138.59,110],lead:[440,554.37,659.25,830.61,739.99,659.25,554.37,440],beat:350,wave:'triangle'},
+    10:{bass:[130.81,196,174.61,146.83,220,196,164.81,130.81],lead:[523.25,783.99,698.46,587.33,880,783.99,659.25,523.25],beat:275,wave:'square'},
+    11:{bass:[130.81,164.81,174.61,196,146.83,174.61,164.81,130.81],lead:[523.25,659.25,698.46,783.99,587.33,698.46,659.25,523.25],beat:235,wave:'triangle'},
+    12:{bass:[73.42,73.42,98,87.31,73.42,110,98,87.31],lead:[293.66,349.23,392,349.23,440,392,349.23,293.66],beat:215,wave:'sawtooth'}
   };
 
-  function tone(freq, start, duration, volume, type='sine'){
-    if(!ctx || !master) return;
+  function createAudio(){
+    if(ctx) return true;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return false;
+    ctx=new AC();
+    master=ctx.createGain();
+    master.gain.value=.85;
+    master.connect(ctx.destination);
+    return true;
+  }
+
+  function primeIOSAudio(){
+    if(!createAudio()) return;
+    try{
+      const buffer=ctx.createBuffer(1,1,22050);
+      const source=ctx.createBufferSource();
+      source.buffer=buffer;
+      source.connect(master);
+      source.start(0);
+    }catch(e){}
+    try{
+      const r=ctx.resume();
+      if(r && typeof r.then==='function') r.then(()=>{unlocked=true;if(musicOn) startLoop();}).catch(()=>{});
+      else unlocked=true;
+    }catch(e){}
+  }
+
+  function tone(freq,start,duration,volume,type='sine'){
+    if(!ctx||!master) return;
     const osc=ctx.createOscillator();
     const gain=ctx.createGain();
     osc.type=type;
@@ -5338,69 +5627,53 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     gain.gain.setValueAtTime(.0001,start);
     gain.gain.exponentialRampToValueAtTime(volume,start+.012);
     gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
-    osc.connect(gain);
-    gain.connect(master);
-    osc.start(start);
-    osc.stop(start+duration+.02);
+    osc.connect(gain); gain.connect(master);
+    osc.start(start); osc.stop(start+duration+.02);
   }
 
   function percussion(start){
-    if(!ctx || !master) return;
+    if(!ctx||!master) return;
     const osc=ctx.createOscillator();
     const gain=ctx.createGain();
     osc.type='triangle';
-    osc.frequency.setValueAtTime(step%2 ? 180 : 230,start);
-    gain.gain.setValueAtTime(.018,start);
+    osc.frequency.setValueAtTime(step%2?180:230,start);
+    gain.gain.setValueAtTime(.07,start);
     gain.gain.exponentialRampToValueAtTime(.0001,start+.055);
-    osc.connect(gain);
-    gain.connect(master);
-    osc.start(start);
-    osc.stop(start+.06);
+    osc.connect(gain); gain.connect(master);
+    osc.start(start); osc.stop(start+.06);
   }
 
   function tick(){
-    if(!musicOn || !ctx || ctx.state!=='running') return;
-    const song=songs[musicChoice] || songs[1];
+    if(!musicOn||!ctx||ctx.state!=='running') return;
+    const song=songs[musicChoice]||songs[1];
     const now=ctx.currentTime+.03;
     const i=step%song.bass.length;
-
-    tone(song.bass[i],now,.28,.026,'triangle');
-    if(step%2===0) tone(song.lead[i],now+.04,.16,.012,song.wave);
-    percussion(now);
-
-    step++;
+    tone(song.bass[i],now,.28,.12,'triangle');
+    if(step%2===0) tone(song.lead[i],now+.04,.16,.075,song.wave);
+    percussion(now); step++;
   }
 
   function startLoop(){
-    if(timer) return;
+    if(!musicOn||!ctx||ctx.state!=='running'||timer) return;
     tick();
-    const song=songs[musicChoice] || songs[1];
+    const song=songs[musicChoice]||songs[1];
     timer=setInterval(tick,song.beat);
   }
 
-  async function ensureMusic(){
+  function stopLoop(){ if(timer){clearInterval(timer);timer=null;} }
+
+  function ensureMusicFromGesture(){
     if(!musicOn) return;
-    try{
-      if(!ctx){
-        const AC=window.AudioContext||window.webkitAudioContext;
-        if(!AC) return;
-        ctx=new AC();
-        master=ctx.createGain();
-        master.gain.value=.42;
-        master.connect(ctx.destination);
-      }
-      if(ctx.state==='suspended') await ctx.resume();
-      startLoop();
-    }catch(e){
-      console.warn('No se pudo iniciar la música.',e);
-    }
+    primeIOSAudio();
+    if(ctx&&ctx.state==='running'){unlocked=true;startLoop();}
   }
 
-  function stopLoop(){
-    if(timer){
-      clearInterval(timer);
-      timer=null;
-    }
+  async function ensureMusic(){
+    if(!musicOn||!createAudio()) return;
+    try{
+      if(ctx.state==='suspended') await ctx.resume();
+      if(ctx.state==='running'){unlocked=true;startLoop();}
+    }catch(e){console.warn('No se pudo iniciar la música.',e);}
   }
 
   function updateButton(){
@@ -5410,33 +5683,51 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     b.setAttribute('aria-pressed',musicOn?'true':'false');
   }
 
-  window.toggleDominoMusic=async function(){
+  window.toggleDominoMusic=function(){
+    // If iOS shows ON but audio is still locked, the first tap unlocks/starts it
+    // instead of immediately turning music OFF.
+    if(musicOn && (!ctx || ctx.state!=='running' || !timer)){
+      ensureMusicFromGesture();
+      updateButton();
+      return;
+    }
     musicOn=!musicOn;
-    if(musicOn) await ensureMusic();
-    else stopLoop();
+    if(musicOn) ensureMusicFromGesture(); else stopLoop();
     updateButton();
   };
 
-  document.getElementById('musicToggle')?.addEventListener('click',window.toggleDominoMusic);
+  const toggle=document.getElementById('musicToggle');
+  toggle?.addEventListener('click',window.toggleDominoMusic);
 
-  document.getElementById('musicChoice')?.addEventListener('change',async function(){
+  document.getElementById('musicChoice')?.addEventListener('change',function(){
     musicChoice=Number(this.value)||1;
-    step=0;
-    stopLoop();
-    if(musicOn) await ensureMusic();
+    step=0; stopLoop();
+    if(musicOn) ensureMusicFromGesture();
   });
 
-  // Browsers require a user gesture before sound can begin.
-  const unlock=()=>{
-    if(document.body.classList.contains('in-room')) ensureMusic();
+  // Safari/iPhone only allows Web Audio after a direct user gesture.
+  // Do the unlock synchronously on the first touch/click anywhere in the app.
+  const unlock=function(e){
+    // Do not pre-unlock on the music toggle itself: pointerdown followed by click
+    // could otherwise start and immediately switch the music off on desktop.
+    if(e?.target?.closest?.('#musicToggle')) return;
+    if(musicOn) ensureMusicFromGesture();
   };
-  document.addEventListener('pointerdown',unlock,{passive:true});
-  document.addEventListener('keydown',unlock);
+  document.addEventListener('touchstart',unlock,{passive:true,capture:true});
+  document.addEventListener('pointerdown',unlock,{passive:true,capture:true});
+  document.addEventListener('keydown',unlock,{capture:true});
 
-  // Start as soon as the user enters/creates a room after an interaction.
+  // Read the visible selection immediately and make a best-effort desktop start.
+  // Browsers that require a gesture will simply start on the first interaction above.
+  musicChoice=Number(document.getElementById('musicChoice')?.value)||1;
+  setTimeout(()=>{ if(musicOn) ensureMusic(); },0);
+
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden && musicOn && unlocked) ensureMusic();
+  });
+
   const observer=new MutationObserver(()=>{
-    if(document.body.classList.contains('in-room')) ensureMusic();
-    else stopLoop();
+    if(musicOn && unlocked) ensureMusic();
   });
   observer.observe(document.body,{attributes:true,attributeFilter:['class']});
 
@@ -5444,45 +5735,6 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 })();
 </script>
 
-
-<style id="room-share-link-style">
-.room-share-actions{margin-top:6px;display:flex;justify-content:center;align-items:center}
-.room-share-actions[hidden]{display:none!important}
-#shareRoomButton{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:7px 13px;background:#ffd166;color:#102b27;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18)}
-#shareRoomButton:active{transform:translateY(1px)}
-@media(max-width:700px){#shareRoomButton{font-size:12px;padding:6px 10px}.room-share-actions{margin-top:4px}}
-</style>
-<script id="room-share-link-js">
-(function(){
-  function roomUrl(){
-    if(typeof game==='undefined'||!game||!game.code) return '';
-    const u=new URL(window.location.href);
-    u.search=''; u.hash=''; u.searchParams.set('room',game.code);
-    return u.toString();
-  }
-  window.shareRoomLink=async function(){
-    const url=roomUrl(); if(!url) return;
-    const roomLabel=(typeof game!=='undefined'&&game&&game.roomName)?game.roomName:'Dominó Latino';
-    try{
-      if(navigator.share){await navigator.share({title:'Dominó Latino',text:`Únete a mi sala ${roomLabel}`,url});return;}
-      if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url);}
-      else{const ta=document.createElement('textarea');ta.value=url;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
-      const b=document.getElementById('shareRoomButton');if(b){const old=b.textContent;b.textContent='✓ Link copiado';setTimeout(()=>b.textContent=old,1800);}
-    }catch(e){
-      if(e&&e.name==='AbortError') return;
-      try{await navigator.clipboard.writeText(url);const b=document.getElementById('shareRoomButton');if(b){const old=b.textContent;b.textContent='✓ Link copiado';setTimeout(()=>b.textContent=old,1800);}}catch(_e){prompt('Copia este enlace para invitar:',url);}
-    }
-  };
-  function updateShareButton(){
-    const wrap=document.getElementById('roomShareActions'); if(!wrap) return;
-    wrap.hidden=!(typeof game!=='undefined'&&game&&game.code&&document.body.classList.contains('in-room'));
-  }
-  const previousRender=window.render;
-  if(typeof previousRender==='function'){window.render=function(){const r=previousRender.apply(this,arguments);updateShareButton();return r;};}
-  window.addEventListener('DOMContentLoaded',updateShareButton);
-  window.addEventListener('popstate',updateShareButton);
-})();
-</script>
 </body>
 
 </html>
@@ -5715,5 +5967,466 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     font-size:13px!important;
     padding:6px 12px!important;
   }
+}
+
+/* Mexican Train mode */
+.pip-number{font-size:18px;line-height:1;font-weight:900;color:#111;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+body.mexican-mode .board-play-target{display:none!important}
+body.mexican-mode #opponents{display:none!important}
+body.mexican-mode .board{left:2%!important;right:2%!important;top:3%!important;bottom:3%!important;overflow:auto!important;transform:none!important}
+.mt-board{min-height:100%;display:flex;flex-direction:column;gap:8px;padding:8px;box-sizing:border-box}
+.mt-station{align-self:center;background:#ffd166;color:#17251f;border:3px solid #fff8;border-radius:50%;width:76px;height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;box-shadow:0 5px 16px #0005;flex:0 0 auto}
+.mt-station strong{font-size:20px}.mt-trains{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.mt-train{background:#003e31aa;border:1px solid #ffffff35;border-radius:10px;padding:6px;min-height:55px;cursor:pointer;color:#fff}
+.mt-train.allowed{outline:2px solid #ffd166}.mt-train.open .mt-train-title:after{content:' 🚂 ABIERTO';color:#ffd166;font-size:10px}.mt-train-title{font-size:11px;font-weight:800;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-chain{display:flex;gap:2px;overflow-x:auto;align-items:center;min-height:34px}.mt-mini{display:flex;background:#fff;color:#111;border-radius:4px;border:1px solid #222;flex:0 0 auto;height:30px}.mt-mini span{width:23px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px}.mt-mini span+span{border-left:1px solid #222}.mt-empty{font-size:10px;opacity:.65;padding:8px}.mt-engine{background:#ffd166!important}.mt-pending{box-shadow:0 0 0 3px #ff6b6b inset}
+body.mexican-mode .tile{transform:scale(.82);margin:-3px}
+body.mexican-mode .back-tile{transform:scale(.72);margin:-5px}
+@media(max-width:700px){.mt-trains{grid-template-columns:1fr}.mt-board{padding:4px;gap:5px}.mt-station{width:58px;height:58px}.mt-station strong{font-size:16px}.mt-train{padding:4px;min-height:45px}.mt-mini{height:25px}.mt-mini span{width:19px;font-size:9px}body.mexican-mode .hand{gap:0!important}body.mexican-mode .tile{transform:scale(.70);margin:-8px}}
+
+
+/* Mexican Train UX v2: 2-8 jugadores, fichas 8-12 por puntos */
+body.mexican-mode #start{
+  position:fixed!important;
+  left:50%!important;
+  bottom:78px!important;
+  transform:translateX(-50%)!important;
+  z-index:1200!important;
+  min-width:220px!important;
+  padding:13px 22px!important;
+  border:3px solid rgba(255,255,255,.7)!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.38)!important;
+}
+.mt-player-info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:100%}
+.mt-player-chip{background:rgba(0,45,35,.78);border:1px solid rgba(255,255,255,.18);border-radius:9px;padding:5px 7px;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px;color:#fff}
+.mt-player-chip strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mt-player-chip span{font-size:9px;white-space:nowrap;opacity:.9}.mt-player-chip.me{outline:2px solid #ffd166}.mt-player-chip.waiting{opacity:.72}
+.mt-high-pips{position:relative!important;width:100%!important;height:100%!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;grid-auto-rows:1fr!important;align-items:center!important;justify-items:center!important;padding:2px!important;box-sizing:border-box!important}
+.mt-high-pips>i{display:block!important;width:4px!important;height:4px!important;border-radius:50%!important;background:currentColor!important;position:static!important}
+.mt-high-pips>em{position:absolute!important;right:1px!important;bottom:-1px!important;font-style:normal!important;font-size:6px!important;line-height:1!important;color:currentColor!important;background:#fff!important;border-radius:50%!important;padding:1px!important}
+.mt-value-8{color:#e4572e!important}.mt-value-9{color:#7b2cbf!important}.mt-value-10{color:#0077b6!important}.mt-value-11{color:#2a9d8f!important}.mt-value-12{color:#c1121f!important}
+.mt-mini .mt-high-pips>i{width:3px!important;height:3px!important}.mt-mini .mt-high-pips>em{font-size:5px!important}
+body.mexican-mode .mt-train-title{display:flex;align-items:center;min-height:18px}
+body.mexican-mode .mt-preview{opacity:.6;cursor:default!important}
+@media(max-width:700px){
+  body.mexican-mode #start{bottom:72px!important;min-width:190px!important;font-size:14px!important;padding:11px 16px!important}
+  .mt-player-info{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
+  .mt-player-chip{padding:3px 5px;border-radius:7px}.mt-player-chip strong{font-size:9px}.mt-player-chip span{font-size:8px}
+  body.mexican-mode .mt-board{gap:4px!important}
+  body.mexican-mode .mt-trains{gap:4px!important}
+  body.mexican-mode .mt-train{min-height:40px!important;border-radius:9px!important}
+  body.mexican-mode .mt-train-title{font-size:10px!important;margin-bottom:2px!important}
+  body.mexican-mode .mt-chain{min-height:28px!important}
+  .mt-high-pips>i{width:3px!important;height:3px!important}.mt-high-pips>em{font-size:5px!important}
+}
+
+
+/* Mexican Train UX v3 */
+body.mexican-mode .mt-station{
+  width:auto!important;height:auto!important;border-radius:999px!important;
+  padding:5px 12px!important;display:flex!important;flex-direction:row!important;
+  gap:7px!important;align-items:center!important;justify-content:center!important;
+  border-width:2px!important;white-space:nowrap!important;
+}
+body.mexican-mode .mt-station span,body.mexican-mode .mt-station strong,body.mexican-mode .mt-station small{
+  font-size:11px!important;line-height:1!important;margin:0!important;
+}
+body.mexican-mode .mt-station strong{font-size:13px!important}
+body.mexican-mode .mt-high-pips{grid-template-columns:repeat(4,1fr)!important;gap:1px!important;padding:3px!important}
+body.mexican-mode .mt-high-pips>i{width:5px!important;height:5px!important;box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+body.mexican-mode .mt-high-pips>em{right:1px!important;bottom:1px!important;font-size:7px!important;background:#fff!important;padding:1px!important}
+body.mexican-mode .mt-high-pips>b{position:absolute!important;left:1px!important;bottom:0!important;font-size:6px!important;line-height:1!important;background:rgba(255,255,255,.9)!important;border-radius:3px!important;padding:1px 2px!important;color:currentColor!important}
+body.mexican-mode .mt-value-7{color:#d97706!important}
+body.mexican-mode .mt-value-8{color:#e4572e!important}
+body.mexican-mode .mt-value-9{color:#7b2cbf!important}
+body.mexican-mode .mt-value-10{color:#0077b6!important}
+body.mexican-mode .mt-value-11{color:#2a9d8f!important}
+body.mexican-mode .mt-value-12{color:#c1121f!important}
+body.mexican-mode .tile .tile-half{background:#fff!important}
+body.mexican-mode .controls{left:0!important;right:0!important;width:100%!important;max-width:100vw!important;box-sizing:border-box!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important}
+body.mexican-mode .controls #start{grid-column:1/-1}
+body.mexican-mode .social-drawer-toggle{display:flex!important;visibility:visible!important;opacity:1!important;z-index:3000!important;right:0!important}
+@media(max-width:700px){
+ body.mexican-mode .mt-station{padding:4px 8px!important;gap:5px!important}
+ body.mexican-mode .mt-station span,body.mexican-mode .mt-station strong,body.mexican-mode .mt-station small{font-size:9px!important}
+ body.mexican-mode .mt-station strong{font-size:11px!important}
+ body.mexican-mode .controls{grid-template-columns:repeat(3,minmax(0,1fr))!important;padding-left:5px!important;padding-right:5px!important}
+ body.mexican-mode .controls button{min-width:0!important;width:auto!important;font-size:10px!important}
+ body.mexican-mode .mt-high-pips>i{width:4px!important;height:4px!important}
+ body.mexican-mode .mt-high-pips>em{font-size:6px!important}
+ body.mexican-mode .mt-high-pips>b{font-size:5px!important}
+ body.mexican-mode .social-drawer-toggle{position:fixed!important;right:0!important;top:62%!important}
+}
+
+
+/* Mexican Train UX v4: números de alto contraste + trenes horizontales */
+body.mexican-mode .mt-board,
+body.mexican-mode .mt-trains,
+body.mexican-mode .mt-train{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+body.mexican-mode .mt-train{overflow:hidden!important}
+body.mexican-mode .mt-chain{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  overflow-x:auto!important;overflow-y:hidden!important;
+  flex-wrap:nowrap!important;overscroll-behavior-x:contain!important;
+  -webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;
+  scrollbar-width:thin!important;padding-bottom:2px!important;
+}
+body.mexican-mode .mt-mini{flex:0 0 auto!important}
+body.mexican-mode .mt-high-number{
+  width:100%!important;height:100%!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;
+  border-radius:2px!important;font-weight:1000!important;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)!important;
+}
+body.mexican-mode .mt-high-number>b{
+  font-size:15px!important;line-height:1!important;color:#101010!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.45)!important;
+}
+body.mexican-mode .mt-value-7{background:#ffe600!important;color:#111!important}
+body.mexican-mode .mt-value-8{background:#ff6b00!important;color:#111!important}
+body.mexican-mode .mt-value-9{background:#ff3bd4!important;color:#111!important}
+body.mexican-mode .mt-value-10{background:#28d7ff!important;color:#111!important}
+body.mexican-mode .mt-value-11{background:#35f28b!important;color:#111!important}
+body.mexican-mode .mt-value-12{background:#ff4057!important;color:#111!important}
+body.mexican-mode .tile-half:has(.mt-high-number),
+body.mexican-mode .mt-mini span:has(.mt-high-number){padding:0!important;background:transparent!important}
+body.mexican-mode .mt-mini .mt-high-number>b{font-size:11px!important}
+
+@media(max-width:700px) and (orientation:portrait){
+  body.mexican-mode .board{left:0!important;right:0!important;width:100%!important;padding:0 5px!important;box-sizing:border-box!important;overflow-x:hidden!important}
+  body.mexican-mode .mt-board{width:100%!important;padding:3px!important;gap:3px!important}
+  body.mexican-mode .mt-trains{grid-template-columns:minmax(0,1fr)!important;width:100%!important;gap:3px!important}
+  body.mexican-mode .mt-train{width:100%!important;min-height:37px!important;padding:3px 5px!important;border-radius:7px!important}
+  body.mexican-mode .mt-train-title{font-size:9px!important;min-height:13px!important;margin-bottom:1px!important}
+  body.mexican-mode .mt-chain{min-height:23px!important;gap:1px!important}
+  body.mexican-mode .mt-mini{height:22px!important}
+  body.mexican-mode .mt-mini span{width:18px!important;font-size:8px!important}
+  body.mexican-mode .mt-mini .mt-high-number>b{font-size:9px!important}
+  body.mexican-mode .mt-empty{font-size:8px!important;padding:4px!important;white-space:nowrap!important}
+}
+</style>
+
+<style id="mexican-train-v5-layout-fix">
+/* SOLO Tren Mexicano: tablero compacto, centrado y drawers accesibles. */
+body.mexican-mode .mt-board{
+  width:100%!important;
+  max-width:100%!important;
+  margin:0 auto!important;
+  padding:6px 10px!important;
+  box-sizing:border-box!important;
+  align-items:center!important;
+}
+body.mexican-mode .mt-player-info,
+body.mexican-mode .mt-trains{
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}
+body.mexican-mode .mt-player-chip{
+  text-align:center!important;
+}
+body.mexican-mode .mt-player-chip strong,
+body.mexican-mode .mt-player-chip span{
+  text-align:center!important;
+}
+body.mexican-mode .mt-train{
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-align:center!important;
+}
+body.mexican-mode .mt-train-title{
+  width:100%!important;
+  justify-content:center!important;
+  text-align:center!important;
+}
+body.mexican-mode .mt-chain{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x!important;
+  overscroll-behavior-x:contain!important;
+  box-sizing:border-box!important;
+}
+body.mexican-mode .mt-chain:not(.has-pieces){
+  justify-content:center!important;
+}
+body.mexican-mode .mt-empty{
+  text-align:center!important;
+}
+
+/* El tirador Jugadas/Chat debe verse también en iPhone landscape (>700px). */
+@media (max-width:950px){
+  body.mexican-mode.in-room .social-panel{
+    display:flex!important;
+    position:fixed!important;
+    right:0!important;
+    left:auto!important;
+    top:50%!important;
+    bottom:auto!important;
+    width:min(82vw,340px)!important;
+    height:min(56dvh,390px)!important;
+    z-index:2500!important;
+    transform:translate(100%,-50%)!important;
+    transition:transform .22s ease!important;
+    overflow:visible!important;
+  }
+  body.mexican-mode.in-room .social-panel.mobile-open{
+    transform:translate(0,-50%)!important;
+  }
+  body.mexican-mode .social-drawer-toggle{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:.82!important;
+    position:absolute!important;
+    left:-28px!important;
+    right:auto!important;
+    top:50%!important;
+    width:28px!important;
+    height:62px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    z-index:2600!important;
+    transform:translateY(-50%)!important;
+    pointer-events:auto!important;
+  }
+}
+
+/* iPhone vertical: dos columnas compactas. Así la mesa completa usa el ancho
+   disponible y no queda una segunda mitad fuera de pantalla. */
+@media (max-width:700px) and (orientation:portrait){
+  body.mexican-mode .board{
+    left:0!important;
+    right:0!important;
+    width:100%!important;
+    max-width:100vw!important;
+    padding:0 4px!important;
+    overflow-x:hidden!important;
+    box-sizing:border-box!important;
+  }
+  body.mexican-mode .mt-board{
+    width:100%!important;
+    padding:3px 4px!important;
+    gap:3px!important;
+  }
+  body.mexican-mode .mt-player-info{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:2px!important;
+  }
+  body.mexican-mode .mt-player-chip{
+    min-height:20px!important;
+    padding:2px 4px!important;
+    gap:3px!important;
+  }
+  body.mexican-mode .mt-player-chip strong{font-size:8px!important}
+  body.mexican-mode .mt-player-chip span{font-size:7px!important}
+  body.mexican-mode .mt-trains{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:3px!important;
+    width:100%!important;
+  }
+  body.mexican-mode .mt-train{
+    min-height:55px!important;
+    height:55px!important;
+    padding:3px!important;
+    border-radius:8px!important;
+  }
+  body.mexican-mode .mt-train-title{
+    min-height:13px!important;
+    margin:0 0 2px!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  body.mexican-mode .mt-chain{
+    min-height:31px!important;
+    height:31px!important;
+    gap:1px!important;
+    padding:1px!important;
+  }
+  body.mexican-mode .mt-mini{height:28px!important}
+  body.mexican-mode .mt-mini span{width:20px!important}
+  body.mexican-mode .mt-mini .mt-high-number>b{font-size:9px!important}
+  body.mexican-mode .mt-empty{
+    font-size:7px!important;
+    padding:3px!important;
+    white-space:nowrap!important;
+  }
+}
+
+/* Landscape: el menú izquierdo se repliega y el botón ☰ siempre puede abrirlo.
+   Esto corrige una regla antigua al final del archivo que lo forzaba oculto. */
+@media (max-width:950px) and (orientation:landscape) and (max-height:500px){
+  body.mexican-mode.in-room .app,
+  body.mexican-mode.in-room .app.sidebar-collapsed{
+    grid-template-columns:0 minmax(0,1fr)!important;
+  }
+  body.mexican-mode.in-room .side{
+    display:block!important;
+    position:fixed!important;
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    width:min(330px,78vw)!important;
+    min-width:min(330px,78vw)!important;
+    max-width:78vw!important;
+    height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    z-index:2400!important;
+    transform:translateX(0)!important;
+    pointer-events:auto!important;
+    transition:transform .22s ease!important;
+    box-shadow:8px 0 24px #0008!important;
+  }
+  body.mexican-mode.in-room .side.closed{
+    display:block!important;
+    width:min(330px,78vw)!important;
+    min-width:min(330px,78vw)!important;
+    transform:translateX(-105%)!important;
+    pointer-events:none!important;
+    box-shadow:none!important;
+  }
+  body.mexican-mode.in-room .main .toggle{
+    display:flex!important;
+    position:fixed!important;
+    left:8px!important;
+    top:max(8px,env(safe-area-inset-top))!important;
+    z-index:2450!important;
+  }
+  body.mexican-mode .mt-trains{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4px!important;
+  }
+  body.mexican-mode .mt-train{
+    min-height:54px!important;
+    height:54px!important;
+    padding:3px 5px!important;
+  }
+  body.mexican-mode .mt-train-title{
+    justify-content:center!important;
+    text-align:center!important;
+    font-size:9px!important;
+    min-height:12px!important;
+    margin-bottom:1px!important;
+  }
+  body.mexican-mode .mt-chain{
+    min-height:32px!important;
+    height:32px!important;
+  }
+}
+</style>
+
+
+<style id="mexican-train-v6-desktop-polish">
+/* SOLO Tren Mexicano: cabecera sin solapamientos, cámaras en esquinas y sin puntos/scrollbars extraños. */
+body.mexican-mode.in-room .main{
+  grid-template-rows:72px minmax(0,1fr) 88px 92px!important;
+}
+body.mexican-mode.in-room .top{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+  gap:4px!important;
+  min-height:72px!important;
+  height:72px!important;
+  padding:5px 58px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+body.mexican-mode.in-room #status{
+  display:block!important;
+  max-width:100%!important;
+  font-size:14px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+body.mexican-mode.in-room #subStatus{
+  display:block!important;
+  margin:0!important;
+  font-size:10px!important;
+  line-height:1!important;
+}
+body.mexican-mode.in-room .score-bar{
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0 2px!important;
+  justify-content:center!important;
+  gap:4px!important;
+  flex-wrap:nowrap!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scrollbar-width:none!important;
+  font-size:9px!important;
+  box-sizing:border-box!important;
+}
+body.mexican-mode.in-room .score-bar::-webkit-scrollbar{display:none!important}
+body.mexican-mode.in-room .score-player{padding:3px 7px!important;flex:0 0 auto!important}
+body.mexican-mode.in-room .score-target{flex:0 0 auto!important;font-size:9px!important}
+
+/* Esos puntos negros eran artefactos de los scrollbars horizontales compactos. */
+body.mexican-mode .mt-chain{scrollbar-width:none!important}
+body.mexican-mode .mt-chain::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+body.mexican-mode .mt-player-chip::before,
+body.mexican-mode .mt-player-chip::after,
+body.mexican-mode .mt-train::before,
+body.mexican-mode .mt-train::after{box-shadow:none!important}
+
+/* Las cámaras del Tren Mexicano viven en el perímetro, no encima de los trenes. */
+body.mexican-mode .player-video,
+body.mexican-mode .remote-video-wrap{
+  position:absolute!important;
+  width:86px!important;
+  height:58px!important;
+  z-index:80!important;
+  transform:none!important;
+}
+body.mexican-mode .player-video.local{left:8px!important;right:auto!important;bottom:8px!important;top:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-0{left:8px!important;right:auto!important;top:8px!important;bottom:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-1{right:8px!important;left:auto!important;top:8px!important;bottom:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-2{right:8px!important;left:auto!important;bottom:8px!important;top:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-3{left:102px!important;right:auto!important;top:8px!important;bottom:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-4{right:102px!important;left:auto!important;top:8px!important;bottom:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-5{left:102px!important;right:auto!important;bottom:8px!important;top:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-6{right:102px!important;left:auto!important;bottom:8px!important;top:auto!important}
+body.mexican-mode .remote-video-name{font-size:8px!important;top:calc(100% + 2px)!important;bottom:auto!important}
+body.mexican-mode .media-controls{bottom:8px!important;z-index:90!important}
+
+@media(max-width:950px){
+  body.mexican-mode.in-room .main{grid-template-rows:78px minmax(0,1fr) 82px 56px!important}
+  body.mexican-mode.in-room .top{height:78px!important;min-height:78px!important;padding:max(7px,env(safe-area-inset-top)) 48px 4px!important;gap:3px!important}
+  body.mexican-mode.in-room #status{font-size:13px!important}
+  body.mexican-mode.in-room #subStatus{font-size:9px!important}
+  body.mexican-mode.in-room .score-bar{font-size:8px!important;justify-content:flex-start!important;padding:0 4px!important}
+  body.mexican-mode.in-room .score-player{padding:3px 5px!important}
+  body.mexican-mode .player-video,body.mexican-mode .remote-video-wrap{width:58px!important;height:42px!important}
+  body.mexican-mode .player-video.local{left:5px!important;bottom:38px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-0{left:5px!important;top:5px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-1{right:5px!important;top:5px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-2{right:5px!important;bottom:38px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-3{left:68px!important;top:5px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-4{right:68px!important;top:5px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-5{left:68px!important;bottom:38px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-6{right:68px!important;bottom:38px!important}
+}
+@media(max-width:950px) and (orientation:landscape) and (max-height:500px){
+  body.mexican-mode.in-room .main{grid-template-rows:58px minmax(0,1fr) 64px 50px!important}
+  body.mexican-mode.in-room .top{height:58px!important;min-height:58px!important;padding:3px 50px!important;gap:2px!important}
+  body.mexican-mode.in-room #status{font-size:11px!important}
+  body.mexican-mode.in-room #subStatus{font-size:8px!important}
+  body.mexican-mode.in-room .score-bar{font-size:7px!important}
+  body.mexican-mode.in-room .score-player{padding:2px 4px!important}
 }
 </style>
