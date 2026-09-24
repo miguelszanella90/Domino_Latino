@@ -647,7 +647,6 @@ function finishBlockedRound(g) {
     `🔒 ${winner.name} gana el cierre y suma ${points} puntos`
   );
 }
-
 function placeTile(
   g,
   playerIndex,
@@ -660,6 +659,24 @@ function placeTile(
   const tile =
     player.hand[tileIndex];
 
+  if (!tile) {
+    return false;
+  }
+
+  if (!g.board.length) {
+    g.board.push([
+      tile[0],
+      tile[1]
+    ]);
+
+    player.hand.splice(
+      tileIndex,
+      1
+    );
+
+    return true;
+  }
+
   const left =
     g.board[0][0];
 
@@ -668,31 +685,38 @@ function placeTile(
       g.board.length - 1
     ][1];
 
-  let placed;
-
   if (side === 'left') {
     if (tile[1] === left) {
-      placed = tile;
-    } else {
-      placed = [
+      g.board.unshift([
+        tile[0],
+        tile[1]
+      ]);
+    } else if (
+      tile[0] === left
+    ) {
+      g.board.unshift([
         tile[1],
         tile[0]
-      ];
+      ]);
+    } else {
+      return false;
     }
-
-    g.board.unshift(placed);
-
   } else {
     if (tile[0] === right) {
-      placed = tile;
-    } else {
-      placed = [
+      g.board.push([
+        tile[0],
+        tile[1]
+      ]);
+    } else if (
+      tile[1] === right
+    ) {
+      g.board.push([
         tile[1],
         tile[0]
-      ];
+      ]);
+    } else {
+      return false;
     }
-
-    g.board.push(placed);
   }
 
   player.hand.splice(
@@ -700,21 +724,19 @@ function placeTile(
     1
   );
 
-  g.consecutivePasses = 0;
-
-  return placed;
+  return true;
 }
 
 function chooseBotMove(
   g,
-  playerIndex
+  botIndex
 ) {
-  const player =
-    g.players[playerIndex];
+  const bot =
+    g.players[botIndex];
 
   const moves =
     getValidMoves(
-      player,
+      bot,
       g.board
     );
 
@@ -723,8 +745,7 @@ function chooseBotMove(
   }
 
   if (
-    g.botDifficulty ===
-    'easy'
+    g.difficulty === 'easy'
   ) {
     return moves[
       Math.floor(
@@ -734,74 +755,88 @@ function chooseBotMove(
     ];
   }
 
-  if (
-    g.botDifficulty ===
-    'normal'
-  ) {
-    return moves
-      .sort(
-        (a, b) =>
-          (
-            b.tile[0] +
-            b.tile[1]
-          ) -
-          (
-            a.tile[0] +
-            a.tile[1]
-          )
-      )[0];
-  }
+  const left =
+    g.board.length
+      ? g.board[0][0]
+      : null;
 
-  const frequencies = {};
+  const right =
+    g.board.length
+      ? g.board[
+          g.board.length - 1
+        ][1]
+      : null;
 
-  player.hand.forEach(
-    tile => {
+  const counts = {};
 
-      frequencies[tile[0]] =
-        (
-          frequencies[tile[0]] ||
-          0
-        ) + 1;
+  bot.hand.forEach(tile => {
+    counts[tile[0]] =
+      (counts[tile[0]] || 0) + 1;
 
-      frequencies[tile[1]] =
-        (
-          frequencies[tile[1]] ||
-          0
-        ) + 1;
-    }
-  );
+    counts[tile[1]] =
+      (counts[tile[1]] || 0) + 1;
+  });
 
-  function moveScore(move) {
-    const tile =
+  function exposedValue(move) {
+    const [a, b] =
       move.tile;
 
-    let value =
-      (
-        tile[0] +
-        tile[1]
-      ) * 3;
-
-    if (
-      tile[0] ===
-      tile[1]
-    ) {
-      value += 5;
+    if (!g.board.length) {
+      return b;
     }
 
-    value +=
-      (
-        frequencies[tile[0]] ||
-        0
-      ) +
-      (
-        frequencies[tile[1]] ||
-        0
-      );
+    if (
+      move.side === 'left'
+    ) {
+      return b === left
+        ? a
+        : b;
+    }
 
-    return value;
+    return a === right
+      ? b
+      : a;
+  }
+
+  function moveScore(move) {
+    const [a, b] =
+      move.tile;
+
+    let score =
+      a + b;
+
+    if (a === b) {
+      score += 3;
+    }
+
+    const exposed =
+      exposedValue(move);
+
+    score +=
+      (counts[exposed] || 0) *
+      2;
+
+    if (
+      g.difficulty === 'hard'
+    ) {
+      score +=
+        Math.max(a, b);
+
+      if (
+        a === left ||
+        b === left ||
+        a === right ||
+        b === right
+      ) {
+        score += 2;
+      }
+    }
+
+    return score;
   }
 
   return moves
+    .slice()
     .sort(
       (a, b) =>
         moveScore(b) -
@@ -810,7 +845,9 @@ function chooseBotMove(
 }
 
 function prepareRound(g) {
-  const tiles =
+  applyPendingRotation(g);
+
+  const set =
     createSet();
 
   g.players.forEach(
@@ -819,138 +856,141 @@ function prepareRound(g) {
     }
   );
 
+  const handSize =
+    g.players.length === 2
+      ? 7
+      : g.players.length === 3
+        ? 7
+        : 7;
+
+  for (
+    let round = 0;
+    round < handSize;
+    round++
+  ) {
+    g.players.forEach(
+      player => {
+        if (set.length) {
+          player.hand.push(
+            set.pop()
+          );
+        }
+      }
+    );
+  }
+
+  g.boneyard = set;
   g.board = [];
-  g.boneyard = tiles;
-  g.consecutivePasses = 0;
-  g.history = [];
-
-  g.roundNumber =
-    (g.roundNumber || 0) + 1;
-
-  g.players.forEach(
-    player => {
-      player.hand =
-        g.boneyard.splice(
-          0,
-          7
-        );
-    }
-  );
+  g.passCount = 0;
+  g.status = 'playing';
+  g.round =
+    (g.round || 0) + 1;
 
   const opening =
     findOpeningTile(g);
 
-  const starter =
-    opening.playerIndex;
-
-  const openingTile =
-    g.players[starter]
-      .hand.splice(
-        opening.tileIndex,
-        1
-      )[0];
-
-  g.board.push(
-    openingTile
-  );
+  if (!opening) {
+    g.message =
+      'No se pudo determinar quién abre.';
+    return;
+  }
 
   g.turn =
-    (starter + 1) %
-    g.players.length;
+    opening.playerIndex;
 
-  g.status =
-    'playing';
+  const opener =
+    g.players[g.turn];
+
+  const openingTile =
+    opener.hand[
+      opening.tileIndex
+    ];
+
+  placeTile(
+    g,
+    g.turn,
+    opening.tileIndex,
+    'right'
+  );
+
+  const isDouble =
+    openingTile[0] ===
+    openingTile[1];
 
   g.message =
-    `${g.players[starter].name} abre con ${openingTile[0]}-${openingTile[1]}`;
+    isDouble
+      ? `${opener.name} abre con ${openingTile[0]}-${openingTile[1]}`
+      : `${opener.name} abre con ${openingTile[0]}-${openingTile[1]}`;
 
   addHistory(
     g,
-    `🎲 ${g.players[starter].name} abrió con ${openingTile[0]}|${openingTile[1]}`
+    `🎲 ${opener.name} abrió con ${openingTile[0]}|${openingTile[1]}`
   );
+
+  if (
+    opener.hand.length === 0
+  ) {
+    finishDominoRound(
+      g,
+      g.turn
+    );
+    return;
+  }
+
+  nextTurn(g);
 }
 
 function publicGame(
   g,
   playerId
 ) {
-  const myIndex =
-    g.players.findIndex(
-      player =>
-        player.id === playerId
-    );
+  ensureRotationData(g);
 
   const me =
-    myIndex >= 0
-      ? g.players[myIndex]
-      : null;
+    g.players.find(
+      p =>
+        p.id === playerId
+    ) ||
+    g.waiting?.find(
+      p =>
+        p.id === playerId
+    );
+
+  const playerIndex =
+    g.players.findIndex(
+      p =>
+        p.id === playerId
+    );
+
+  const isWaiting =
+    playerIndex === -1 &&
+    !!g.waiting?.some(
+      p =>
+        p.id === playerId
+    );
+
+  const humanPlayers =
+    g.players
+      .filter(
+        p => !p.isBot
+      )
+      .map(p => ({
+        id: p.id,
+        name: p.name
+      }));
 
   return {
-    code:
+    code: g.code,
+
+    roomName:
+      g.roomName ||
       g.code,
 
-    gameMode:
-      g.gameMode || 'classic',
+    customRoomName:
+      !!g.customRoomName,
 
-    waitingCount:
-      Array.isArray(g.waiting)
-        ? g.waiting.length
-        : 0,
-
-    isWaiting:
-      Array.isArray(g.waiting) &&
-      g.waiting.some(
-        p => p.id === playerId
-      ),
-
-    leaderboard:
-      g.gameMode === 'rotation'
-        ? Object.keys(
-            g.individualScores || {}
-          )
-            .map(id => ({
-              id,
-              name:
-                (g.participantNames || {})[id] ||
-                'Jugador',
-              score:
-                (g.individualScores || {})[id] ||
-                0,
-              isMe:
-                id === playerId
-            }))
-            .sort(
-              (a, b) =>
-                b.score - a.score ||
-                a.name.localeCompare(b.name)
-            )
-        : null,
-
-    maxPlayers:
-      g.maxPlayers,
-
-    botCount:
-      g.botCount || 0,
-
-    botDifficulty:
-      g.botDifficulty ||
-      'normal',
-
-    humanSlots:
-      g.maxPlayers -
-      (g.botCount || 0),
-
-    target:
-      g.target,
-
-    board:
-      g.board,
-
-    boneyardCount:
-      g.boneyard.length,
-
-    turn:
-      g.turn,
+    hostId:
+      g.hostId,
 
     status:
       g.status,
@@ -958,87 +998,234 @@ function publicGame(
     message:
       g.message,
 
-    roundNumber:
-      g.roundNumber || 0,
+    target:
+      g.target,
 
-    history:
-      g.history || [],
+    round:
+      g.round,
 
-    chat:
-      g.chat || [],
+    turn:
+      g.turn,
 
-    signals:
-      (g.signals || []).filter(
-        signal =>
-          signal.to === playerId
-      ),
+    turnDirection:
+      g.turnDirection,
 
-    humanPlayerIds:
-      g.players
-        .filter(
-          player =>
-            !player.isBot
-        )
-        .map(
-          player =>
-            player.id
-        ),
+    difficulty:
+      g.difficulty,
 
-    myIndex,
+    gameMode:
+      g.gameMode ||
+      'classic',
 
-    myHand:
-      me
-        ? me.hand
-        : [],
+    board:
+      g.board,
 
-    isHost:
-      g.host === playerId,
-
-    currentPlayerIsBot:
-      !!g.players[g.turn]?.isBot,
+    boneyardCount:
+      g.boneyard.length,
 
     players:
       g.players.map(
-        (player, index) => ({
-          id:
-            player.isBot
-              ? null
-              : player.id,
-
-          name:
-            player.name,
-
+        (p, index) => ({
+          id: p.id,
+          name: p.name,
+          isBot: p.isBot,
           handCount:
-            player.hand.length,
-
-          isBot:
-            !!player.isBot,
-
+            p.hand.length,
           team:
             g.players.length === 4
               ? teamOf(index)
-              : null,
-
-          score:
-            g.players.length === 4
-              ? null
-              : g.scores[player.id] || 0,
-
-          isMe:
-            player.id === playerId
+              : null
         })
       ),
 
+    myHand:
+      me &&
+      !isWaiting
+        ? me.hand
+        : [],
+
+    myIndex:
+      playerIndex,
+
+    isWaiting,
+
+    waiting:
+      (g.waiting || []).map(
+        p => ({
+          id: p.id,
+          name: p.name
+        })
+      ),
+
+    waitingCount:
+      (g.waiting || [])
+        .length,
+
+    scores:
+      g.scores,
+
     teamScores:
-      g.players.length === 4
-        ? g.teamScores
-        : null
+      g.teamScores,
+
+    individualScores:
+      g.individualScores ||
+      {},
+
+    participantNames:
+      g.participantNames ||
+      {},
+
+    history:
+      g.history ||
+      [],
+
+    chat:
+      g.chat ||
+      [],
+
+    humanPlayers,
+
+    signals:
+      (g.signals || [])
+        .filter(
+          signal =>
+            signal.to ===
+            playerId
+        ),
+
+    canStart:
+      g.hostId ===
+        playerId &&
+      (
+        g.status ===
+          'lobby' ||
+        g.status ===
+          'finished'
+      ),
+
+    isHost:
+      g.hostId ===
+      playerId
   };
 }
 
+async function runBots(g) {
+  let safety = 0;
 
-module.exports =
-async (req, res) => {
+  while (
+    g.status ===
+      'playing' &&
+    g.players[g.turn]
+      ?.isBot &&
+    safety < 100
+  ) {
+    safety++;
+
+    const botIndex =
+      g.turn;
+
+    const bot =
+      g.players[botIndex];
+
+    let moves =
+      getValidMoves(
+        bot,
+        g.board
+      );
+
+    while (
+      !moves.length &&
+      g.boneyard.length
+    ) {
+      const drawn =
+        g.boneyard.pop();
+
+      bot.hand.push(
+        drawn
+      );
+
+      addHistory(
+        g,
+        `🤖 ${bot.name} robó una ficha`
+      );
+
+      moves =
+        getValidMoves(
+          bot,
+          g.board
+        );
+    }
+
+    if (!moves.length) {
+      g.passCount++;
+
+      addHistory(
+        g,
+        `🤖 ${bot.name} pasó`
+      );
+
+      if (
+        g.passCount >=
+        g.players.length
+      ) {
+        finishBlockedRound(g);
+        break;
+      }
+
+      nextTurn(g);
+      continue;
+    }
+
+    g.passCount = 0;
+
+    const move =
+      chooseBotMove(
+        g,
+        botIndex
+      );
+
+    if (!move) {
+      nextTurn(g);
+      continue;
+    }
+
+    const playedTile =
+      bot.hand[
+        move.index
+      ].slice();
+
+    const placed =
+      placeTile(
+        g,
+        botIndex,
+        move.index,
+        move.side
+      );
+
+    if (!placed) {
+      nextTurn(g);
+      continue;
+    }
+
+    addHistory(
+      g,
+      `🤖 ${bot.name} jugó ${playedTile[0]}|${playedTile[1]} ${move.side === 'left' ? '←' : '→'}`
+    );
+
+    if (
+      bot.hand.length === 0
+    ) {
+      finishDominoRound(
+        g,
+        botIndex
+      );
+      break;
+    }
+
+    nextTurn(g);
+  }
+}
+module.exports = async (req, res) => {
   try {
     const b =
       req.body || {};
@@ -1106,13 +1293,40 @@ async (req, res) => {
       });
     }
 
+
+    /* =========================
+       GET GAME
+    ========================= */
+
     if (
-      req.method ===
-      'GET'
+      req.method === 'GET'
     ) {
+      const code =
+        String(
+          req.query.code ||
+          ''
+        )
+          .trim()
+          .toUpperCase();
+
+      const playerId =
+        String(
+          req.query.playerId ||
+          ''
+        ).trim();
+
+      if (!code) {
+        return res
+          .status(400)
+          .json({
+            error:
+              'Falta el código de la sala'
+          });
+      }
+
       const g =
         await kv.get(
-          `domino:${req.query.code}`
+          `domino:${code}`
         );
 
       if (!g) {
@@ -1127,14 +1341,18 @@ async (req, res) => {
       return res.json(
         publicGame(
           g,
-          req.query.playerId
+          playerId
         )
       );
     }
 
+
+    /* =========================
+       CREATE ROOM
+    ========================= */
+
     if (
-      action ===
-      'create'
+      action === 'create'
     ) {
       const code =
         id();
@@ -1142,30 +1360,58 @@ async (req, res) => {
       const pid =
         id();
 
+      const requestedName =
+        String(
+          b.roomName ||
+          ''
+        )
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 40);
+
+      const useAutomaticName =
+        b.autoRoomName !== false ||
+        !requestedName;
+
+      const roomName =
+        useAutomaticName
+          ? code
+          : requestedName;
+
       const gameMode =
         b.gameMode === 'rotation'
           ? 'rotation'
           : 'classic';
 
+      const requestedPlayers =
+        Number(
+          b.maxPlayers
+        ) || 4;
+
       const maxPlayers =
         gameMode === 'rotation'
           ? 4
-          : Math.min(
-              4,
-              Math.max(
-                2,
-                Number(b.maxPlayers) || 4
+          : Math.max(
+              2,
+              Math.min(
+                4,
+                requestedPlayers
               )
             );
+
+      const requestedBots =
+        Number(
+          b.botCount
+        ) || 0;
 
       const botCount =
         gameMode === 'rotation'
           ? 0
-          : Math.min(
-              maxPlayers - 1,
-              Math.max(
-                0,
-                Number(b.botCount) || 0
+          : Math.max(
+              0,
+              Math.min(
+                maxPlayers - 1,
+                requestedBots
               )
             );
 
@@ -1175,32 +1421,101 @@ async (req, res) => {
           'normal',
           'hard'
         ].includes(
-          b.botDifficulty
+          b.difficulty
         )
-          ? b.botDifficulty
+          ? b.difficulty
           : 'normal';
 
+      const target =
+        Math.max(
+          25,
+          Number(
+            b.target
+          ) || 100
+        );
+
       const playerName =
-        (
+        String(
           b.name ||
-          ''
-        ).trim() ||
-        'Jugador 1';
+          'Jugador'
+        )
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 30) ||
+        'Jugador';
 
       const g = {
         code,
-        host: pid,
+
+        roomName,
+
+        customRoomName:
+          !useAutomaticName,
+
+        hostId:
+          pid,
+
+        status:
+          'lobby',
 
         gameMode,
 
+        maxPlayers,
+
+        botCount,
+
+        difficulty,
+
+        target,
+
+        turnDirection:
+          'clockwise',
+
+        players: [
+          {
+            id: pid,
+            name:
+              playerName,
+            hand: [],
+            isBot:
+              false
+          }
+        ],
+
         waiting: [],
+
+        board: [],
+
+        boneyard: [],
+
+        turn: 0,
+
+        passCount: 0,
+
+        round: 0,
+
+        message:
+          gameMode ===
+          'rotation'
+            ? 'Sala rotativa creada'
+            : 'Sala creada',
+
+        scores: {
+          [pid]: 0
+        },
+
+        teamScores: {
+          A: 0,
+          B: 0
+        },
 
         individualScores: {
           [pid]: 0
         },
 
         participantNames: {
-          [pid]: playerName
+          [pid]:
+            playerName
         },
 
         rotationCursor: {
@@ -1211,62 +1526,11 @@ async (req, res) => {
         pendingRotationTeam:
           null,
 
-        maxPlayers,
-        botCount,
-
-        botDifficulty:
-          difficulty,
-
-        target:
-          Number(b.target) ||
-          100,
-
-        turnDirection:
-          'clockwise',
-
-        players: [
-          {
-            id: pid,
-
-            name:
-              playerName,
-
-            hand: [],
-
-            isBot:
-              false
-          }
-        ],
-
-        board: [],
-
-        boneyard:
-          createSet(),
-
-        scores: {},
-
-        teamScores: {
-          A: 0,
-          B: 0
-        },
-
-        turn: 0,
-
-        status:
-          'lobby',
-
-        message:
-          'Sala creada',
-
         history: [],
 
         chat: [],
 
-        signals: [],
-
-        consecutivePasses: 0,
-
-        roundNumber: 0
+        signals: []
       };
 
       await save(g);
@@ -1283,9 +1547,31 @@ async (req, res) => {
       });
     }
 
+
+    /* =========================
+       FROM HERE ROOM REQUIRED
+    ========================= */
+
+    const code =
+      String(
+        b.code ||
+        ''
+      )
+        .trim()
+        .toUpperCase();
+
+    if (!code) {
+      return res
+        .status(400)
+        .json({
+          error:
+            'Falta el código de la sala'
+        });
+    }
+
     const g =
       await kv.get(
-        `domino:${b.code}`
+        `domino:${code}`
       );
 
     if (!g) {
@@ -1297,48 +1583,187 @@ async (req, res) => {
         });
     }
 
+    ensureRotationData(g);
+
+
+    /* =========================
+       JOIN ROOM
+    ========================= */
+
+    if (
+      action === 'join'
+    ) {
+      const pid =
+        id();
+
+      const playerName =
+        String(
+          b.name ||
+          'Jugador'
+        )
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 30) ||
+        'Jugador';
+
+      const player = {
+        id: pid,
+
+        name:
+          playerName,
+
+        hand: [],
+
+        isBot:
+          false
+      };
+
+      const humanCount =
+        g.players.filter(
+          p => !p.isBot
+        ).length;
+
+      const humanSlots =
+        g.maxPlayers -
+        (g.botCount || 0);
+
+      if (
+        g.gameMode ===
+        'rotation'
+      ) {
+        if (
+          humanCount < 4 &&
+          g.status === 'lobby'
+        ) {
+          g.players.push(
+            player
+          );
+
+          g.message =
+            `${player.name} se unió a la mesa`;
+        } else {
+          g.waiting.push(
+            player
+          );
+
+          g.message =
+            `${player.name} entró en la cola`;
+        }
+
+        g.individualScores[
+          pid
+        ] = 0;
+
+        g.participantNames[
+          pid
+        ] =
+          playerName;
+
+      } else {
+        if (
+          g.status !==
+          'lobby'
+        ) {
+          return res
+            .status(400)
+            .json({
+              error:
+                'La partida ya comenzó'
+            });
+        }
+
+        if (
+          humanCount >=
+          humanSlots
+        ) {
+          return res
+            .status(400)
+            .json({
+              error:
+                'La sala está llena'
+            });
+        }
+
+        g.players.push(
+          player
+        );
+
+        g.scores[pid] = 0;
+
+        g.individualScores[
+          pid
+        ] = 0;
+
+        g.participantNames[
+          pid
+        ] =
+          playerName;
+
+        g.message =
+          `${player.name} se unió a la sala`;
+      }
+
+      addHistory(
+        g,
+        `👋 ${player.name} entró a la sala`
+      );
+
+      await save(g);
+
+      return res.json({
+        game:
+          publicGame(
+            g,
+            pid
+          ),
+
+        playerId:
+          pid
+      });
+    }
+
 
     /* =========================
        CHAT
     ========================= */
 
     if (
-      action ===
-      'chat'
+      action === 'chat'
     ) {
-      const sender =
+      const player =
         g.players.find(
-          player =>
-            player.id === b.playerId &&
-            !player.isBot
+          p =>
+            p.id ===
+            b.playerId
         ) ||
-        (g.waiting || []).find(
-          player =>
-            player.id === b.playerId
+        g.waiting.find(
+          p =>
+            p.id ===
+            b.playerId
         );
 
-      if (!sender) {
+      if (!player) {
         return res
           .status(403)
           .json({
             error:
-              'Jugador inválido'
+              'Jugador no válido'
           });
       }
 
-      const ok =
+      const added =
         addChatMessage(
           g,
-          sender,
+          player,
           b.text
         );
 
-      if (!ok) {
+      if (!added) {
         return res
           .status(400)
           .json({
             error:
-              'El mensaje está vacío'
+              'Mensaje vacío'
           });
       }
 
@@ -1358,50 +1783,47 @@ async (req, res) => {
     ========================= */
 
     if (
-      action ===
-      'signal'
+      action === 'signal'
     ) {
-      const sender =
+      const player =
         g.players.find(
-          player =>
-            player.id === b.playerId &&
-            !player.isBot
+          p =>
+            p.id ===
+              b.playerId &&
+            !p.isBot
         );
 
-      if (!sender) {
+      if (!player) {
         return res
           .status(403)
           .json({
             error:
-              'Jugador inválido'
+              'Jugador no válido'
           });
       }
 
-      const ok =
+      const added =
         addSignal(
           g,
-          sender,
-          b.to,
+          player,
+          b.toPlayerId,
           b.signal
         );
 
-      if (!ok) {
+      if (!added) {
         return res
           .status(400)
           .json({
             error:
-              'Señal de cámara inválida'
+              'Señal no válida'
           });
       }
 
       await save(g);
 
-      return res.json(
-        publicGame(
-          g,
-          b.playerId
-        )
-      );
+      return res.json({
+        ok: true
+      });
     }
 
 
@@ -1413,65 +1835,76 @@ async (req, res) => {
       action ===
       'ackSignals'
     ) {
-      const sender =
+      const player =
         g.players.find(
-          player =>
-            player.id === b.playerId &&
-            !player.isBot
+          p =>
+            p.id ===
+              b.playerId &&
+            !p.isBot
         );
 
-      if (!sender) {
+      if (!player) {
         return res
           .status(403)
           .json({
             error:
-              'Jugador inválido'
+              'Jugador no válido'
           });
       }
 
       const ids =
-        Array.isArray(b.signalIds)
-          ? new Set(
-              b.signalIds
-                .map(String)
-                .slice(0, 100)
-            )
-          : new Set();
+        Array.isArray(
+          b.signalIds
+        )
+          ? b.signalIds
+          : [];
+
+      const idSet =
+        new Set(ids);
 
       g.signals =
-        (g.signals || []).filter(
-          signal =>
-            !(
-              signal.to ===
-                b.playerId &&
-              ids.has(
-                String(signal.id)
+        (g.signals || [])
+          .filter(
+            signal =>
+              !(
+                signal.to ===
+                  b.playerId &&
+                idSet.has(
+                  signal.id
+                )
               )
-            )
-        );
+          );
 
       await save(g);
 
-      return res.json(
-        publicGame(
-          g,
-          b.playerId
-        )
-      );
+      return res.json({
+        ok: true
+      });
     }
 
 
     /* =========================
-       JOIN
+       START GAME
     ========================= */
 
     if (
-      action ===
-      'join'
+      action === 'start'
     ) {
       if (
-        g.status !== 'lobby' &&
-        g.gameMode !== 'rotation'
+        b.playerId !==
+        g.hostId
+      ) {
+        return res
+          .status(403)
+          .json({
+            error:
+              'Solo el anfitrión puede iniciar'
+          });
+      }
+
+      if (
+        g.status !==
+        'lobby'
       ) {
         return res
           .status(400)
@@ -1481,176 +1914,68 @@ async (req, res) => {
           });
       }
 
-      const humanSlots =
-        g.maxPlayers -
-        (g.botCount || 0);
-
-      const humanPlayers =
-        g.players.filter(
-          player =>
-            !player.isBot
-        ).length;
-
-      const pid =
-        id();
-
-      const newPlayer = {
-        id: pid,
-
-        name:
-          (
-            b.name ||
-            ''
-          ).trim() ||
-          `Jugador ${
-            humanPlayers +
-            (g.waiting?.length || 0) +
-            1
-          }`,
-
-        hand: [],
-
-        isBot:
-          false
-      };
-
       if (
-        humanPlayers >=
-        humanSlots
+        g.gameMode ===
+        'rotation'
       ) {
         if (
-          g.gameMode !==
-          'rotation'
+          g.players.length < 4
         ) {
           return res
             .status(400)
             .json({
               error:
-                'Todos los puestos humanos están ocupados'
+                'La mesa rotativa necesita 4 jugadores para comenzar'
             });
         }
 
-        ensureRotationData(g);
-
-        g.waiting.push(
-          newPlayer
-        );
-
-        g.individualScores[pid] =
-          g.individualScores[pid] ||
-          0;
-
-        g.participantNames[pid] =
-          newPlayer.name;
-
-        g.message =
-          `${newPlayer.name} entró a la cola · ${g.waiting.length} esperando`;
+        g.players =
+          g.players.slice(
+            0,
+            4
+          );
 
       } else {
-        g.players.push(
-          newPlayer
-        );
-
-        if (
-          g.gameMode ===
-          'rotation'
+        while (
+          g.players.length <
+          g.maxPlayers
         ) {
-          ensureRotationData(g);
+          const botNumber =
+            g.players.filter(
+              p => p.isBot
+            ).length + 1;
 
-          g.individualScores[pid] =
-            g.individualScores[pid] ||
-            0;
+          g.players.push({
+            id:
+              `BOT_${id()}`,
 
-          g.participantNames[pid] =
-            newPlayer.name;
+            name:
+              `Bot ${botNumber}`,
+
+            hand: [],
+
+            isBot:
+              true
+          });
         }
-
-        g.message =
-          `${humanPlayers + 1}/${humanSlots} jugadores humanos conectados`;
       }
 
-      await save(g);
-
-      return res.json({
-        game:
-          publicGame(
-            g,
-            pid
-          ),
-
-        playerId:
-          pid
-      });
-    }
-
-
-    /* =========================
-       START
-    ========================= */
-
-    if (
-      action ===
-      'start'
-    ) {
-      if (
-        b.playerId !==
-        g.host
-      ) {
-        return res
-          .status(403)
-          .json({
-            error:
-              'Solo el host puede iniciar'
-          });
-      }
-
-      const humanSlots =
-        g.maxPlayers -
-        (g.botCount || 0);
-
-      const humanPlayers =
-        g.players.filter(
-          player =>
-            !player.isBot
-        ).length;
-
-      if (
-        humanPlayers !==
-        humanSlots
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              `Faltan jugadores humanos. ${humanPlayers}/${humanSlots} conectados.`
-          });
-      }
-
-      while (
-        g.players.length <
-        g.maxPlayers
-      ) {
-        const botNumber =
-          g.players.filter(
-            player =>
-              player.isBot
-          ).length + 1;
-
-        g.players.push({
-          id:
-            `BOT-${id()}`,
-
-          name:
-            `Bot ${botNumber}`,
-
-          hand: [],
-
-          isBot:
-            true
-        });
-      }
+      g.players.forEach(
+        p => {
+          if (
+            !p.isBot &&
+            g.scores[p.id] ==
+              null
+          ) {
+            g.scores[p.id] =
+              0;
+          }
+        }
+      );
 
       prepareRound(g);
+
+      await runBots(g);
 
       await save(g);
 
@@ -1673,13 +1998,13 @@ async (req, res) => {
     ) {
       if (
         b.playerId !==
-        g.host
+        g.hostId
       ) {
         return res
           .status(403)
           .json({
             error:
-              'Solo el host puede iniciar una nueva ronda'
+              'Solo el anfitrión puede iniciar otra ronda'
           });
       }
 
@@ -1691,14 +2016,14 @@ async (req, res) => {
           .status(400)
           .json({
             error:
-              'La ronda todavía no ha terminado'
+              'La ronda actual no ha terminado'
           });
       }
 
-      applyPendingRotation(g);
-
       prepareRound(g);
 
+      await runBots(g);
+
       await save(g);
 
       return res.json(
@@ -1711,175 +2036,24 @@ async (req, res) => {
 
 
     /* =========================
-       BOT STEP
+       PLAYER VALIDATION
     ========================= */
+
+    const playerIndex =
+      g.players.findIndex(
+        p =>
+          p.id ===
+          b.playerId
+      );
 
     if (
-      action ===
-      'botStep'
+      playerIndex < 0
     ) {
-      if (
-        g.status !==
-        'playing'
-      ) {
-        return res.json(
-          publicGame(
-            g,
-            b.playerId
-          )
-        );
-      }
-
-      const botIndex =
-        g.turn;
-
-      const bot =
-        g.players[
-          botIndex
-        ];
-
-      if (
-        !bot ||
-        !bot.isBot
-      ) {
-        return res.json(
-          publicGame(
-            g,
-            b.playerId
-          )
-        );
-      }
-
-      let move =
-        chooseBotMove(
-          g,
-          botIndex
-        );
-
-      if (move) {
-        const played =
-          placeTile(
-            g,
-            botIndex,
-            move.index,
-            move.side
-          );
-
-        addHistory(
-          g,
-          `🤖 ${bot.name} jugó ${played[0]}|${played[1]} ${move.side === 'left' ? '←' : '→'}`
-        );
-
-        if (
-          !bot.hand.length
-        ) {
-          finishDominoRound(
-            g,
-            botIndex
-          );
-
-          await save(g);
-
-          return res.json(
-            publicGame(
-              g,
-              b.playerId
-            )
-          );
-        }
-
-        nextTurn(g);
-
-        await save(g);
-
-        return res.json(
-          publicGame(
-            g,
-            b.playerId
-          )
-        );
-      }
-
-      if (
-        g.boneyard.length
-      ) {
-        bot.hand.push(
-          g.boneyard.pop()
-        );
-
-        g.message =
-          `${bot.name} roba del pozo`;
-
-        addHistory(
-          g,
-          `🤖 ${bot.name} robó del pozo`
-        );
-
-        await save(g);
-
-        return res.json(
-          publicGame(
-            g,
-            b.playerId
-          )
-        );
-      }
-
-      g.consecutivePasses =
-        (g.consecutivePasses || 0) +
-        1;
-
-      addHistory(
-        g,
-        `🤖 ${bot.name} pasó`
-      );
-
-      if (
-        g.consecutivePasses >=
-        g.players.length
-      ) {
-        finishBlockedRound(g);
-
-        await save(g);
-
-        return res.json(
-          publicGame(
-            g,
-            b.playerId
-          )
-        );
-      }
-
-      nextTurn(g);
-
-      await save(g);
-
-      return res.json(
-        publicGame(
-          g,
-          b.playerId
-        )
-      );
-    }
-
-
-    /* =========================
-       VALIDATE HUMAN PLAYER
-    ========================= */
-
-    const pi =
-      g.players.findIndex(
-        player =>
-          player.id ===
-          b.playerId
-      );
-
-    if (pi < 0) {
       return res
         .status(403)
         .json({
           error:
-            'Jugador inválido'
+            'Jugador no válido'
         });
     }
 
@@ -1891,12 +2065,13 @@ async (req, res) => {
         .status(400)
         .json({
           error:
-            'La ronda no está activa'
+            'La partida no está activa'
         });
     }
 
     if (
-      pi !== g.turn
+      playerIndex !==
+      g.turn
     ) {
       return res
         .status(400)
@@ -1907,7 +2082,9 @@ async (req, res) => {
     }
 
     const player =
-      g.players[pi];
+      g.players[
+        playerIndex
+      ];
 
 
     /* =========================
@@ -1915,8 +2092,7 @@ async (req, res) => {
     ========================= */
 
     if (
-      action ===
-      'draw'
+      action === 'draw'
     ) {
       if (
         hasPlayableTile(
@@ -1928,7 +2104,7 @@ async (req, res) => {
           .status(400)
           .json({
             error:
-              'Ya tienes una ficha que puedes jugar'
+              'Tienes una ficha que puedes jugar'
           });
       }
 
@@ -1939,21 +2115,26 @@ async (req, res) => {
           .status(400)
           .json({
             error:
-              'El pozo está vacío. Debes pasar.'
+              'No quedan fichas para robar'
           });
       }
 
+      const tile =
+        g.boneyard.pop();
+
       player.hand.push(
-        g.boneyard.pop()
+        tile
       );
 
-      g.message =
-        `${player.name} roba una ficha`;
+      g.passCount = 0;
 
       addHistory(
         g,
-        `🁣 ${player.name} robó del pozo`
+        `🎲 ${player.name} robó una ficha`
       );
+
+      g.message =
+        `${player.name} robó una ficha`;
 
       await save(g);
 
@@ -1964,15 +2145,12 @@ async (req, res) => {
         )
       );
     }
-
-
-    /* =========================
+        /* =========================
        PASS
     ========================= */
 
     if (
-      action ===
-      'pass'
+      action === 'pass'
     ) {
       if (
         hasPlayableTile(
@@ -1995,21 +2173,20 @@ async (req, res) => {
           .status(400)
           .json({
             error:
-              'Todavía quedan fichas en el pozo'
+              'Todavía puedes robar del pozo'
           });
       }
 
-      g.consecutivePasses =
-        (g.consecutivePasses || 0) +
-        1;
+      g.passCount =
+        (g.passCount || 0) + 1;
 
       addHistory(
         g,
-        `⏭ ${player.name} pasó`
+        `⏭️ ${player.name} pasó`
       );
 
       if (
-        g.consecutivePasses >=
+        g.passCount >=
         g.players.length
       ) {
         finishBlockedRound(g);
@@ -2025,6 +2202,8 @@ async (req, res) => {
       }
 
       nextTurn(g);
+
+      await runBots(g);
 
       await save(g);
 
@@ -2042,41 +2221,63 @@ async (req, res) => {
     ========================= */
 
     if (
-      action ===
-      'play'
+      action === 'play'
     ) {
       const tileIndex =
         Number(
           b.tileIndex
         );
 
-      const tile =
-        player.hand[
-          tileIndex
-        ];
+      const side =
+        b.side === 'left'
+          ? 'left'
+          : b.side === 'right'
+            ? 'right'
+            : null;
 
-      if (!tile) {
+      if (
+        !Number.isInteger(
+          tileIndex
+        ) ||
+        tileIndex < 0 ||
+        tileIndex >=
+          player.hand.length
+      ) {
         return res
           .status(400)
           .json({
             error:
-              'Ficha inválida'
+              'Ficha no válida'
           });
       }
 
-      const moves =
+      if (!side) {
+        return res
+          .status(400)
+          .json({
+            error:
+              'Debes indicar izquierda o derecha'
+          });
+      }
+
+      const tile =
+        player.hand[
+          tileIndex
+        ].slice();
+
+      const validMoves =
         getValidMoves(
           player,
           g.board
         );
 
       const valid =
-        moves.some(
+        validMoves.some(
           move =>
             move.index ===
               tileIndex &&
             move.side ===
-              b.side
+              side
         );
 
       if (!valid) {
@@ -2084,29 +2285,40 @@ async (req, res) => {
           .status(400)
           .json({
             error:
-              'La ficha no puede colocarse en ese extremo'
+              'Esa ficha no se puede jugar en ese lado'
           });
       }
 
-      const played =
+      const placed =
         placeTile(
           g,
-          pi,
+          playerIndex,
           tileIndex,
-          b.side
+          side
         );
+
+      if (!placed) {
+        return res
+          .status(400)
+          .json({
+            error:
+              'No se pudo colocar la ficha'
+          });
+      }
+
+      g.passCount = 0;
 
       addHistory(
         g,
-        `🁣 ${player.name} jugó ${played[0]}|${played[1]} ${b.side === 'left' ? '←' : '→'}`
+        `🁣 ${player.name} jugó ${tile[0]}|${tile[1]} ${side === 'left' ? '←' : '→'}`
       );
 
       if (
-        !player.hand.length
+        player.hand.length === 0
       ) {
         finishDominoRound(
           g,
-          pi
+          playerIndex
         );
 
         await save(g);
@@ -2121,6 +2333,8 @@ async (req, res) => {
 
       nextTurn(g);
 
+      await runBots(g);
+
       await save(g);
 
       return res.json(
@@ -2131,22 +2345,30 @@ async (req, res) => {
       );
     }
 
+
+    /* =========================
+       UNKNOWN ACTION
+    ========================= */
+
     return res
       .status(400)
       .json({
         error:
-          'Acción inválida'
+          'Acción no válida'
       });
 
-  } catch(e) {
-    console.error(e);
+  } catch (error) {
+    console.error(
+      'DOMINO API ERROR:',
+      error
+    );
 
     return res
       .status(500)
       .json({
         error:
-          e.message ||
-          'Error del servidor'
+          error?.message ||
+          'Error interno del servidor'
       });
   }
 };
