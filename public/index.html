@@ -1805,6 +1805,35 @@ body.in-room .menu-nav-actions{display:flex!important;}
   }
 </style>
 
+
+<style id="friendly-lobby-style">
+  .friendly-lobby{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+  .player-name-row{display:flex;flex-direction:column;gap:5px;margin-bottom:2px}
+  .player-name-row label{font-size:12px;font-weight:800;opacity:.9}
+  .menu-section{margin:0;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.045);overflow:hidden}
+  .menu-section > summary{display:flex;align-items:center;min-height:42px;padding:0 12px;font-size:13px;font-weight:800;cursor:pointer;user-select:none;list-style:none}
+  .menu-section > summary::-webkit-details-marker{display:none}
+  .menu-section > summary::after{content:'⌄';margin-left:auto;font-size:16px;opacity:.7;transition:transform .15s ease}
+  .menu-section[open] > summary::after{transform:rotate(180deg)}
+  .menu-section-body{display:flex;flex-direction:column;gap:10px;padding:2px 12px 12px}
+  .menu-section-body > label,.menu-section-body .bot-options > label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}
+  .menu-section-body select{flex:0 0 auto}
+  .friendly-mode-box{margin:0;padding:0;border:0;background:transparent}
+  .friendly-mode-box label{justify-content:flex-start!important}
+  .join-room-block{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+  .join-room-block input{min-width:0}
+  .join-room-block button,.primary-room-action{white-space:nowrap}
+  .target-setting{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  @media(max-width:700px){
+    .side h2{display:block!important;margin-top:max(8px,env(safe-area-inset-top))!important}
+    .friendly-lobby{gap:7px}
+    .menu-section > summary{min-height:40px;padding:0 10px;font-size:12px}
+    .menu-section-body{padding:2px 10px 10px;gap:8px}
+    .join-room-block{grid-template-columns:1fr}
+    .join-room-block button{width:100%}
+  }
+</style>
+
 </head>
 
 
@@ -1830,165 +1859,108 @@ body.in-room .menu-nav-actions{display:flex!important;}
 </div>
 
 
-<div id="lobby">
+<div id="lobby" class="friendly-lobby">
 
-<input
-  id="name"
-  placeholder="Tu nombre"
->
-
-<br>
-
-<div class="room-name-create">
-  <label class="room-auto-label">
-    <input id="autoRoomName" type="checkbox" checked onchange="toggleRoomNameChoice()">
-    Generar nombre/código automáticamente
-  </label>
-  <input id="customRoomName" maxlength="40" placeholder="Nombre de la sala (ej. Viernes de Dominó)" disabled>
-  <div class="small">El enlace seguirá usando un código privado aunque pongas un nombre.</div>
-</div>
-
-<label>
-Jugadores
-
-<select
-  id="max"
-  onchange="updateBotOptions()"
->
-
-<option value="2">
-2
-</option>
-
-<option value="3">
-3
-</option>
-
-<option
-  value="4"
-  selected
->
-4
-</option>
-
-</select>
-
-</label>
-
-
-<div class="game-mode-box">
-  <strong>Modalidad</strong>
-  <label><input type="radio" name="gameMode" value="classic" checked onchange="updateGameMode()"> Partida clásica</label>
-  <label><input type="radio" name="gameMode" value="rotation" onchange="updateGameMode()"> Mesa rotativa</label>
-  <div class="game-mode-help" id="gameModeHelp">La partida termina al llegar a la meta.</div>
-</div>
-
-<div class="bot-options">
-
-<label>
-Bots
-
-<select id="botCount">
-
-<option value="0">
-0 bots
-</option>
-
-<option value="1">
-1 bot
-</option>
-
-<option value="2">
-2 bots
-</option>
-
-<option value="3">
-3 bots
-</option>
-
-</select>
-
-</label>
-
-
-<label>
-Dificultad
-
-<select id="botDifficulty">
-
-<option value="easy">
-Fácil
-</option>
-
-<option
-  value="normal"
-  selected
->
-Normal
-</option>
-
-<option value="hard">
-Difícil
-</option>
-
-</select>
-
-</label>
-
-</div>
-
-
-<button onclick="create()">
-Crear sala
-</button>
-
-<div class="row">
-  <input
-    id="code"
-    placeholder="Nombre o código de la sala"
-  >
-  <button onclick="join()">
-    Unirme
-  </button>
-</div>
-
-<div class="setting-row music-settings-row">
-  <label for="musicChoice">Música</label>
-  <div class="music-settings-controls">
-    <select id="musicChoice" title="Escoger música" aria-label="Escoger música">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-    </select>
-    <button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 ON</button>
+  <div class="player-name-row">
+    <label for="name">Tu nombre</label>
+    <input id="name" placeholder="Tu nombre">
   </div>
+
+  <details class="menu-section" open>
+    <summary>👥 Set de jugadores</summary>
+    <div class="menu-section-body">
+      <label>
+        Número de jugadores
+        <select id="max" onchange="updateBotOptions()">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+        </select>
+      </label>
+
+      <div class="bot-options">
+        <label>
+          Bots
+          <select id="botCount">
+            <option value="0">0 bots</option>
+            <option value="1">1 bot</option>
+            <option value="2">2 bots</option>
+            <option value="3">3 bots</option>
+          </select>
+        </label>
+
+        <label>
+          Dificultad
+          <select id="botDifficulty">
+            <option value="easy">Fácil</option>
+            <option value="normal" selected>Normal</option>
+            <option value="hard">Difícil</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </details>
+
+  <details class="menu-section">
+    <summary>🎮 Modalidad</summary>
+    <div class="menu-section-body">
+      <div class="game-mode-box friendly-mode-box">
+        <label><input type="radio" name="gameMode" value="classic" checked onchange="updateGameMode()"> Partida clásica</label>
+        <label><input type="radio" name="gameMode" value="rotation" onchange="updateGameMode()"> Mesa rotativa</label>
+        <div class="game-mode-help" id="gameModeHelp">La partida termina al llegar a la meta.</div>
+      </div>
+    </div>
+  </details>
+
+  <details class="menu-section">
+    <summary>🚪 Sala</summary>
+    <div class="menu-section-body">
+      <div class="room-name-create">
+        <label class="room-auto-label">
+          <input id="autoRoomName" type="checkbox" checked onchange="toggleRoomNameChoice()">
+          Generar nombre automáticamente
+        </label>
+        <input id="customRoomName" maxlength="40" placeholder="Nombre de la sala" disabled>
+        <div class="small">El enlace seguirá usando un código privado aunque pongas un nombre.</div>
+      </div>
+
+      <button class="primary-room-action" onclick="create()">Crear sala</button>
+
+      <div class="join-room-block">
+        <input id="code" placeholder="Nombre o código de la sala">
+        <button onclick="join()">Unirme a una sala</button>
+      </div>
+    </div>
+  </details>
+
+  <details class="menu-section">
+    <summary>⚙️ Settings</summary>
+    <div class="menu-section-body">
+      <div class="setting-row music-settings-row">
+        <label for="musicChoice">Música</label>
+        <div class="music-settings-controls">
+          <select id="musicChoice" title="Escoger música" aria-label="Escoger música">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 ON</button>
+        </div>
+      </div>
+
+      <label class="target-setting">
+        Meta
+        <select id="target">
+          <option value="100">100</option>
+          <option value="150">150</option>
+        </select>
+      </label>
+    </div>
+  </details>
+
 </div>
-
-
-<br>
-
-
-<label>
-
-Meta
-
-<select id="target">
-
-<option value="100">
-100
-</option>
-
-<option value="150">
-150
-</option>
-
-</select>
-
-</label>
-
-</details>
 
 </aside>
 
@@ -5319,7 +5291,7 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     if(!AC) return false;
     ctx=new AC();
     master=ctx.createGain();
-    master.gain.value=.42;
+    master.gain.value=.85;
     master.connect(ctx.destination);
     return true;
   }
@@ -5359,7 +5331,7 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     const gain=ctx.createGain();
     osc.type='triangle';
     osc.frequency.setValueAtTime(step%2?180:230,start);
-    gain.gain.setValueAtTime(.018,start);
+    gain.gain.setValueAtTime(.07,start);
     gain.gain.exponentialRampToValueAtTime(.0001,start+.055);
     osc.connect(gain); gain.connect(master);
     osc.start(start); osc.stop(start+.06);
@@ -5370,8 +5342,8 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     const song=songs[musicChoice]||songs[1];
     const now=ctx.currentTime+.03;
     const i=step%song.bass.length;
-    tone(song.bass[i],now,.28,.026,'triangle');
-    if(step%2===0) tone(song.lead[i],now+.04,.16,.012,song.wave);
+    tone(song.bass[i],now,.28,.12,'triangle');
+    if(step%2===0) tone(song.lead[i],now+.04,.16,.075,song.wave);
     percussion(now); step++;
   }
 
