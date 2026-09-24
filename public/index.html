@@ -1332,6 +1332,88 @@ summary{
 }
 </style>
 
+
+<style id="mobile-ux-v2">
+/* Mobile-first game experience: lobby and game are separate screens. */
+@media(max-width:700px){
+  body:not(.in-room) .main{visibility:hidden;}
+  body:not(.in-room) .side{
+    transform:none !important; width:100vw; max-width:none; height:100dvh;
+    display:flex; flex-direction:column; justify-content:center; padding:28px;
+    background:radial-gradient(circle at 50% 25%,#173d38,#071c1b 72%);
+  }
+  body:not(.in-room) .side h2{text-align:center;font-size:30px;margin:0 0 22px;}
+  body:not(.in-room) #lobby{width:min(100%,430px);margin:0 auto;padding:22px;border-radius:20px;background:#ffffff0b;border:1px solid #ffffff18;box-shadow:0 18px 50px #0007;}
+  body:not(.in-room) #lobby input,body:not(.in-room) #lobby select{min-height:46px;}
+  body:not(.in-room) .toggle{display:none;}
+  body.in-room .main{visibility:visible;}
+
+  .main{grid-template-rows:58px minmax(0,1fr) 88px 92px !important;overflow:hidden;}
+  .top{min-height:58px!important;padding:max(12px,env(safe-area-inset-top)) 58px 5px!important;}
+  #status{font-size:15px!important;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #subStatus{font-size:11px!important;}
+  .game-content{display:block!important;position:relative;overflow:hidden;}
+  .table-zone{position:absolute!important;inset:0!important;overflow:hidden;touch-action:none;}
+  .board{left:10%!important;right:10%!important;top:12%!important;bottom:12%!important;overflow:visible!important;transform-origin:center center;touch-action:none;}
+
+  /* Side player labels are vertical and hug the screen edges. */
+  .seat-left{left:8px!important;}
+  .seat-right{right:8px!important;}
+  .seat-left .opponent-name{
+    left:-4px!important;right:auto!important;top:50%!important;
+    writing-mode:vertical-rl;transform:translate(-15%,-50%) rotate(180deg)!important;
+    max-height:150px;max-width:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .seat-right .opponent-name{
+    right:-4px!important;left:auto!important;top:50%!important;
+    writing-mode:vertical-rl;transform:translate(15%,-50%)!important;
+    max-height:150px;max-width:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .opponent-name{font-size:9px!important;padding:4px 3px!important;}
+  .seat-left .wood-rack{margin-left:18px;}
+  .seat-right .wood-rack{margin-right:18px;}
+
+  /* Videos live in corners, never in the middle of the domino chain. */
+  .player-video,.remote-video-wrap{width:62px!important;height:48px!important;z-index:14!important;}
+  .player-video.local{left:8px!important;right:auto!important;bottom:8px!important;}
+  .remote-video-wrap.seat-left{left:8px!important;top:8px!important;transform:none!important;}
+  .remote-video-wrap.seat-top{right:8px!important;left:auto!important;top:8px!important;transform:none!important;}
+  .remote-video-wrap.seat-right{right:8px!important;top:auto!important;bottom:8px!important;transform:none!important;}
+  .remote-video-name{left:0!important;right:0!important;bottom:-16px!important;max-width:none!important;text-align:center;font-size:8px!important;padding:1px 2px!important;}
+
+  /* Compact media controls. */
+  .media-controls{left:50%!important;bottom:4px!important;transform:translateX(-50%)!important;gap:4px!important;}
+  .media-controls button{padding:5px 7px!important;font-size:9px!important;border-radius:14px!important;}
+
+  /* Chat/history is a bottom drawer. Closed state is only a slim tab bar. */
+  .social-panel{
+    position:absolute!important;left:8px!important;right:8px!important;bottom:4px!important;
+    height:38px!important;max-height:none!important;border-radius:15px!important;z-index:22!important;
+    transition:height .22s ease;box-shadow:0 5px 20px #0009!important;
+  }
+  .social-panel.mobile-open{height:min(36dvh,290px)!important;}
+  .social-tabs{height:38px;flex:0 0 38px;}
+  .social-tab{padding:7px 4px!important;font-size:11px!important;}
+  .social-panel:not(.mobile-open) .social-view{display:none!important;}
+  .social-panel.mobile-open .social-view{display:block;min-height:0;}
+  .social-panel.mobile-open .social-view[hidden]{display:none!important;}
+  .history-list,.chat-list{max-height:calc(min(36dvh,290px) - 38px)!important;padding:7px 10px 58px!important;overflow:auto!important;}
+  .chat-compose{padding:6px!important;}
+  .chat-compose input{padding:8px!important;font-size:13px!important;}
+  .chat-compose button{padding:8px 10px!important;font-size:12px!important;}
+
+  /* Keep the hand fully visible and compact. */
+  .hand-zone{height:88px;padding:3px 5px 5px!important;overflow:hidden;}
+  .you-label{font-size:10px!important;padding:2px 9px!important;margin-bottom:2px!important;}
+  .hand-rack{padding:5px 6px 6px!important;max-width:calc(100vw - 10px)!important;}
+  .hand{gap:2px!important;min-height:48px!important;overflow-x:auto!important;}
+  .hand .tile-half{width:25px!important;height:46px!important;}
+  .hand .pip{width:5px!important;height:5px!important;}
+  .controls{height:92px!important;grid-template-columns:1fr 1fr!important;gap:5px!important;padding:5px 6px max(6px,env(safe-area-inset-bottom))!important;}
+  .controls button{min-height:36px!important;font-size:10px!important;padding:6px 3px!important;}
+}
+</style>
+
 </head>
 
 
@@ -1811,40 +1893,12 @@ const peerConnections = new Map();
 const remoteStreams = new Map();
 const handledSignalIds = new Set();
 
-let RTC_CONFIG = {
+const RTC_CONFIG = {
   iceServers:[
-    { urls:'stun:stun.relay.metered.ca:80' }
+    { urls:'stun:stun.l.google.com:19302' },
+    { urls:'stun:stun1.l.google.com:19302' }
   ]
 };
-
-let rtcConfigPromise = null;
-
-async function loadRTCConfig(){
-  if(rtcConfigPromise) return rtcConfigPromise;
-
-  rtcConfigPromise = fetch('/api/game',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action:'rtcConfig'})
-  })
-    .then(async response=>{
-      const data = await response.json();
-      if(!response.ok) throw new Error(data.error || 'No se pudo cargar TURN');
-      if(Array.isArray(data.iceServers) && data.iceServers.length){
-        RTC_CONFIG = {iceServers:data.iceServers};
-      }
-      return RTC_CONFIG;
-    })
-    .catch(error=>{
-      console.error('TURN config error', error);
-      rtcConfigPromise = null;
-      return RTC_CONFIG;
-    });
-
-  return rtcConfigPromise;
-}
-
-loadRTCConfig();
 
 
 /* =========================
@@ -2238,6 +2292,8 @@ async function join(){
 ========================= */
 
 function enter(){
+
+  document.body.classList.add('in-room');
 
   document
     .getElementById(
@@ -2858,12 +2914,11 @@ async function sendSignal(to, signal){
   });
 }
 
-async function createPeerConnection(remoteId){
+function createPeerConnection(remoteId){
   if(peerConnections.has(remoteId)){
     return peerConnections.get(remoteId);
   }
 
-  await loadRTCConfig();
   const pc = new RTCPeerConnection(RTC_CONFIG);
   peerConnections.set(remoteId, pc);
 
@@ -2904,7 +2959,7 @@ async function createPeerConnection(remoteId){
 }
 
 async function makeOffer(remoteId){
-  const pc = await createPeerConnection(remoteId);
+  const pc = createPeerConnection(remoteId);
 
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
@@ -2948,7 +3003,7 @@ async function handleSignals(){
     try{
       const remoteId = item.from;
       const signal = item.signal || {};
-      const pc = await createPeerConnection(remoteId);
+      const pc = createPeerConnection(remoteId);
 
       if(signal.type === 'offer'){
         await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
@@ -3260,9 +3315,7 @@ function renderBoard(){
         // exact exposed edge of the preceding horizontal tile/double.
         const cx = cursor + dir * (H / 2);
         const cy = y + verticalSign * (H / 2 + W / 2);
-        const rot = verticalSign > 0
-          ? (dir > 0 ? 90 : 270)
-          : (dir > 0 ? 270 : 90);
+        const rot = 90;
 
         positions[index] = { cx, cy, rot };
 
@@ -3315,9 +3368,7 @@ function renderBoard(){
       // Therefore there can be no horizontal hole before the curve.
       const cx = cursor + dir * (H / 2);
       const cy = y + verticalSign * (H / 2 + W / 2);
-      const rot = verticalSign > 0
-        ? (dir > 0 ? 90 : 270)
-        : (dir > 0 ? 270 : 90);
+      const rot = 90;
 
       positions[index] = { cx, cy, rot };
 
@@ -4370,6 +4421,51 @@ function toggleMusic(on){
 
 }
 
+</script>
+
+
+<script id="mobile-ux-v2-js">
+(function(){
+  const oldShow = window.showSocialTab;
+  window.showSocialTab = function(tab){
+    if(typeof oldShow === 'function') oldShow(tab);
+    if(window.innerWidth <= 700){
+      const panel=document.getElementById('historyPanel');
+      if(!panel) return;
+      if(panel.classList.contains('mobile-open') && panel.dataset.openTab===tab){
+        panel.classList.remove('mobile-open');
+        panel.dataset.openTab='';
+      }else{
+        panel.classList.add('mobile-open');
+        panel.dataset.openTab=tab;
+      }
+    }
+  };
+
+  // Touch navigation for the table: drag, pinch to zoom, double tap to recenter.
+  let scale=1, tx=0, ty=0, startX=0, startY=0, startTx=0, startTy=0, pinchStart=0, pinchScale=1, lastTap=0;
+  function apply(){
+    const b=document.getElementById('board');
+    if(b) b.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;
+  }
+  function reset(){scale=1;tx=0;ty=0;apply();}
+  function dist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
+  document.addEventListener('touchstart',e=>{
+    const zone=e.target.closest && e.target.closest('#tableZone');
+    if(!zone) return;
+    if(e.touches.length===2){pinchStart=dist(e.touches[0],e.touches[1]);pinchScale=scale;return;}
+    if(e.touches.length===1){
+      const now=Date.now(); if(now-lastTap<280){reset();lastTap=0;return;} lastTap=now;
+      startX=e.touches[0].clientX;startY=e.touches[0].clientY;startTx=tx;startTy=ty;
+    }
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    const zone=e.target.closest && e.target.closest('#tableZone'); if(!zone) return;
+    if(e.touches.length===2 && pinchStart){scale=Math.max(.72,Math.min(1.8,pinchScale*dist(e.touches[0],e.touches[1])/pinchStart));apply();}
+    else if(e.touches.length===1){tx=startTx+(e.touches[0].clientX-startX);ty=startTy+(e.touches[0].clientY-startY);apply();}
+  },{passive:true});
+  document.addEventListener('touchend',e=>{if(e.touches.length<2)pinchStart=0;},{passive:true});
+})();
 </script>
 
 </body>
