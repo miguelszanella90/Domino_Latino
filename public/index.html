@@ -3530,7 +3530,10 @@ async function sendSignal(to, signal){
     action:'signal',
     code:game.code,
     playerId:pid,
-    to,
+    // game.js expects the destination player in `toPlayerId`.
+    // Using `to` meant the signaling message never had a valid target,
+    // so both devices could show their own camera but never each other.
+    toPlayerId:to,
     signal
   });
 }
