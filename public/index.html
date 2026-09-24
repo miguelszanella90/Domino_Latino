@@ -1795,6 +1795,14 @@ body.in-room .menu-nav-actions{display:flex!important;}
 
 <br>
 
+<div class="room-name-create">
+  <label class="room-auto-label">
+    <input id="autoRoomName" type="checkbox" checked onchange="toggleRoomNameChoice()">
+    Generar nombre/código automáticamente
+  </label>
+  <input id="customRoomName" maxlength="40" placeholder="Nombre de la sala (ej. Viernes de Dominó)" disabled>
+  <div class="small">El enlace seguirá usando un código privado aunque pongas un nombre.</div>
+</div>
 
 <label>
 Jugadores
@@ -2551,6 +2559,12 @@ async function create(){
         gameMode:
           (document.querySelector('input[name="gameMode"]:checked') || {}).value || 'classic',
 
+        autoRoomName:
+          document.getElementById('autoRoomName')?.checked !== false,
+
+        roomName:
+          document.getElementById('customRoomName')?.value || '',
+
         name:
 
           document
@@ -2719,7 +2733,9 @@ function enter(){
       'roomCode'
     )
     .textContent =
-      game.code;
+      game.roomName
+        ? `${game.roomName} · ${game.code}`
+        : game.code;
 
 
   history
@@ -5132,6 +5148,180 @@ function toggleMusic(on){
 
   const closeDrawer=()=>document.getElementById('historyPanel')?.classList.remove('mobile-open');
   window.addEventListener('DOMContentLoaded',closeDrawer);
+})();
+</script>
+
+
+<style id="ux-v11-feedback">
+.room-name-create{margin:14px 0;padding:12px;border-radius:12px;background:#ffffff08}
+.room-auto-label{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+#customRoomName{width:100%;box-sizing:border-box}
+.social-drawer-toggle{position:relative}
+.social-drawer-toggle.has-activity::after{
+  content:"";
+  position:absolute;right:5px;top:7px;width:9px;height:9px;border-radius:50%;
+  background:#ffd166;box-shadow:0 0 0 3px rgba(255,209,102,.2);
+  animation:chatPing 1.2s ease-in-out infinite;
+}
+@keyframes chatPing{50%{transform:scale(1.35);box-shadow:0 0 0 6px rgba(255,209,102,0)}}
+.turn-toast{
+  position:fixed;left:50%;top:84px;transform:translateX(-50%) translateY(-12px);
+  z-index:9999;background:#ffd166;color:#102b27;border:2px solid #fff3c4;
+  border-radius:999px;padding:10px 18px;font-weight:900;font-size:18px;
+  box-shadow:0 8px 30px #0007;opacity:0;pointer-events:none;transition:.2s;
+}
+.turn-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
+@keyframes myTurnPulse{50%{filter:drop-shadow(0 0 12px #ffd166)}}
+.round-overlay{
+  position:fixed;inset:0;z-index:9998;background:#001b17a8;display:flex;
+  align-items:center;justify-content:center;padding:20px;
+}
+.round-overlay[hidden]{display:none!important}
+.round-card{
+  width:min(92vw,460px);background:#0b302c;color:white;border:1px solid #ffffff25;
+  border-radius:20px;padding:24px;text-align:center;box-shadow:0 20px 70px #0009
+}
+.round-card h2{margin:0 0 10px;color:#ffd166}
+.round-card p{margin:8px 0 18px}
+.round-card button{font-size:17px;padding:12px 18px}
+@media(max-width:700px){
+  .turn-toast{top:118px;font-size:15px;padding:8px 14px}
+  .round-card{padding:20px}
+}
+</style>
+
+<div id="turnToast" class="turn-toast">🎲 ¡TE TOCA!</div>
+<div id="roundOverlay" class="round-overlay" hidden>
+  <div class="round-card">
+    <h2 id="roundOverlayTitle">🏆 Ronda terminada</h2>
+    <p id="roundOverlayText"></p>
+    <button id="roundNextButton" type="button">Jugar nueva ronda</button>
+  </div>
+</div>
+
+<script id="ux-v11-feedback-js">
+(function(){
+  let previousMyTurn=false;
+  let initializedChat=false;
+  let lastChatId=null;
+  let roundOverlayKey=null;
+
+  window.toggleRoomNameChoice=function(){
+    const auto=document.getElementById('autoRoomName');
+    const input=document.getElementById('customRoomName');
+    if(!auto||!input)return;
+    input.disabled=auto.checked;
+    if(auto.checked) input.value='';
+    else setTimeout(()=>input.focus(),0);
+  };
+
+  function pingTurn(){
+    const toast=document.getElementById('turnToast');
+    if(toast){
+      toast.classList.add('show');
+      clearTimeout(toast._timer);
+      toast._timer=setTimeout(()=>toast.classList.remove('show'),2200);
+    }
+    document.body.classList.add('my-turn-now');
+    setTimeout(()=>document.body.classList.remove('my-turn-now'),2100);
+    if(navigator.vibrate) navigator.vibrate([90,60,90]);
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC)return;
+      const ac=new AC(), osc=ac.createOscillator(), gain=ac.createGain();
+      osc.frequency.value=660; gain.gain.setValueAtTime(.035,ac.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.16);
+      osc.connect(gain); gain.connect(ac.destination); osc.start(); osc.stop(ac.currentTime+.17);
+    }catch(e){}
+  }
+
+  function updateTurnNotice(){
+    if(typeof game==='undefined'||!game)return;
+    const mine=game.status==='playing' && game.myIndex===game.turn && !game.currentPlayerIsBot;
+    if(mine && !previousMyTurn) pingTurn();
+    previousMyTurn=mine;
+  }
+
+  function drawerIsOpen(){
+    return document.getElementById('historyPanel')?.classList.contains('mobile-open');
+  }
+
+  function updateChatActivity(){
+    if(typeof game==='undefined'||!game)return;
+    const items=Array.isArray(game.chat)?game.chat:[];
+    const newest=items.length?items[items.length-1]:null;
+    if(!initializedChat){
+      lastChatId=newest?.id||null;
+      initializedChat=true;
+      return;
+    }
+    if(newest && newest.id!==lastChatId){
+      const fromMe=newest.playerId===pid;
+      if(!fromMe && !(drawerIsOpen() && activeSocialTab==='chat')){
+        document.getElementById('socialDrawerToggle')?.classList.add('has-activity');
+      }
+      lastChatId=newest.id;
+    }
+  }
+
+  function updateRoundOverlay(){
+    const overlay=document.getElementById('roundOverlay');
+    if(!overlay||typeof game==='undefined'||!game)return;
+    const ended=game.status==='finished'||game.status==='match_finished';
+    if(!ended){ overlay.hidden=true; roundOverlayKey=null; return; }
+    const key=`${game.code}:${game.roundNumber}:${game.status}`;
+    if(roundOverlayKey===key)return;
+    roundOverlayKey=key;
+    document.getElementById('roundOverlayTitle').textContent =
+      game.status==='match_finished' ? '🏆 Partida terminada' : '🏆 Ronda terminada';
+    document.getElementById('roundOverlayText').textContent =
+      game.message || 'La ronda ha terminado.';
+    const btn=document.getElementById('roundNextButton');
+    if(game.status==='match_finished'){
+      btn.textContent='Volver al inicio';
+      btn.disabled=false;
+      btn.onclick=()=>window.goHomeMenu ? goHomeMenu() : location.assign(location.pathname);
+    }else if(game.isHost){
+      btn.textContent='Jugar nueva ronda';
+      btn.disabled=false;
+      btn.onclick=async()=>{ overlay.hidden=true; await act('newRound'); };
+    }else{
+      btn.textContent='Esperando al host…';
+      btn.disabled=true;
+      btn.onclick=null;
+    }
+    overlay.hidden=false;
+  }
+
+  const oldRender=window.render;
+  window.render=function(){
+    const result=oldRender.apply(this,arguments);
+    updateTurnNotice();
+    updateChatActivity();
+    updateRoundOverlay();
+    const rc=document.getElementById('roomCode');
+    if(rc && typeof game!=='undefined' && game) rc.textContent=game.roomName ? `${game.roomName} · ${game.code}` : game.code;
+    return result;
+  };
+
+  const oldOpen=window.openSocialTab;
+  window.openSocialTab=function(tab){
+    document.getElementById('socialDrawerToggle')?.classList.remove('has-activity');
+    return oldOpen ? oldOpen(tab) : undefined;
+  };
+
+  const oldToggle=window.toggleSocialDrawer;
+  window.toggleSocialDrawer=function(forceOpen){
+    const r=oldToggle ? oldToggle(forceOpen) : undefined;
+    const panel=document.getElementById('historyPanel');
+    if(panel?.classList.contains('mobile-open') && activeSocialTab==='chat'){
+      document.getElementById('socialDrawerToggle')?.classList.remove('has-activity');
+    }
+    return r;
+  };
+
+  window.addEventListener('DOMContentLoaded',()=>window.toggleRoomNameChoice());
 })();
 </script>
 
