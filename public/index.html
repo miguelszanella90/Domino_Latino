@@ -2642,20 +2642,21 @@ function enter(){
 
   document.body.classList.add('in-room');
 
-  document
-    .getElementById(
-      'room'
-    )
-    .hidden =
-      false;
+  const room =
+    document.getElementById('room');
 
+  const lobby =
+    document.getElementById('lobby');
 
-  document
-    .getElementById(
-      'lobby'
-    )
-    .hidden =
-      true;
+  // Algunas versiones ya no tienen un elemento #room.
+  // En ese caso body.in-room controla la vista y no debemos lanzar error.
+  if(room){
+    room.hidden = false;
+  }
+
+  if(lobby){
+    lobby.hidden = true;
+  }
 
 
   document
