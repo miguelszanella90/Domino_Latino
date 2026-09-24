@@ -1414,6 +1414,75 @@ summary{
 }
 </style>
 
+
+<style id="ux-v3-compact-touch">
+/* UX v3: compact controls, vertical hand, unobtrusive cameras and touch play */
+.hand .tile{flex-direction:column!important;border-radius:6px!important;}
+.hand .tile-half{width:34px!important;height:26px!important;}
+.hand .tile-half + .tile-half{border-left:0!important;border-top:2px solid #222!important;}
+.hand .pip{width:5px!important;height:5px!important;}
+.hand{gap:3px!important;justify-content:center;overflow-x:auto!important;}
+.hand-rack{padding:4px 6px!important;}
+.controls button{font-weight:800!important;}
+
+/* Desktop: cameras stay in table corners, away from the chain. */
+@media(min-width:701px){
+  .remote-video-wrap.seat-top{top:12px!important;right:14px!important;left:auto!important;transform:none!important;}
+  .remote-video-wrap.seat-right{right:14px!important;bottom:14px!important;top:auto!important;transform:none!important;}
+  .remote-video-wrap.seat-left{left:14px!important;top:14px!important;transform:none!important;}
+  .player-video.local{left:14px!important;right:auto!important;bottom:14px!important;}
+  .remote-video-name{top:calc(100% + 3px)!important;bottom:auto!important;text-align:center!important;left:0!important;right:0!important;max-width:none!important;}
+  .hand-zone{height:84px!important;padding:2px 8px!important;}
+  .controls{height:64px!important;grid-template-columns:repeat(4,1fr)!important;padding:6px 10px!important;gap:7px!important;}
+  .controls button{min-height:42px!important;padding:6px!important;font-size:13px!important;}
+}
+
+@media(max-width:700px){
+  .main{grid-template-rows:52px minmax(0,1fr) 72px 58px!important;}
+  .top{min-height:52px!important;padding:max(8px,env(safe-area-inset-top)) 52px 3px!important;}
+  .board{left:7%!important;right:7%!important;top:7%!important;bottom:7%!important;}
+
+  /* Tiny persistent tab bar. Content opens upward only when requested. */
+  .social-panel{left:6px!important;right:6px!important;bottom:4px!important;height:30px!important;border-radius:12px!important;}
+  .social-tabs{height:30px!important;flex:0 0 30px!important;}
+  .social-tab{padding:4px 2px!important;font-size:9px!important;}
+  .social-panel.mobile-open{height:min(27dvh,205px)!important;}
+  .history-list,.chat-list{max-height:calc(min(27dvh,205px) - 30px)!important;padding:6px 8px 42px!important;font-size:11px!important;}
+  .chat-compose{padding:4px!important;}
+  .chat-compose input{padding:6px!important;font-size:11px!important;}
+  .chat-compose button{padding:6px 8px!important;font-size:10px!important;}
+
+  /* Camera thumbnails are anchored to corners. */
+  .player-video,.remote-video-wrap{width:54px!important;height:40px!important;border-radius:8px!important;}
+  .player-video.local{left:7px!important;bottom:38px!important;right:auto!important;}
+  .remote-video-wrap.seat-left{left:7px!important;top:7px!important;}
+  .remote-video-wrap.seat-top{right:7px!important;top:7px!important;left:auto!important;}
+  .remote-video-wrap.seat-right{right:7px!important;bottom:38px!important;top:auto!important;}
+  .remote-video-name{top:calc(100% + 2px)!important;bottom:auto!important;font-size:7px!important;background:#061d1be8!important;}
+  #localVideoName{position:absolute;left:7px;bottom:27px;width:54px;text-align:center;font-size:7px;z-index:15;background:#061d1be8;border-radius:6px;padding:1px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  .media-controls{left:auto!important;right:6px!important;bottom:3px!important;transform:none!important;gap:3px!important;}
+  .media-controls button{padding:4px 5px!important;font-size:8px!important;border-radius:11px!important;}
+
+  /* Smaller vertical hand uses much less height. */
+  .hand-zone{height:72px!important;padding:2px 4px 3px!important;}
+  .you-label{font-size:9px!important;padding:1px 7px!important;margin:0 0 1px!important;}
+  .hand-rack{padding:3px 5px!important;max-width:calc(100vw - 8px)!important;}
+  .hand{min-height:52px!important;gap:2px!important;overflow-x:auto!important;justify-content:center!important;}
+  .hand .tile-half{width:31px!important;height:23px!important;}
+  .hand .pip{width:4px!important;height:4px!important;}
+
+  .controls{height:58px!important;grid-template-columns:repeat(4,1fr)!important;gap:4px!important;padding:4px 5px max(4px,env(safe-area-inset-bottom))!important;}
+  .controls button{min-height:38px!important;font-size:9px!important;padding:3px 2px!important;border-radius:10px!important;}
+
+  /* Drop zones become visible only while dragging a domino. */
+  body.dragging-domino .table-zone:before,body.dragging-domino .table-zone:after{position:absolute;top:32%;z-index:40;padding:9px 7px;border:2px dashed #ffd76a;border-radius:12px;background:#071816c9;color:#ffd76a;font-size:11px;font-weight:900;pointer-events:none;}
+  body.dragging-domino .table-zone:before{content:'← JUGAR';left:7px;}
+  body.dragging-domino .table-zone:after{content:'JUGAR →';right:7px;}
+  .drag-ghost{position:fixed!important;z-index:1000!important;pointer-events:none!important;opacity:.9;transform:translate(-50%,-50%) scale(.9);}
+}
+</style>
+
 </head>
 
 
@@ -1821,7 +1890,7 @@ Tus fichas
   id="leftButton"
   onclick="play('left')"
 >
-← Colocar izquierda
+← Jugar
 </button>
 
 
@@ -1829,7 +1898,7 @@ Tus fichas
   id="rightButton"
   onclick="play('right')"
 >
-Colocar derecha →
+Jugar →
 </button>
 
 
@@ -1837,7 +1906,7 @@ Colocar derecha →
   id="drawButton"
   onclick="act('draw')"
 >
-Robar del pozo
+Pieza +
 </button>
 
 
@@ -4465,6 +4534,71 @@ function toggleMusic(on){
     else if(e.touches.length===1){tx=startTx+(e.touches[0].clientX-startX);ty=startTy+(e.touches[0].clientY-startY);apply();}
   },{passive:true});
   document.addEventListener('touchend',e=>{if(e.touches.length<2)pinchStart=0;},{passive:true});
+})();
+</script>
+
+
+<script id="ux-v3-touch-play">
+(function(){
+  // Give the local camera its own compact name label.
+  function ensureLocalLabel(){
+    const video=document.getElementById('localVideo');
+    if(!video || document.getElementById('localVideoName')) return;
+    const label=document.createElement('div');
+    label.id='localVideoName';
+    label.textContent='Tú';
+    video.insertAdjacentElement('afterend',label);
+  }
+  ensureLocalLabel();
+
+  // On mobile the social panel stays closed until a tab is tapped.
+  const oldShow=window.showSocialTab;
+  window.showSocialTab=function(tab){
+    if(typeof oldShow==='function') oldShow(tab);
+    if(window.innerWidth<=700){
+      const panel=document.getElementById('historyPanel');
+      if(panel){ panel.classList.add('mobile-open'); panel.dataset.openTab=tab; }
+    }
+  };
+
+  // Drag a hand domino to the left/right side of the table to play it.
+  let drag=null;
+  function clearDrag(){
+    if(drag?.ghost) drag.ghost.remove();
+    drag=null;
+    document.body.classList.remove('dragging-domino');
+  }
+  document.addEventListener('touchstart',function(e){
+    if(window.innerWidth>700 || e.touches.length!==1) return;
+    const tile=e.target.closest?.('#hand .tile');
+    if(!tile) return;
+    const tiles=[...document.querySelectorAll('#hand .tile')];
+    const index=tiles.indexOf(tile);
+    if(index<0) return;
+    const t=e.touches[0];
+    const ghost=tile.cloneNode(true); ghost.classList.add('drag-ghost');
+    ghost.style.left=t.clientX+'px'; ghost.style.top=t.clientY+'px';
+    document.body.appendChild(ghost);
+    drag={index,ghost,startX:t.clientX,startY:t.clientY};
+    document.body.classList.add('dragging-domino');
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!drag || e.touches.length!==1) return;
+    const t=e.touches[0]; drag.ghost.style.left=t.clientX+'px'; drag.ghost.style.top=t.clientY+'px';
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(!drag) return;
+    const t=e.changedTouches[0];
+    const moved=Math.hypot(t.clientX-drag.startX,t.clientY-drag.startY);
+    const idx=drag.index;
+    clearDrag();
+    if(moved<22){ selected=selected===idx?null:idx; render(); return; }
+    selected=idx;
+    if(t.clientX < window.innerWidth*.42) play('left');
+    else if(t.clientX > window.innerWidth*.58) play('right');
+    else render();
+  },{passive:true});
+  document.addEventListener('touchcancel',clearDrag,{passive:true});
 })();
 </script>
 
