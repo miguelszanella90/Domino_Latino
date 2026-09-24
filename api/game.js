@@ -8,6 +8,8 @@ const kv = new Redis({
 const id = () =>
   Math.random().toString(36).slice(2, 8).toUpperCase();
 
+const ROOM_TTL_SECONDS = 6 * 60 * 60;
+
 function createSet() {
   const tiles = [];
 
@@ -68,9 +70,20 @@ async function findGameByCodeOrName(value) {
     return null;
   }
 
-  return await kv.get(
-    `domino:${mappedCode}`
-  );
+  const mappedGame =
+    await kv.get(
+      `domino:${mappedCode}`
+    );
+
+  if (!mappedGame) {
+    await kv.del(
+      `domino-room-name:${normalizedName}`
+    );
+
+    return null;
+  }
+
+  return mappedGame;
 }
 
 async function reserveRoomName(
@@ -92,7 +105,18 @@ async function reserveRoomName(
     );
 
   if (existingCode) {
-    return false;
+    const existingNamedGame =
+      await kv.get(
+        `domino:${existingCode}`
+      );
+
+    if (existingNamedGame) {
+      return false;
+    }
+
+    await kv.del(
+      `domino-room-name:${normalizedName}`
+    );
   }
 
   const possibleGameCode =
@@ -114,7 +138,7 @@ async function reserveRoomName(
   await kv.set(
     `domino-room-name:${normalizedName}`,
     code,
-    { ex: 86400 }
+    { ex: ROOM_TTL_SECONDS }
   );
 
   return true;
