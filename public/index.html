@@ -2063,6 +2063,7 @@ body.in-room .controls{grid-template-columns:repeat(3,1fr)!important}
             <option value="9">🌆 Neón Tropical</option>
             <option value="10">🎲 Última Mano</option>
             <option value="11">💃 Salsa Azúcar</option>
+            <option value="12">🐰 BAD Conejo</option>
           </select>
           <button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 ON</button>
         </div>
@@ -3635,9 +3636,9 @@ function pipHTML(
   };
 
 
-  if(number >= 8 && number <= 12 && game?.gameMode === 'mexican'){
-    const icons={8:'★',9:'●',10:'◆',11:'✦',12:'♛'};
-    return `<span class="mt-high-pips mt-value-${number}" aria-label="${number}">${'<i></i>'.repeat(number)}<em>${icons[number]||'•'}</em></span>`;
+  if(number >= 7 && number <= 12 && game?.gameMode === 'mexican'){
+    const icons={7:'☀',8:'★',9:'●',10:'◆',11:'✦',12:'♛'};
+    return `<span class="mt-high-pips mt-value-${number}" aria-label="${number}">${'<i></i>'.repeat(number)}<em>${icons[number]||'•'}</em><b>${number}</b></span>`;
   }
 
   if(number > 6){ return `<b class="pip-number">${number}</b>`; }
@@ -3773,7 +3774,7 @@ function renderMexicanBoard(){
 
   const wrap=document.createElement('div');
   wrap.className='mt-board';
-  wrap.innerHTML=`<div class="mt-station"><span>ESTACIÓN</span><strong>${mt.engine ?? 12}|${mt.engine ?? 12}</strong><small>Ronda ${Math.max(1,(mt.roundIndex??-1)+1)}/13</small></div>`;
+  wrap.innerHTML=`<div class="mt-station"><span>🚉 ESTACIÓN</span><strong>${mt.engine ?? 12}|${mt.engine ?? 12}</strong><small>Ronda ${Math.max(1,(mt.roundIndex??-1)+1)}/13</small></div>`;
 
   const info=document.createElement('div');
   info.className='mt-player-info';
@@ -5511,7 +5512,8 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     8:{bass:[146.83,185,220,185,164.81,196,174.61,146.83],lead:[587.33,739.99,880,739.99,659.25,783.99,698.46,587.33],beat:300,wave:'sine'},
     9:{bass:[110,138.59,164.81,207.65,185,164.81,138.59,110],lead:[440,554.37,659.25,830.61,739.99,659.25,554.37,440],beat:350,wave:'triangle'},
     10:{bass:[130.81,196,174.61,146.83,220,196,164.81,130.81],lead:[523.25,783.99,698.46,587.33,880,783.99,659.25,523.25],beat:275,wave:'square'},
-    11:{bass:[130.81,164.81,174.61,196,146.83,174.61,164.81,130.81],lead:[523.25,659.25,698.46,783.99,587.33,698.46,659.25,523.25],beat:235,wave:'triangle'}
+    11:{bass:[130.81,164.81,174.61,196,146.83,174.61,164.81,130.81],lead:[523.25,659.25,698.46,783.99,587.33,698.46,659.25,523.25],beat:235,wave:'triangle'},
+    12:{bass:[73.42,73.42,98,87.31,73.42,110,98,87.31],lead:[293.66,349.23,392,349.23,440,392,349.23,293.66],beat:215,wave:'sawtooth'}
   };
 
   function createAudio(){
@@ -5933,5 +5935,43 @@ body.mexican-mode .mt-preview{opacity:.6;cursor:default!important}
   body.mexican-mode .mt-train-title{font-size:10px!important;margin-bottom:2px!important}
   body.mexican-mode .mt-chain{min-height:28px!important}
   .mt-high-pips>i{width:3px!important;height:3px!important}.mt-high-pips>em{font-size:5px!important}
+}
+
+
+/* Mexican Train UX v3 */
+body.mexican-mode .mt-station{
+  width:auto!important;height:auto!important;border-radius:999px!important;
+  padding:5px 12px!important;display:flex!important;flex-direction:row!important;
+  gap:7px!important;align-items:center!important;justify-content:center!important;
+  border-width:2px!important;white-space:nowrap!important;
+}
+body.mexican-mode .mt-station span,body.mexican-mode .mt-station strong,body.mexican-mode .mt-station small{
+  font-size:11px!important;line-height:1!important;margin:0!important;
+}
+body.mexican-mode .mt-station strong{font-size:13px!important}
+body.mexican-mode .mt-high-pips{grid-template-columns:repeat(4,1fr)!important;gap:1px!important;padding:3px!important}
+body.mexican-mode .mt-high-pips>i{width:5px!important;height:5px!important;box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+body.mexican-mode .mt-high-pips>em{right:1px!important;bottom:1px!important;font-size:7px!important;background:#fff!important;padding:1px!important}
+body.mexican-mode .mt-high-pips>b{position:absolute!important;left:1px!important;bottom:0!important;font-size:6px!important;line-height:1!important;background:rgba(255,255,255,.9)!important;border-radius:3px!important;padding:1px 2px!important;color:currentColor!important}
+body.mexican-mode .mt-value-7{color:#d97706!important}
+body.mexican-mode .mt-value-8{color:#e4572e!important}
+body.mexican-mode .mt-value-9{color:#7b2cbf!important}
+body.mexican-mode .mt-value-10{color:#0077b6!important}
+body.mexican-mode .mt-value-11{color:#2a9d8f!important}
+body.mexican-mode .mt-value-12{color:#c1121f!important}
+body.mexican-mode .tile .tile-half{background:#fff!important}
+body.mexican-mode .controls{left:0!important;right:0!important;width:100%!important;max-width:100vw!important;box-sizing:border-box!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important}
+body.mexican-mode .controls #start{grid-column:1/-1}
+body.mexican-mode .social-drawer-toggle{display:flex!important;visibility:visible!important;opacity:1!important;z-index:3000!important;right:0!important}
+@media(max-width:700px){
+ body.mexican-mode .mt-station{padding:4px 8px!important;gap:5px!important}
+ body.mexican-mode .mt-station span,body.mexican-mode .mt-station strong,body.mexican-mode .mt-station small{font-size:9px!important}
+ body.mexican-mode .mt-station strong{font-size:11px!important}
+ body.mexican-mode .controls{grid-template-columns:repeat(3,minmax(0,1fr))!important;padding-left:5px!important;padding-right:5px!important}
+ body.mexican-mode .controls button{min-width:0!important;width:auto!important;font-size:10px!important}
+ body.mexican-mode .mt-high-pips>i{width:4px!important;height:4px!important}
+ body.mexican-mode .mt-high-pips>em{font-size:6px!important}
+ body.mexican-mode .mt-high-pips>b{font-size:5px!important}
+ body.mexican-mode .social-drawer-toggle{position:fixed!important;right:0!important;top:62%!important}
 }
 </style>
