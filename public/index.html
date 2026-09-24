@@ -5302,41 +5302,46 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
   let master = null;
   let timer = null;
   let step = 0;
-
-  // Short original Latin/caribbean-inspired loop synthesized in the browser.
-  // No external audio file or copyrighted recording is used.
+  let unlocked = false;
   let musicChoice = 1;
 
   const songs = {
-    1:{
-      bass:[110,110,146.83,110,164.81,146.83,130.81,98],
-      lead:[440,523.25,587.33,523.25,659.25,587.33,523.25,440],
-      beat:360, wave:'sine'
-    },
-    2:{
-      bass:[130.81,164.81,196,164.81,146.83,174.61,196,130.81],
-      lead:[523.25,659.25,783.99,659.25,587.33,698.46,783.99,523.25],
-      beat:315, wave:'triangle'
-    },
-    3:{
-      bass:[98,123.47,146.83,123.47,110,130.81,164.81,110],
-      lead:[392,493.88,587.33,493.88,440,523.25,659.25,440],
-      beat:405, wave:'sine'
-    },
-    4:{
-      bass:[146.83,146.83,174.61,196,174.61,164.81,146.83,123.47],
-      lead:[587.33,698.46,783.99,880,783.99,659.25,587.33,493.88],
-      beat:285, wave:'square'
-    },
-    5:{
-      bass:[110,164.81,146.83,196,174.61,146.83,130.81,98],
-      lead:[659.25,587.33,523.25,783.99,698.46,587.33,523.25,440],
-      beat:340, wave:'triangle'
-    }
+    1:{bass:[110,110,146.83,110,164.81,146.83,130.81,98],lead:[440,523.25,587.33,523.25,659.25,587.33,523.25,440],beat:360,wave:'sine'},
+    2:{bass:[130.81,164.81,196,164.81,146.83,174.61,196,130.81],lead:[523.25,659.25,783.99,659.25,587.33,698.46,783.99,523.25],beat:315,wave:'triangle'},
+    3:{bass:[98,123.47,146.83,123.47,110,130.81,164.81,110],lead:[392,493.88,587.33,493.88,440,523.25,659.25,440],beat:405,wave:'sine'},
+    4:{bass:[146.83,146.83,174.61,196,174.61,164.81,146.83,123.47],lead:[587.33,698.46,783.99,880,783.99,659.25,587.33,493.88],beat:285,wave:'square'},
+    5:{bass:[110,164.81,146.83,196,174.61,146.83,130.81,98],lead:[659.25,587.33,523.25,783.99,698.46,587.33,523.25,440],beat:340,wave:'triangle'}
   };
 
-  function tone(freq, start, duration, volume, type='sine'){
-    if(!ctx || !master) return;
+  function createAudio(){
+    if(ctx) return true;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return false;
+    ctx=new AC();
+    master=ctx.createGain();
+    master.gain.value=.42;
+    master.connect(ctx.destination);
+    return true;
+  }
+
+  function primeIOSAudio(){
+    if(!createAudio()) return;
+    try{
+      const buffer=ctx.createBuffer(1,1,22050);
+      const source=ctx.createBufferSource();
+      source.buffer=buffer;
+      source.connect(master);
+      source.start(0);
+    }catch(e){}
+    try{
+      const r=ctx.resume();
+      if(r && typeof r.then==='function') r.then(()=>{unlocked=true;if(musicOn) startLoop();}).catch(()=>{});
+      else unlocked=true;
+    }catch(e){}
+  }
+
+  function tone(freq,start,duration,volume,type='sine'){
+    if(!ctx||!master) return;
     const osc=ctx.createOscillator();
     const gain=ctx.createGain();
     osc.type=type;
@@ -5344,69 +5349,53 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     gain.gain.setValueAtTime(.0001,start);
     gain.gain.exponentialRampToValueAtTime(volume,start+.012);
     gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
-    osc.connect(gain);
-    gain.connect(master);
-    osc.start(start);
-    osc.stop(start+duration+.02);
+    osc.connect(gain); gain.connect(master);
+    osc.start(start); osc.stop(start+duration+.02);
   }
 
   function percussion(start){
-    if(!ctx || !master) return;
+    if(!ctx||!master) return;
     const osc=ctx.createOscillator();
     const gain=ctx.createGain();
     osc.type='triangle';
-    osc.frequency.setValueAtTime(step%2 ? 180 : 230,start);
+    osc.frequency.setValueAtTime(step%2?180:230,start);
     gain.gain.setValueAtTime(.018,start);
     gain.gain.exponentialRampToValueAtTime(.0001,start+.055);
-    osc.connect(gain);
-    gain.connect(master);
-    osc.start(start);
-    osc.stop(start+.06);
+    osc.connect(gain); gain.connect(master);
+    osc.start(start); osc.stop(start+.06);
   }
 
   function tick(){
-    if(!musicOn || !ctx || ctx.state!=='running') return;
-    const song=songs[musicChoice] || songs[1];
+    if(!musicOn||!ctx||ctx.state!=='running') return;
+    const song=songs[musicChoice]||songs[1];
     const now=ctx.currentTime+.03;
     const i=step%song.bass.length;
-
     tone(song.bass[i],now,.28,.026,'triangle');
     if(step%2===0) tone(song.lead[i],now+.04,.16,.012,song.wave);
-    percussion(now);
-
-    step++;
+    percussion(now); step++;
   }
 
   function startLoop(){
-    if(timer) return;
+    if(!musicOn||!ctx||ctx.state!=='running'||timer) return;
     tick();
-    const song=songs[musicChoice] || songs[1];
+    const song=songs[musicChoice]||songs[1];
     timer=setInterval(tick,song.beat);
   }
 
-  async function ensureMusic(){
+  function stopLoop(){ if(timer){clearInterval(timer);timer=null;} }
+
+  function ensureMusicFromGesture(){
     if(!musicOn) return;
-    try{
-      if(!ctx){
-        const AC=window.AudioContext||window.webkitAudioContext;
-        if(!AC) return;
-        ctx=new AC();
-        master=ctx.createGain();
-        master.gain.value=.42;
-        master.connect(ctx.destination);
-      }
-      if(ctx.state==='suspended') await ctx.resume();
-      startLoop();
-    }catch(e){
-      console.warn('No se pudo iniciar la música.',e);
-    }
+    primeIOSAudio();
+    if(ctx&&ctx.state==='running'){unlocked=true;startLoop();}
   }
 
-  function stopLoop(){
-    if(timer){
-      clearInterval(timer);
-      timer=null;
-    }
+  async function ensureMusic(){
+    if(!musicOn||!createAudio()) return;
+    try{
+      if(ctx.state==='suspended') await ctx.resume();
+      if(ctx.state==='running'){unlocked=true;startLoop();}
+    }catch(e){console.warn('No se pudo iniciar la música.',e);}
   }
 
   function updateButton(){
@@ -5416,36 +5405,46 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     b.setAttribute('aria-pressed',musicOn?'true':'false');
   }
 
-  window.toggleDominoMusic=async function(){
+  window.toggleDominoMusic=function(){
+    // If iOS shows ON but audio is still locked, the first tap unlocks/starts it
+    // instead of immediately turning music OFF.
+    if(musicOn && (!ctx || ctx.state!=='running' || !timer)){
+      ensureMusicFromGesture();
+      updateButton();
+      return;
+    }
     musicOn=!musicOn;
-    if(musicOn) await ensureMusic();
-    else stopLoop();
+    if(musicOn) ensureMusicFromGesture(); else stopLoop();
     updateButton();
   };
 
-  document.getElementById('musicToggle')?.addEventListener('click',window.toggleDominoMusic);
+  const toggle=document.getElementById('musicToggle');
+  toggle?.addEventListener('click',window.toggleDominoMusic);
 
-  document.getElementById('musicChoice')?.addEventListener('change',async function(){
+  document.getElementById('musicChoice')?.addEventListener('change',function(){
     musicChoice=Number(this.value)||1;
-    step=0;
-    stopLoop();
-    if(musicOn) await ensureMusic();
+    step=0; stopLoop();
+    if(musicOn) ensureMusicFromGesture();
   });
 
-  // iPhone/Safari requires AudioContext to be created/resumed directly
-  // from a user gesture. Unlock it on the first interaction, even in the lobby.
-  const unlock=()=>{
-    if(musicOn) ensureMusic();
+  // Safari/iPhone only allows Web Audio after a direct user gesture.
+  // Do the unlock synchronously on the first touch/click anywhere in the app.
+  const unlock=function(){
+    if(musicOn) ensureMusicFromGesture();
   };
-  document.addEventListener('pointerdown',unlock,{passive:true});
-  document.addEventListener('touchstart',unlock,{passive:true});
+  document.addEventListener('touchend',unlock,{passive:true});
+  document.addEventListener('pointerup',unlock,{passive:true});
   document.addEventListener('click',unlock,{passive:true});
   document.addEventListener('keydown',unlock);
 
-  // Start as soon as the user enters/creates a room after an interaction.
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden && musicOn && unlocked) ensureMusic();
+  });
+
   const observer=new MutationObserver(()=>{
-    if(document.body.classList.contains('in-room')) ensureMusic();
-    else stopLoop();
+    if(document.body.classList.contains('in-room')){
+      if(musicOn && unlocked) ensureMusic();
+    }else stopLoop();
   });
   observer.observe(document.body,{attributes:true,attributeFilter:['class']});
 
