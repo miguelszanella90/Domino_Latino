@@ -26,8 +26,21 @@ async function save(g) {
   await kv.set(
     `domino:${g.code}`,
     g,
-    { ex: 86400 }
+    { ex: ROOM_TTL_SECONDS }
   );
+
+  if (g.roomName) {
+    const normalizedName =
+      normalizeRoomLookup(g.roomName);
+
+    if (normalizedName) {
+      await kv.set(
+        `domino-room-name:${normalizedName}`,
+        g.code,
+        { ex: ROOM_TTL_SECONDS }
+      );
+    }
+  }
 }
 function normalizeRoomLookup(value) {
   return String(value || '')
