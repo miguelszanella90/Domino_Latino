@@ -1760,6 +1760,51 @@ body.in-room .menu-nav-actions{display:flex!important;}
 .game-mode-help{font-size:11px;opacity:.72;line-height:1.35;margin-top:6px;}
 .rotation-score{font-size:11px!important;}
 </style>
+
+<style id="domino-music-settings-style">
+  .music-settings-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .music-settings-controls{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    flex:0 0 auto;
+  }
+  #musicChoice{
+    min-width:54px;
+    height:32px;
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:8px;
+    padding:0 8px;
+    background:rgba(255,255,255,.96);
+    color:#173a2b;
+    font-weight:800;
+    cursor:pointer;
+  }
+  #musicToggle{
+    min-width:68px;
+    height:32px;
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:8px;
+    padding:0 9px;
+    background:rgba(8,35,23,.88);
+    color:#fff;
+    font-weight:800;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  @media (max-width:700px){
+    .music-settings-row{gap:6px}
+    .music-settings-controls{gap:5px}
+    #musicChoice{min-width:48px;height:30px;padding:0 6px;font-size:12px}
+    #musicToggle{min-width:62px;height:30px;padding:0 7px;font-size:11px}
+  }
+</style>
+
 </head>
 
 
@@ -1899,159 +1944,19 @@ Crear sala
 </button>
 
 
-<div class="row">
-
-<input
-  id="code"
-  placeholder="Código"
->
-
-<button onclick="join()">
-Unirme
-</button>
-
+<div class="setting-row music-settings-row">
+  <label for="musicChoice">Música</label>
+  <div class="music-settings-controls">
+    <select id="musicChoice" title="Escoger música" aria-label="Escoger música">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+    <button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 ON</button>
+  </div>
 </div>
-
-</div>
-
-
-<!-- ROOM -->
-
-<div
-  id="room"
-  hidden
->
-
-<h3>
-
-Sala
-
-<b id="roomCode"></b>
-
-</h3>
-
-
-<button onclick="copyLink()">
-Copiar URL
-</button>
-
-
-<button
-  id="start"
-  onclick="act('start')"
->
-Iniciar partida
-</button>
-
-
-<button
-  id="newRound"
-  onclick="act('newRound')"
-  style="display:none"
->
-Nueva ronda
-</button>
-
-
-<div
-  class="players"
-  id="players"
-></div>
-
-
-<p
-  id="msg"
-  class="small"
-></p>
-
-</div>
-
-
-<!-- RULES -->
-
-<details>
-
-<summary>
-Reglas
-</summary>
-
-<p class="small">
-
-28 fichas, valores 0 a 6.
-
-De 2 a 4 jugadores.
-
-Cada jugador recibe 7 fichas.
-
-Comienza quien tenga el doble más alto.
-
-La ficha inicial se coloca automáticamente.
-
-En cada turno se juega una ficha que coincida
-con uno de los extremos.
-
-Si no puedes jugar y quedan fichas en el pozo,
-debes robar.
-
-Si el pozo está vacío y no puedes jugar,
-debes pasar.
-
-Con cuatro jugadores se juega por equipos:
-jugadores 1 y 3 contra jugadores 2 y 4.
-
-</p>
-
-</details>
-
-
-<!-- SETTINGS -->
-
-<details>
-
-<summary>
-Settings
-</summary>
-
-
-<label>
-
-Color mesa
-
-<input
-  type="color"
-  value="#0d6b4d"
-  oninput="
-    document
-    .documentElement
-    .style
-    .setProperty(
-      '--felt',
-      this.value
-    )
-  "
->
-
-</label>
-
-
-<br>
-
-
-<label>
-
-Música
-
-<input
-  id="music"
-  type="checkbox"
-  onchange="
-    toggleMusic(
-      this.checked
-    )
-  "
->
-
-</label>
 
 
 <br>
@@ -5375,73 +5280,9 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 </script>
 
 
-<style id="domino-music-style">
-  #musicChoiceWrap{
-    position:fixed;
-    left:10px;
-    bottom:48px;
-    z-index:1200;
-    display:flex;
-    align-items:center;
-    gap:5px;
-    border:1px solid rgba(255,255,255,.24);
-    border-radius:999px;
-    padding:6px 9px;
-    background:rgba(8,35,23,.82);
-    color:#fff;
-    font:700 11px/1 system-ui,sans-serif;
-    box-shadow:0 4px 14px rgba(0,0,0,.2);
-    backdrop-filter:blur(6px);
-  }
-  #musicChoice{
-    border:0;
-    border-radius:999px;
-    padding:3px 5px;
-    background:#fff;
-    color:#163629;
-    font-weight:800;
-    cursor:pointer;
-  }
-  body:not(.in-room) #musicChoiceWrap{display:none}
-  #musicToggle{
-    position:fixed;
-    left:10px;
-    bottom:10px;
-    z-index:1200;
-    border:1px solid rgba(255,255,255,.24);
-    border-radius:999px;
-    padding:7px 11px;
-    background:rgba(8,35,23,.82);
-    color:#fff;
-    font:700 11px/1 system-ui,sans-serif;
-    box-shadow:0 4px 14px rgba(0,0,0,.2);
-    backdrop-filter:blur(6px);
-    cursor:pointer;
-  }
-  body:not(.in-room) #musicToggle{display:none}
-  @media (max-width:700px){
-    #musicChoiceWrap{left:6px;bottom:38px;padding:5px 7px;font-size:9px}
-    #musicChoice{font-size:9px;padding:2px 4px}
-    #musicToggle{left:6px;bottom:5px;padding:6px 8px;font-size:9px}
-  }
-  @media (max-width:950px) and (orientation:landscape) and (max-height:500px){
-    #musicChoiceWrap{left:42px;bottom:34px;padding:4px 6px;font-size:8px}
-    #musicChoice{font-size:8px;padding:2px 3px}
-    #musicToggle{left:42px;bottom:4px;padding:5px 7px;font-size:8px}
-  }
-</style>
 
-<div id="musicChoiceWrap">
-  <label for="musicChoice">🎶 Música</label>
-  <select id="musicChoice" title="Escoger música">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-    <option value="5">5</option>
-  </select>
-</div>
-<button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 Música ON</button>
+
+
 
 <script id="domino-background-music">
 (function(){
@@ -5560,7 +5401,7 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
   function updateButton(){
     const b=document.getElementById('musicToggle');
     if(!b) return;
-    b.textContent=musicOn?'🎵 Música ON':'🔇 Música OFF';
+    b.textContent=musicOn?'🎵 ON':'🔇 OFF';
     b.setAttribute('aria-pressed',musicOn?'true':'false');
   }
 
