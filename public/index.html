@@ -1801,7 +1801,7 @@ body.in-room .menu-nav-actions{display:flex!important;}
     Generar nombre/código automáticamente
   </label>
   <input id="customRoomName" maxlength="40" placeholder="Nombre de la sala (ej. Viernes de Dominó)" disabled>
-  <div class="small">Los demás podrán entrar escribiendo este nombre o usando el código de la sala.</div>
+  <div class="small">El enlace seguirá usando un código privado aunque pongas un nombre.</div>
 </div>
 
 <label>
@@ -1903,8 +1903,7 @@ Crear sala
 
 <input
   id="code"
-  placeholder="Nombre o código de sala"
-  autocomplete="off"
+  placeholder="Código"
 >
 
 <button onclick="join()">
@@ -2252,7 +2251,7 @@ let oscillator =
   null;
 
 const BOT_DELAY =
-  1500;
+  1800;
 
 let activeSocialTab = 'history';
 let localStream = null;
@@ -2647,7 +2646,8 @@ async function join(){
         'code'
       )
       .value
-      .trim();
+      .trim()
+      .toUpperCase();
 
 
     if(
@@ -2655,7 +2655,7 @@ async function join(){
     ){
 
       return alert(
-        'Introduce el nombre o código de la sala'
+        'Introduce el código de la sala'
       );
 
     }
@@ -5270,7 +5270,7 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     if(!overlay||typeof game==='undefined'||!game)return;
     const ended=game.status==='finished'||game.status==='match_finished';
     if(!ended){ overlay.hidden=true; roundOverlayKey=null; return; }
-    const key=`${game.code}:${game.round}:${game.status}`;
+    const key=`${game.code}:${game.roundNumber}:${game.status}`;
     if(roundOverlayKey===key)return;
     roundOverlayKey=key;
     document.getElementById('roundOverlayTitle').textContent =
@@ -5328,3 +5328,234 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 </body>
 
 </html>
+
+
+<style id="mobile-landscape-fix">
+/* Mobile horizontal only. Vertical mobile and desktop remain unchanged. */
+@media (max-width: 950px) and (orientation: landscape) and (max-height: 500px) {
+  body.in-room .app{
+    grid-template-columns:0 minmax(0,1fr)!important;
+    width:100vw!important;
+    height:100dvh!important;
+  }
+
+  body.in-room .side{
+    transform:translateX(-100%)!important;
+    width:0!important;
+    min-width:0!important;
+    overflow:hidden!important;
+    pointer-events:none!important;
+  }
+
+  body.in-room .main{
+    width:100vw!important;
+    min-width:0!important;
+    height:100dvh!important;
+    grid-template-rows:46px minmax(0,1fr) 64px 50px!important;
+    overflow:hidden!important;
+  }
+
+  body.in-room .top{
+    min-height:46px!important;
+    height:46px!important;
+    padding:4px 54px 2px!important;
+    flex-direction:row!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:8px!important;
+    overflow:hidden!important;
+  }
+
+  body.in-room #status{
+    font-size:12px!important;
+    line-height:1!important;
+    max-width:38vw!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  body.in-room #subStatus{
+    display:none!important;
+  }
+
+  body.in-room .score-bar{
+    width:auto!important;
+    margin:0!important;
+    gap:3px!important;
+    font-size:8px!important;
+    flex-wrap:nowrap!important;
+  }
+
+  body.in-room .score-team,
+  body.in-room .score-player{
+    padding:2px 5px!important;
+  }
+
+  body.in-room .game-content,
+  body.in-room .table-zone{
+    position:relative!important;
+    width:100%!important;
+    min-width:0!important;
+    overflow:hidden!important;
+  }
+
+  body.in-room .table-zone{
+    position:absolute!important;
+    inset:0!important;
+  }
+
+  body.in-room .board{
+    left:9%!important;
+    right:9%!important;
+    top:5%!important;
+    bottom:5%!important;
+  }
+
+  body.in-room .seat-left{
+    left:22px!important;
+    top:50%!important;
+    transform:translateY(-50%) scale(.82)!important;
+    transform-origin:left center!important;
+  }
+
+  body.in-room .seat-right{
+    right:22px!important;
+    top:50%!important;
+    transform:translateY(-50%) scale(.82)!important;
+    transform-origin:right center!important;
+  }
+
+  body.in-room .seat-top{
+    top:5px!important;
+    transform:translateX(-50%) scale(.82)!important;
+    transform-origin:center top!important;
+  }
+
+  body.in-room .opponent-name{
+    font-size:8px!important;
+    padding:2px 3px!important;
+  }
+
+  body.in-room .seat-left .opponent-name{
+    left:-20px!important;
+  }
+
+  body.in-room .seat-right .opponent-name{
+    right:-20px!important;
+  }
+
+  body.in-room .hand-zone{
+    height:64px!important;
+    min-height:64px!important;
+    padding:1px 4px 2px!important;
+  }
+
+  body.in-room .you-label{
+    font-size:8px!important;
+    padding:1px 6px!important;
+    margin:0!important;
+  }
+
+  body.in-room .hand-rack{
+    padding:2px 4px!important;
+    max-width:96vw!important;
+  }
+
+  body.in-room .hand{
+    min-height:45px!important;
+    gap:2px!important;
+  }
+
+  body.in-room .hand .tile-half{
+    width:27px!important;
+    height:20px!important;
+  }
+
+  body.in-room .hand .pip{
+    width:4px!important;
+    height:4px!important;
+  }
+
+  body.in-room .controls{
+    height:50px!important;
+    min-height:50px!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:5px!important;
+    padding:3px 8px max(3px,env(safe-area-inset-bottom))!important;
+  }
+
+  body.in-room .controls button{
+    min-height:40px!important;
+    height:40px!important;
+    padding:3px 4px!important;
+    font-size:10px!important;
+    border-radius:10px!important;
+  }
+
+  body.in-room .player-video,
+  body.in-room .remote-video-wrap{
+    width:48px!important;
+    height:34px!important;
+  }
+
+  body.in-room .remote-video-wrap.seat-left{
+    left:5px!important;
+    top:5px!important;
+    transform:none!important;
+  }
+
+  body.in-room .remote-video-wrap.seat-top{
+    right:5px!important;
+    left:auto!important;
+    top:5px!important;
+    transform:none!important;
+  }
+
+  body.in-room .remote-video-wrap.seat-right{
+    right:5px!important;
+    bottom:5px!important;
+    top:auto!important;
+    transform:none!important;
+  }
+
+  body.in-room .player-video.local{
+    left:5px!important;
+    bottom:5px!important;
+  }
+
+  body.in-room .remote-video-name,
+  body.in-room #localVideoName{
+    font-size:6px!important;
+  }
+
+  body.in-room .media-controls{
+    right:28px!important;
+    bottom:3px!important;
+    gap:3px!important;
+  }
+
+  body.in-room .media-controls button{
+    padding:3px 5px!important;
+    font-size:7px!important;
+  }
+
+  body.in-room .toggle{
+    left:5px!important;
+    top:5px!important;
+    width:32px!important;
+    height:32px!important;
+    font-size:14px!important;
+  }
+
+  body.in-room .social-drawer-toggle{
+    top:65%!important;
+  }
+
+  .turn-toast{
+    top:52px!important;
+    font-size:13px!important;
+    padding:6px 12px!important;
+  }
+}
+</style>
