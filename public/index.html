@@ -1525,6 +1525,22 @@ summary{
 
 
 
+<style id="ux-v6-lobby-social-fix">
+/* Never show game social UI on the create/join screen. */
+body:not(.in-room) .social-panel{display:none!important;}
+
+@media (max-width:700px){
+  /* In a room, the social panel exists only as an optional right drawer. */
+  body.in-room .social-panel{display:flex!important;}
+  body.in-room .social-panel:not(.mobile-open){
+    transform:translate(100%,-50%)!important;
+  }
+  body.in-room .social-panel.mobile-open{
+    transform:translate(0,-50%)!important;
+  }
+}
+</style>
+
 <style id="ux-v5-side-drawer">
 /* UX v5: centered side players + mobile right retractable social drawer */
 .social-drawer-toggle{display:none;}
@@ -4804,6 +4820,73 @@ function toggleMusic(on){
     else render();
   },{passive:true});
   document.addEventListener('touchcancel',clearDrag,{passive:true});
+})();
+</script>
+
+
+<style id="ux-v7-stable-subtle-drawer">
+@media (max-width:700px){
+  body.in-room .social-panel:not(.mobile-open){
+    transform:translate(100%,-50%)!important;
+  }
+  .social-drawer-toggle{
+    left:-20px!important;
+    top:72%!important;
+    width:20px!important;
+    height:48px!important;
+    border-radius:10px 0 0 10px!important;
+    font-size:12px!important;
+    opacity:.58!important;
+    box-shadow:0 2px 7px #0005!important;
+    background:var(--accent)!important;
+    transition:opacity .18s ease!important;
+  }
+  .social-drawer-toggle:active{opacity:.95!important;}
+  .social-panel.mobile-open .social-drawer-toggle{
+    transform:translateY(-50%) rotate(180deg)!important;
+    opacity:.82!important;
+  }
+}
+</style>
+<script id="ux-v7-stable-drawer-js">
+(function(){
+  // Final mobile drawer controller. It deliberately replaces the earlier
+  // stacked wrappers so refresh/render cannot reopen a drawer the user closed.
+  window.toggleSocialDrawer=function(forceOpen){
+    const panel=document.getElementById('historyPanel');
+    if(!panel) return;
+    if(window.innerWidth>700){ panel.classList.add('mobile-open'); return; }
+    const open=(typeof forceOpen==='boolean') ? forceOpen : !panel.classList.contains('mobile-open');
+    panel.classList.toggle('mobile-open',open);
+  };
+
+  window.showSocialTab=function(tab){
+    const wanted=tab==='chat'?'chat':'history';
+    const panel=document.getElementById('historyPanel');
+    const historyView=document.getElementById('historyView');
+    const chatView=document.getElementById('chatView');
+    const historyTab=document.getElementById('historyTab');
+    const chatTab=document.getElementById('chatTab');
+    activeSocialTab=wanted;
+    if(historyView) historyView.hidden=wanted!=='history';
+    if(chatView) chatView.hidden=wanted!=='chat';
+    if(historyTab) historyTab.classList.toggle('active',wanted==='history');
+    if(chatTab) chatTab.classList.toggle('active',wanted==='chat');
+    if(panel) panel.dataset.openTab=wanted;
+    // Choosing a tab opens it. Normal renders/refreshes do not call this
+    // controller to change the user's closed/open choice.
+    if(window.innerWidth<=700 && panel) panel.classList.add('mobile-open');
+  };
+
+  // Always enter a room with the drawer closed on mobile.
+  const closeOnRoomEntry=()=>{
+    if(window.innerWidth<=700){
+      const panel=document.getElementById('historyPanel');
+      if(panel) panel.classList.remove('mobile-open');
+    }
+  };
+  window.addEventListener('popstate',closeOnRoomEntry);
+  window.addEventListener('DOMContentLoaded',closeOnRoomEntry);
 })();
 </script>
 
