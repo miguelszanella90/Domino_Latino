@@ -1942,6 +1942,15 @@ Difícil
 Crear sala
 </button>
 
+<div class="row">
+  <input
+    id="code"
+    placeholder="Nombre o código de la sala"
+  >
+  <button onclick="join()">
+    Unirme
+  </button>
+</div>
 
 <div class="setting-row music-settings-row">
   <label for="musicChoice">Música</label>
@@ -5423,11 +5432,14 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     if(musicOn) await ensureMusic();
   });
 
-  // Browsers require a user gesture before sound can begin.
+  // iPhone/Safari requires AudioContext to be created/resumed directly
+  // from a user gesture. Unlock it on the first interaction, even in the lobby.
   const unlock=()=>{
-    if(document.body.classList.contains('in-room')) ensureMusic();
+    if(musicOn) ensureMusic();
   };
   document.addEventListener('pointerdown',unlock,{passive:true});
+  document.addEventListener('touchstart',unlock,{passive:true});
+  document.addEventListener('click',unlock,{passive:true});
   document.addEventListener('keydown',unlock);
 
   // Start as soon as the user enters/creates a room after an interaction.
