@@ -1523,6 +1523,116 @@ summary{
 }
 </style>
 
+
+
+<style id="ux-v5-side-drawer">
+/* UX v5: centered side players + mobile right retractable social drawer */
+.social-drawer-toggle{display:none;}
+
+@media (max-width:700px){
+  /* Keep the two side players truly centered vertically. */
+  .seat-left,
+  .seat-right{
+    top:50%!important;
+    bottom:auto!important;
+    transform:translateY(-50%)!important;
+  }
+  .seat-left{left:10px!important;}
+  .seat-right{right:10px!important;}
+
+  .seat-left .wood-rack,
+  .seat-right .wood-rack{
+    margin:0!important;
+  }
+
+  /* Right-side retractable drawer. It no longer reserves vertical space. */
+  .social-panel{
+    left:auto!important;
+    right:0!important;
+    top:50%!important;
+    bottom:auto!important;
+    width:min(82vw,340px)!important;
+    height:min(43dvh,330px)!important;
+    max-height:min(43dvh,330px)!important;
+    border-radius:16px 0 0 16px!important;
+    transform:translate(100%,-50%)!important;
+    transition:transform .22s ease!important;
+    overflow:visible!important;
+    z-index:40!important;
+  }
+
+  .social-panel.mobile-open{
+    height:min(43dvh,330px)!important;
+    transform:translate(0,-50%)!important;
+  }
+
+  .social-drawer-toggle{
+    display:flex!important;
+    position:absolute;
+    left:-34px;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    height:76px;
+    margin:0;
+    padding:0;
+    align-items:center;
+    justify-content:center;
+    border-radius:14px 0 0 14px;
+    background:var(--accent);
+    color:#102a2e;
+    font-size:18px;
+    font-weight:900;
+    box-shadow:0 3px 12px #0007;
+    z-index:2;
+  }
+
+  .social-panel.mobile-open .social-drawer-toggle{
+    transform:translateY(-50%) rotate(180deg);
+  }
+
+  .social-tabs{
+    height:38px!important;
+    flex:0 0 38px!important;
+    border-radius:16px 0 0 0;
+    overflow:hidden;
+  }
+
+  .social-tab{
+    padding:7px 4px!important;
+    font-size:11px!important;
+  }
+
+  /* The views are visible only while drawer is open. */
+  .social-panel:not(.mobile-open) .social-tabs,
+  .social-panel:not(.mobile-open) .social-view{
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+
+  .social-panel.mobile-open .social-tabs,
+  .social-panel.mobile-open .social-view{
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+
+  .history-list,
+  .chat-list{
+    max-height:calc(min(43dvh,330px) - 38px)!important;
+    padding:8px 10px 52px!important;
+    font-size:11px!important;
+  }
+
+  .chat-compose{
+    padding:6px!important;
+  }
+
+  /* Keep media controls clear of the drawer handle. */
+  .media-controls{
+    right:42px!important;
+  }
+}
+</style>
 </head>
 
 
@@ -1877,6 +1987,7 @@ Crea o únete a una sala
 
 
 <aside class="social-panel" id="historyPanel">
+  <button class="social-drawer-toggle" id="socialDrawerToggle" type="button" onclick="toggleSocialDrawer()" aria-label="Abrir o cerrar chat e historial">◀</button>
   <div class="social-tabs">
     <button class="social-tab active" id="historyTab" onclick="showSocialTab('history')">📜 Jugadas</button>
     <button class="social-tab" id="chatTab" onclick="showSocialTab('chat')">💬 Chat</button>
@@ -2458,6 +2569,10 @@ function enter(){
   }
 
 
+  if(window.innerWidth <= 700){
+    document.getElementById('historyPanel')?.classList.remove('mobile-open');
+  }
+
   render();
 
 
@@ -2804,8 +2919,28 @@ function escapeHTML(value){
     .replace(/'/g,'&#039;');
 }
 
+function toggleSocialDrawer(forceOpen){
+  const panel = document.getElementById('historyPanel');
+  if(!panel) return;
+
+  if(window.innerWidth > 700){
+    panel.classList.add('mobile-open');
+    return;
+  }
+
+  const shouldOpen = typeof forceOpen === 'boolean'
+    ? forceOpen
+    : !panel.classList.contains('mobile-open');
+
+  panel.classList.toggle('mobile-open', shouldOpen);
+}
+
 function showSocialTab(tab){
   activeSocialTab = tab === 'chat' ? 'chat' : 'history';
+
+  if(window.innerWidth <= 700){
+    toggleSocialDrawer(true);
+  }
 
   const historyView = document.getElementById('historyView');
   const chatView = document.getElementById('chatView');
