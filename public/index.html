@@ -2659,14 +2659,15 @@ function enter(){
   }
 
 
-  document
-    .getElementById(
-      'roomCode'
-    )
-    .textContent =
+  const roomCodeEl =
+    document.getElementById('roomCode');
+
+  if(roomCodeEl){
+    roomCodeEl.textContent =
       game.roomName
         ? `${game.roomName} · ${game.code}`
         : game.code;
+  }
 
 
   history
@@ -4244,10 +4245,8 @@ function render(){
 
 
   const playersEl =
-    document
-    .getElementById(
-      'players'
-    );
+    document.getElementById('players') ||
+    document.createElement('div');
 
 
   const handEl =
@@ -4258,24 +4257,18 @@ function render(){
 
 
   const msg =
-    document
-    .getElementById(
-      'msg'
-    );
+    document.getElementById('msg') ||
+    document.createElement('div');
 
 
   const start =
-    document
-    .getElementById(
-      'start'
-    );
+    document.getElementById('start') ||
+    document.createElement('button');
 
 
   const newRound =
-    document
-    .getElementById(
-      'newRound'
-    );
+    document.getElementById('newRound') ||
+    document.createElement('button');
 
 
   const leftButton =
