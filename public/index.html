@@ -205,6 +205,46 @@ summary{
 }
 
 /* =========================
+   SCOREBOARD
+========================= */
+.score-bar{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  margin:6px auto 0;
+  min-height:25px;
+  font-size:13px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.score-bar:empty{display:none;}
+.score-team,.score-player{
+  padding:4px 9px;
+  border-radius:999px;
+  background:#031f18b8;
+  border:1px solid #ffffff24;
+}
+.score-team.leading,.score-player.leading{
+  border-color:var(--gold);
+  box-shadow:0 0 0 1px #d7aa4a33;
+}
+.score-sep{opacity:.65;font-weight:700;}
+.score-target{opacity:.7;font-size:11px;font-weight:600;}
+.round-result{
+  color:var(--gold);
+  font-weight:900;
+}
+@media(max-width:700px){
+  .top{padding-top:7px!important;padding-bottom:7px!important;}
+  #status{font-size:15px!important;}
+  #subStatus{font-size:10px!important;margin-top:1px!important;}
+  .score-bar{gap:4px;margin-top:4px;min-height:20px;font-size:11px;}
+  .score-team,.score-player{padding:3px 7px;}
+  .score-target{display:none;}
+}
+
+/* =========================
    GAME AREA
 ========================= */
 
@@ -1805,6 +1845,7 @@ Crea o únete a una sala
 </b>
 
 <div id="subStatus"></div>
+<div id="scoreBar" class="score-bar" aria-live="polite"></div>
 
 </div>
 
@@ -3865,6 +3906,32 @@ function renderHistory(){
    RENDER
 ========================= */
 
+function renderScoreboard(){
+  const el=document.getElementById('scoreBar');
+  if(!el || !game){ return; }
+
+  if(game.players.length===4 && game.teamScores){
+    const a=Number(game.teamScores.A||0);
+    const b=Number(game.teamScores.B||0);
+    const aLead=a>b ? ' leading' : '';
+    const bLead=b>a ? ' leading' : '';
+    const result=(game.status==='finished' || game.status==='match_finished')
+      ? `<span class="round-result">${game.status==='match_finished' ? '🏆 Final' : '✓ Ronda '+game.roundNumber}</span><span class="score-sep">·</span>`
+      : '';
+    el.innerHTML=`${result}<span class="score-team${aLead}">Equipo A&nbsp; ${a}</span><span class="score-sep">│</span><span class="score-team${bLead}">${b} &nbsp;Equipo B</span><span class="score-target">Meta ${game.target}</span>`;
+    return;
+  }
+
+  const scored=(game.players||[]).map(p=>({
+    name:p.isMe ? `${p.name} (Tú)` : p.name,
+    score:Number(p.score||0)
+  }));
+  const high=scored.length ? Math.max(...scored.map(p=>p.score)) : 0;
+  el.innerHTML=scored.map((p,i)=>
+    `${i?'<span class="score-sep">│</span>':''}<span class="score-player${p.score===high && high>0?' leading':''}">${p.name}&nbsp; ${p.score}</span>`
+  ).join('') + `<span class="score-target">Meta ${game.target}</span>`;
+}
+
 function render(){
 
   if(
@@ -3993,6 +4060,9 @@ function render(){
       '';
 
   }
+
+
+  renderScoreboard();
 
 
   /* PLAYERS */
