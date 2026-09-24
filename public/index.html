@@ -1731,6 +1731,35 @@ body.in-room .social-panel.mobile-open{transform:translateX(0)!important;}
 }
 </style>
 
+
+<style id="ux-v10-fit-score-mode">
+/* V10: readable score, fully visible mobile seats, contextual navigation */
+body:not(.in-room) .menu-nav-actions{display:none!important;}
+body.in-room .menu-nav-actions{display:flex!important;}
+.top{display:grid!important;grid-template-columns:minmax(220px,1fr) auto minmax(220px,1fr)!important;align-items:center!important;column-gap:14px!important;}
+.top > #status,.top > #subStatus{grid-column:2;}
+.score-bar{grid-column:3!important;grid-row:1 / span 2!important;margin:0 14px 0 0!important;justify-content:flex-end!important;flex-wrap:nowrap!important;max-width:none!important;}
+.score-team,.score-player{padding:4px 8px!important;}
+@media(max-width:700px){
+  .main{grid-template-rows:78px minmax(0,1fr) 82px 56px!important;}
+  .top{display:flex!important;flex-direction:column!important;justify-content:center!important;padding:max(7px,env(safe-area-inset-top)) 44px 4px!important;overflow:visible!important;}
+  #status{font-size:14px!important;max-width:100%!important;}
+  #subStatus{font-size:10px!important;}
+  .score-bar{margin:3px 0 0!important;width:100%!important;justify-content:center!important;gap:3px!important;font-size:9px!important;line-height:1!important;}
+  .score-team,.score-player{padding:3px 5px!important;}
+  .seat-left{left:34px!important;}
+  .seat-right{right:34px!important;}
+  .seat-left .opponent-name{left:-24px!important;}
+  .seat-right .opponent-name{right:-24px!important;}
+  .hand-zone{height:82px!important;}
+  .controls{height:56px!important;min-height:56px!important;}
+  .controls button{min-height:44px!important;padding:5px 4px!important;font-size:10px!important;}
+}
+.game-mode-box{margin:12px 0;padding:12px;border-radius:12px;background:#ffffff08;border:1px solid #ffffff10;}
+.game-mode-box label{display:flex;align-items:center;gap:8px;margin:6px 0;}
+.game-mode-help{font-size:11px;opacity:.72;line-height:1.35;margin-top:6px;}
+.rotation-score{font-size:11px!important;}
+</style>
 </head>
 
 
@@ -1794,6 +1823,13 @@ Jugadores
 
 </label>
 
+
+<div class="game-mode-box">
+  <strong>Modalidad</strong>
+  <label><input type="radio" name="gameMode" value="classic" checked onchange="updateGameMode()"> Partida clásica</label>
+  <label><input type="radio" name="gameMode" value="rotation" onchange="updateGameMode()"> Mesa rotativa</label>
+  <div class="game-mode-help" id="gameModeHelp">La partida termina al llegar a la meta.</div>
+</div>
 
 <div class="bot-options">
 
@@ -2479,6 +2515,25 @@ function updateBotOptions(){
 updateBotOptions();
 
 
+function updateGameMode(){
+  const mode=(document.querySelector('input[name="gameMode"]:checked')||{}).value||'classic';
+  const max=document.getElementById('max');
+  const bots=document.getElementById('botCount');
+  const help=document.getElementById('gameModeHelp');
+  if(mode==='rotation'){
+    if(max) max.value='4';
+    if(max) max.disabled=true;
+    if(bots){bots.value='0';bots.disabled=true;}
+    if(help) help.textContent='4 juegan y los demás esperan. Después de cada ronda, un jugador del equipo perdedor rota con la siguiente persona en cola. El puntaje es individual y dura hasta cerrar la sala.';
+  }else{
+    if(max) max.disabled=false;
+    if(bots) bots.disabled=false;
+    if(help) help.textContent='La partida termina al llegar a la meta.';
+    updateBotOptions();
+  }
+}
+updateGameMode();
+
 /* =========================
    CREATE
 ========================= */
@@ -2492,6 +2547,9 @@ async function create(){
 
         action:
           'create',
+
+        gameMode:
+          (document.querySelector('input[name="gameMode"]:checked') || {}).value || 'classic',
 
         name:
 
@@ -4169,26 +4227,25 @@ function renderScoreboard(){
   const el=document.getElementById('scoreBar');
   if(!el || !game){ return; }
 
-  if(game.players.length===4 && game.teamScores){
-    const a=Number(game.teamScores.A||0);
-    const b=Number(game.teamScores.B||0);
-    const aLead=a>b ? ' leading' : '';
-    const bLead=b>a ? ' leading' : '';
-    const result=(game.status==='finished' || game.status==='match_finished')
-      ? `<span class="round-result">${game.status==='match_finished' ? '🏆 Final' : '✓ Ronda '+game.roundNumber}</span><span class="score-sep">·</span>`
-      : '';
-    el.innerHTML=`${result}<span class="score-team${aLead}">Equipo A&nbsp; ${a}</span><span class="score-sep">│</span><span class="score-team${bLead}">${b} &nbsp;Equipo B</span><span class="score-target">Meta ${game.target}</span>`;
+  if(game.gameMode==='rotation' && Array.isArray(game.leaderboard)){
+    const leaders=game.leaderboard.slice(0,4);
+    el.innerHTML=leaders.map((p,i)=>
+      `<span class="score-player rotation-score${i===0 && p.score>0?' leading':''}">${p.name}${p.isMe?' (Tú)':''}&nbsp; ${p.score}</span>`
+    ).join('<span class="score-sep">│</span>');
     return;
   }
 
-  const scored=(game.players||[]).map(p=>({
-    name:p.isMe ? `${p.name} (Tú)` : p.name,
-    score:Number(p.score||0)
-  }));
-  const high=scored.length ? Math.max(...scored.map(p=>p.score)) : 0;
-  el.innerHTML=scored.map((p,i)=>
-    `${i?'<span class="score-sep">│</span>':''}<span class="score-player${p.score===high && high>0?' leading':''}">${p.name}&nbsp; ${p.score}</span>`
-  ).join('') + `<span class="score-target">Meta ${game.target}</span>`;
+  if(game.players.length===4 && game.teamScores){
+    const a=Number(game.teamScores.A||0), b=Number(game.teamScores.B||0);
+    const result=(game.status==='finished'||game.status==='match_finished')
+      ? `<span class="round-result">${game.status==='match_finished'?'🏆 Final':'✓ R'+game.roundNumber}</span>` : '';
+    el.innerHTML=`${result}<span class="score-team${a>b?' leading':''}">A ${a}</span><span class="score-sep">│</span><span class="score-team${b>a?' leading':''}">B ${b}</span><span class="score-target">Meta ${game.target}</span>`;
+    return;
+  }
+
+  const scored=(game.players||[]).map(p=>({name:p.isMe?`${p.name} (Tú)`:p.name,score:Number(p.score||0)}));
+  const high=scored.length?Math.max(...scored.map(p=>p.score)):0;
+  el.innerHTML=scored.map((p,i)=>`${i?'<span class="score-sep">│</span>':''}<span class="score-player${p.score===high&&high>0?' leading':''}">${p.name} ${p.score}</span>`).join('')+`<span class="score-target">Meta ${game.target}</span>`;
 }
 
 function render(){
