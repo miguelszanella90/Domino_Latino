@@ -3396,13 +3396,20 @@ async function ensureLocalMedia(){
 
   await connectToHumanPlayers();
 
-  // Existing peer connections are skipped by connectToHumanPlayers(),
-  // so explicitly renegotiate them after adding local media.
+  // Renegotiate existing connections after adding media. Give the
+  // offer to only one side when possible so PC and mobile do not send
+  // simultaneous offers ("offer glare").
   for(const player of humanPeers()){
     const pc = peerConnections.get(player.id);
     if(!pc) continue;
     try{
-      if(pc.signalingState === 'stable'){
+      const iAmPreferredOfferer = String(pid) < String(player.id);
+      const hasRemoteDescription = !!pc.remoteDescription;
+
+      if(
+        pc.signalingState === 'stable' &&
+        (iAmPreferredOfferer || !hasRemoteDescription)
+      ){
         await makeOffer(player.id);
       }
     }catch(e){
@@ -3507,15 +3514,40 @@ function renderRemoteVideos(){
     const video = document.createElement('video');
     video.autoplay = true;
     video.playsInline = true;
-    video.muted = false;
+
+    // Remote media that contains microphone audio is commonly blocked
+    // from autoplay by Chrome/Samsung Internet/Safari. Start muted so
+    // the VIDEO always becomes visible. Tapping the remote camera
+    // enables/disables its audio.
+    video.muted = true;
     video.srcObject = stream;
-    video.addEventListener('loadedmetadata', ()=>{
-      video.play().catch(()=>{});
-    }, {once:true});
 
     const label = document.createElement('div');
     label.className = 'remote-video-name';
-    label.textContent = player.name;
+    label.textContent = player.name + ' · 🔇 toca para audio';
+
+    const startRemoteVideo = async()=>{
+      try{
+        await video.play();
+      }catch(e){
+        console.warn('Remote video autoplay blocked', e);
+      }
+    };
+
+    video.addEventListener('loadedmetadata', startRemoteVideo, {once:true});
+    video.addEventListener('canplay', startRemoteVideo, {once:true});
+
+    wrap.addEventListener('click', async()=>{
+      video.muted = !video.muted;
+      label.textContent =
+        player.name +
+        (video.muted ? ' · 🔇 toca para audio' : ' · 🔊 audio');
+      try{
+        await video.play();
+      }catch(e){
+        console.warn('Remote media play error', e);
+      }
+    });
 
     wrap.appendChild(video);
     wrap.appendChild(label);
@@ -3562,11 +3594,24 @@ function createPeerConnection(remoteId){
   };
 
   pc.ontrack = event=>{
-    const stream = event.streams[0];
-    if(stream){
+    // Some Android/Chrome WebRTC sessions deliver a track without a
+    // populated event.streams array. Keep one MediaStream per peer and
+    // add every incoming track to it.
+    let stream = remoteStreams.get(remoteId);
+
+    if(!stream){
+      stream = event.streams?.[0] || new MediaStream();
       remoteStreams.set(remoteId, stream);
-      renderRemoteVideos();
     }
+
+    if(
+      event.track &&
+      !stream.getTracks().some(track=>track.id === event.track.id)
+    ){
+      stream.addTrack(event.track);
+    }
+
+    renderRemoteVideos();
   };
 
   pc.onconnectionstatechange = ()=>{
