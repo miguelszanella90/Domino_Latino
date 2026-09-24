@@ -1801,7 +1801,7 @@ body.in-room .menu-nav-actions{display:flex!important;}
     Generar nombre/código automáticamente
   </label>
   <input id="customRoomName" maxlength="40" placeholder="Nombre de la sala (ej. Viernes de Dominó)" disabled>
-  <div class="small">El enlace seguirá usando un código privado aunque pongas un nombre.</div>
+  <div class="small">Los demás podrán entrar escribiendo este nombre o usando el código de la sala.</div>
 </div>
 
 <label>
@@ -1903,7 +1903,8 @@ Crear sala
 
 <input
   id="code"
-  placeholder="Código"
+  placeholder="Nombre o código de sala"
+  autocomplete="off"
 >
 
 <button onclick="join()">
@@ -2646,8 +2647,7 @@ async function join(){
         'code'
       )
       .value
-      .trim()
-      .toUpperCase();
+      .trim();
 
 
     if(
@@ -2655,7 +2655,7 @@ async function join(){
     ){
 
       return alert(
-        'Introduce el código de la sala'
+        'Introduce el nombre o código de la sala'
       );
 
     }
@@ -5270,7 +5270,7 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     if(!overlay||typeof game==='undefined'||!game)return;
     const ended=game.status==='finished'||game.status==='match_finished';
     if(!ended){ overlay.hidden=true; roundOverlayKey=null; return; }
-    const key=`${game.code}:${game.roundNumber}:${game.status}`;
+    const key=`${game.code}:${game.round}:${game.status}`;
     if(roundOverlayKey===key)return;
     roundOverlayKey=key;
     document.getElementById('roundOverlayTitle').textContent =
