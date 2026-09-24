@@ -2260,13 +2260,39 @@ let micEnabled = false;
 const peerConnections = new Map();
 const remoteStreams = new Map();
 const handledSignalIds = new Set();
+const pendingIceCandidates = new Map();
 
-const RTC_CONFIG = {
+let RTC_CONFIG = {
   iceServers:[
     { urls:'stun:stun.l.google.com:19302' },
     { urls:'stun:stun1.l.google.com:19302' }
   ]
 };
+
+let rtcConfigLoaded = false;
+let rtcConfigPromise = null;
+
+async function loadRtcConfig(){
+  if(rtcConfigLoaded) return RTC_CONFIG;
+  if(rtcConfigPromise) return rtcConfigPromise;
+
+  rtcConfigPromise = (async()=>{
+    try{
+      const cfg = await api({ action:'rtcConfig' });
+      if(cfg?.iceServers?.length){
+        RTC_CONFIG = cfg;
+      }
+    }catch(e){
+      console.warn('No se pudo cargar TURN; se usará STUN como respaldo.', e);
+    }finally{
+      rtcConfigLoaded = true;
+      rtcConfigPromise = null;
+    }
+    return RTC_CONFIG;
+  })();
+
+  return rtcConfigPromise;
+}
 
 
 /* =========================
@@ -2646,8 +2672,7 @@ async function join(){
         'code'
       )
       .value
-      .trim()
-      .toUpperCase();
+      .trim();
 
 
     if(
@@ -2655,7 +2680,7 @@ async function join(){
     ){
 
       return alert(
-        'Introduce el código de la sala'
+        'Introduce el nombre o código de la sala'
       );
 
     }
@@ -2836,8 +2861,8 @@ async function refresh(){
 
 
       render();
-      handleSignals();
-      connectToHumanPlayers();
+      await handleSignals();
+      await connectToHumanPlayers();
 
     }
 
@@ -3217,6 +3242,8 @@ function renderChat(){
 async function ensureLocalMedia(){
   if(localStream) return localStream;
 
+  await loadRtcConfig();
+
   if(!navigator.mediaDevices?.getUserMedia){
     throw new Error('Este navegador no permite cámara/micrófono.');
   }
@@ -3416,6 +3443,8 @@ async function makeOffer(remoteId){
 async function connectToHumanPlayers(){
   if(!localStream || !game) return;
 
+  await loadRtcConfig();
+
   for(const player of humanPeers()){
     /*
       Only one side initiates. This avoids both browsers creating offers
@@ -3434,6 +3463,8 @@ async function connectToHumanPlayers(){
 async function handleSignals(){
   if(!game || !pid) return;
 
+  await loadRtcConfig();
+
   const signals = (game.signals || []).filter(
     signal => signal?.id && !handledSignalIds.has(signal.id)
   );
@@ -3450,6 +3481,12 @@ async function handleSignals(){
 
       if(signal.type === 'offer'){
         await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+
+        const queuedCandidates = pendingIceCandidates.get(remoteId) || [];
+        for(const candidate of queuedCandidates){
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+        pendingIceCandidates.delete(remoteId);
 
         if(localStream){
           const existing = pc.getSenders().map(sender=>sender.track).filter(Boolean);
@@ -3471,10 +3508,22 @@ async function handleSignals(){
 
       else if(signal.type === 'answer'){
         await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+
+        const queuedCandidates = pendingIceCandidates.get(remoteId) || [];
+        for(const candidate of queuedCandidates){
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+        pendingIceCandidates.delete(remoteId);
       }
 
       else if(signal.type === 'candidate' && signal.candidate){
-        await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+        if(pc.remoteDescription){
+          await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+        }else{
+          const queued = pendingIceCandidates.get(remoteId) || [];
+          queued.push(signal.candidate);
+          pendingIceCandidates.set(remoteId, queued);
+        }
       }
 
       else if(signal.type === 'hangup'){
@@ -5270,7 +5319,7 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
     if(!overlay||typeof game==='undefined'||!game)return;
     const ended=game.status==='finished'||game.status==='match_finished';
     if(!ended){ overlay.hidden=true; roundOverlayKey=null; return; }
-    const key=`${game.code}:${game.roundNumber}:${game.status}`;
+    const key=`${game.code}:${game.round}:${game.status}`;
     if(roundOverlayKey===key)return;
     roundOverlayKey=key;
     document.getElementById('roundOverlayTitle').textContent =
