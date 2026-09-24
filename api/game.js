@@ -1241,6 +1241,12 @@ function publicGame(
     difficulty:
       g.difficulty,
 
+    maxPlayers:
+      g.maxPlayers,
+
+    botCount:
+      g.botCount || 0,
+
     gameMode:
       g.gameMode ||
       'classic',
