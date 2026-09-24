@@ -39,6 +39,105 @@ function teamOf(index) {
   return index % 2 === 0 ? 'A' : 'B';
 }
 
+function ensureRotationData(g) {
+  g.waiting = Array.isArray(g.waiting) ? g.waiting : [];
+  g.individualScores = g.individualScores || {};
+  g.participantNames = g.participantNames || {};
+  g.rotationCursor = g.rotationCursor || { A: 0, B: 1 };
+
+  g.players.forEach(p => {
+    if (!p.isBot) {
+      if (g.individualScores[p.id] == null) {
+        g.individualScores[p.id] = 0;
+      }
+
+      g.participantNames[p.id] = p.name;
+    }
+  });
+
+  g.waiting.forEach(p => {
+    if (g.individualScores[p.id] == null) {
+      g.individualScores[p.id] = 0;
+    }
+
+    g.participantNames[p.id] = p.name;
+  });
+}
+
+function awardRotationRound(g, winnerTeam, points) {
+  if (g.gameMode !== 'rotation') return;
+
+  ensureRotationData(g);
+
+  g.players.forEach((p, i) => {
+    if (!p.isBot && teamOf(i) === winnerTeam) {
+      g.individualScores[p.id] =
+        (g.individualScores[p.id] || 0) + points;
+    }
+  });
+
+  g.pendingRotationTeam =
+    winnerTeam === 'A'
+      ? 'B'
+      : 'A';
+}
+
+function applyPendingRotation(g) {
+  if (
+    g.gameMode !== 'rotation' ||
+    !g.pendingRotationTeam ||
+    !g.waiting?.length
+  ) {
+    return;
+  }
+
+  ensureRotationData(g);
+
+  const loserTeam =
+    g.pendingRotationTeam;
+
+  const seats =
+    loserTeam === 'A'
+      ? [0, 2]
+      : [1, 3];
+
+  let seat =
+    g.rotationCursor[loserTeam];
+
+  if (!seats.includes(seat)) {
+    seat = seats[0];
+  }
+
+  const outgoing =
+    g.players[seat];
+
+  const incoming =
+    g.waiting.shift();
+
+  outgoing.hand = [];
+  incoming.hand = [];
+
+  g.players[seat] =
+    incoming;
+
+  g.waiting.push(
+    outgoing
+  );
+
+  g.rotationCursor[loserTeam] =
+    seats[0] === seat
+      ? seats[1]
+      : seats[0];
+
+  addHistory(
+    g,
+    `🔄 ${outgoing.name} sale de la mesa y entra ${incoming.name}`
+  );
+
+  g.pendingRotationTeam =
+    null;
+}
+
 function addHistory(g, text) {
   if (!g.history) {
     g.history = [];
@@ -349,7 +448,14 @@ function finishDominoRound(
     g.teamScores[winnerTeam] +=
       points;
 
+    awardRotationRound(
+      g,
+      winnerTeam,
+      points
+    );
+
     const done =
+      g.gameMode !== 'rotation' &&
       g.teamScores[winnerTeam] >=
       g.target;
 
@@ -447,7 +553,14 @@ function finishBlockedRound(g) {
     g.teamScores[winnerTeam] +=
       points;
 
+    awardRotationRound(
+      g,
+      winnerTeam,
+      points
+    );
+
     const done =
+      g.gameMode !== 'rotation' &&
       g.teamScores[winnerTeam] >=
       g.target;
 
@@ -776,6 +889,43 @@ function publicGame(
     code:
       g.code,
 
+    gameMode:
+      g.gameMode || 'classic',
+
+    waitingCount:
+      Array.isArray(g.waiting)
+        ? g.waiting.length
+        : 0,
+
+    isWaiting:
+      Array.isArray(g.waiting) &&
+      g.waiting.some(
+        p => p.id === playerId
+      ),
+
+    leaderboard:
+      g.gameMode === 'rotation'
+        ? Object.keys(
+            g.individualScores || {}
+          )
+            .map(id => ({
+              id,
+              name:
+                (g.participantNames || {})[id] ||
+                'Jugador',
+              score:
+                (g.individualScores || {})[id] ||
+                0,
+              isMe:
+                id === playerId
+            }))
+            .sort(
+              (a, b) =>
+                b.score - a.score ||
+                a.name.localeCompare(b.name)
+            )
+        : null,
+
     maxPlayers:
       g.maxPlayers,
 
@@ -825,8 +975,14 @@ function publicGame(
 
     humanPlayerIds:
       g.players
-        .filter(player => !player.isBot)
-        .map(player => player.id),
+        .filter(
+          player =>
+            !player.isBot
+        )
+        .map(
+          player =>
+            player.id
+        ),
 
     myIndex,
 
@@ -904,7 +1060,10 @@ async (req, res) => {
       const credential =
         process.env.METERED_TURN_CREDENTIAL;
 
-      if (!username || !credential) {
+      if (
+        !username ||
+        !credential
+      ) {
         return res
           .status(503)
           .json({
@@ -983,27 +1142,32 @@ async (req, res) => {
       const pid =
         id();
 
+      const gameMode =
+        b.gameMode === 'rotation'
+          ? 'rotation'
+          : 'classic';
+
       const maxPlayers =
-        Math.min(
-          4,
-          Math.max(
-            2,
-            Number(
-              b.maxPlayers
-            ) || 4
-          )
-        );
+        gameMode === 'rotation'
+          ? 4
+          : Math.min(
+              4,
+              Math.max(
+                2,
+                Number(b.maxPlayers) || 4
+              )
+            );
 
       const botCount =
-        Math.min(
-          maxPlayers - 1,
-          Math.max(
-            0,
-            Number(
-              b.botCount
-            ) || 0
-          )
-        );
+        gameMode === 'rotation'
+          ? 0
+          : Math.min(
+              maxPlayers - 1,
+              Math.max(
+                0,
+                Number(b.botCount) || 0
+              )
+            );
 
       const difficulty =
         [
@@ -1016,9 +1180,36 @@ async (req, res) => {
           ? b.botDifficulty
           : 'normal';
 
+      const playerName =
+        (
+          b.name ||
+          ''
+        ).trim() ||
+        'Jugador 1';
+
       const g = {
         code,
         host: pid,
+
+        gameMode,
+
+        waiting: [],
+
+        individualScores: {
+          [pid]: 0
+        },
+
+        participantNames: {
+          [pid]: playerName
+        },
+
+        rotationCursor: {
+          A: 0,
+          B: 1
+        },
+
+        pendingRotationTeam:
+          null,
 
         maxPlayers,
         botCount,
@@ -1038,11 +1229,7 @@ async (req, res) => {
             id: pid,
 
             name:
-              (
-                b.name ||
-                ''
-              ).trim() ||
-              'Jugador 1',
+              playerName,
 
             hand: [],
 
@@ -1124,6 +1311,10 @@ async (req, res) => {
           player =>
             player.id === b.playerId &&
             !player.isBot
+        ) ||
+        (g.waiting || []).find(
+          player =>
+            player.id === b.playerId
         );
 
       if (!sender) {
@@ -1279,8 +1470,8 @@ async (req, res) => {
       'join'
     ) {
       if (
-        g.status !==
-        'lobby'
+        g.status !== 'lobby' &&
+        g.gameMode !== 'rotation'
       ) {
         return res
           .status(400)
@@ -1300,22 +1491,10 @@ async (req, res) => {
             !player.isBot
         ).length;
 
-      if (
-        humanPlayers >=
-        humanSlots
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              'Todos los puestos humanos están ocupados'
-          });
-      }
-
       const pid =
         id();
 
-      g.players.push({
+      const newPlayer = {
         id: pid,
 
         name:
@@ -1323,16 +1502,72 @@ async (req, res) => {
             b.name ||
             ''
           ).trim() ||
-          `Jugador ${g.players.length + 1}`,
+          `Jugador ${
+            humanPlayers +
+            (g.waiting?.length || 0) +
+            1
+          }`,
 
         hand: [],
 
         isBot:
           false
-      });
+      };
 
-      g.message =
-        `${humanPlayers + 1}/${humanSlots} jugadores humanos conectados`;
+      if (
+        humanPlayers >=
+        humanSlots
+      ) {
+        if (
+          g.gameMode !==
+          'rotation'
+        ) {
+          return res
+            .status(400)
+            .json({
+              error:
+                'Todos los puestos humanos están ocupados'
+            });
+        }
+
+        ensureRotationData(g);
+
+        g.waiting.push(
+          newPlayer
+        );
+
+        g.individualScores[pid] =
+          g.individualScores[pid] ||
+          0;
+
+        g.participantNames[pid] =
+          newPlayer.name;
+
+        g.message =
+          `${newPlayer.name} entró a la cola · ${g.waiting.length} esperando`;
+
+      } else {
+        g.players.push(
+          newPlayer
+        );
+
+        if (
+          g.gameMode ===
+          'rotation'
+        ) {
+          ensureRotationData(g);
+
+          g.individualScores[pid] =
+            g.individualScores[pid] ||
+            0;
+
+          g.participantNames[pid] =
+            newPlayer.name;
+        }
+
+        g.message =
+          `${humanPlayers + 1}/${humanSlots} jugadores humanos conectados`;
+      }
 
       await save(g);
 
@@ -1459,6 +1694,8 @@ async (req, res) => {
               'La ronda todavía no ha terminado'
           });
       }
+
+      applyPendingRotation(g);
 
       prepareRound(g);
 
