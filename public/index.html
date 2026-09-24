@@ -3378,12 +3378,12 @@ function renderRemoteVideos(){
 
   container.innerHTML = '';
 
-  peers.forEach(player=>{
+  peers.forEach((player, cameraIndex)=>{
     const stream = remoteStreams.get(player.id);
     if(!stream) return;
 
     const wrap = document.createElement('div');
-    wrap.className = `remote-video-wrap ${seatClassForPlayerId(player.id)}`;
+    wrap.className = `remote-video-wrap ${seatClassForPlayerId(player.id)} mexican-camera-${cameraIndex % 7}`;
 
     const video = document.createElement('video');
     video.autoplay = true;
@@ -3804,7 +3804,7 @@ function renderMexicanBoard(){
     if(mtCanTarget(key)) el.onclick=()=>mtPlay(key);
     const title=key==='mexican'?'🚂 Tren Mexicano':`${player?.name||`Jugador ${owner+1}`}${player?.isMe?' (Tú)':''} · ${player?.handCount ?? 0} fichas`;
     const chain=arr.length?arr.map(t=>`<div class="mt-mini"><span>${pipHTML(t[0])}</span><span>${pipHTML(t[1])}</span></div>`).join(''):'<span class="mt-empty">Toca aquí para iniciar este tren</span>';
-    el.innerHTML=`<div class="mt-train-title">${title}</div><div class="mt-chain"><div class="mt-mini mt-engine"><span>${pipHTML(mt.engine ?? 12)}</span><span>${pipHTML(mt.engine ?? 12)}</span></div>${chain}</div>`;
+    el.innerHTML=`<div class="mt-train-title">${title}</div><div class="mt-chain ${arr.length?'has-pieces':'empty-train'}"><div class="mt-mini mt-engine"><span>${pipHTML(mt.engine ?? 12)}</span><span>${pipHTML(mt.engine ?? 12)}</span></div>${chain}</div>`;
     trains.appendChild(el);
   });
 
@@ -5639,13 +5639,20 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 
   // Safari/iPhone only allows Web Audio after a direct user gesture.
   // Do the unlock synchronously on the first touch/click anywhere in the app.
-  const unlock=function(){
+  const unlock=function(e){
+    // Do not pre-unlock on the music toggle itself: pointerdown followed by click
+    // could otherwise start and immediately switch the music off on desktop.
+    if(e?.target?.closest?.('#musicToggle')) return;
     if(musicOn) ensureMusicFromGesture();
   };
   document.addEventListener('touchstart',unlock,{passive:true,capture:true});
   document.addEventListener('pointerdown',unlock,{passive:true,capture:true});
-  document.addEventListener('click',unlock,{passive:true,capture:true});
   document.addEventListener('keydown',unlock,{capture:true});
+
+  // Read the visible selection immediately and make a best-effort desktop start.
+  // Browsers that require a gesture will simply start on the first interaction above.
+  musicChoice=Number(document.getElementById('musicChoice')?.value)||1;
+  setTimeout(()=>{ if(musicOn) ensureMusic(); },0);
 
   document.addEventListener('visibilitychange',function(){
     if(!document.hidden && musicOn && unlocked) ensureMusic();
@@ -6027,5 +6034,331 @@ body.mexican-mode .mt-mini .mt-high-number>b{font-size:11px!important}
   body.mexican-mode .mt-mini span{width:18px!important;font-size:8px!important}
   body.mexican-mode .mt-mini .mt-high-number>b{font-size:9px!important}
   body.mexican-mode .mt-empty{font-size:8px!important;padding:4px!important;white-space:nowrap!important}
+}
+</style>
+
+<style id="mexican-train-v5-layout-fix">
+/* SOLO Tren Mexicano: tablero compacto, centrado y drawers accesibles. */
+body.mexican-mode .mt-board{
+  width:100%!important;
+  max-width:100%!important;
+  margin:0 auto!important;
+  padding:6px 10px!important;
+  box-sizing:border-box!important;
+  align-items:center!important;
+}
+body.mexican-mode .mt-player-info,
+body.mexican-mode .mt-trains{
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}
+body.mexican-mode .mt-player-chip{
+  text-align:center!important;
+}
+body.mexican-mode .mt-player-chip strong,
+body.mexican-mode .mt-player-chip span{
+  text-align:center!important;
+}
+body.mexican-mode .mt-train{
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-align:center!important;
+}
+body.mexican-mode .mt-train-title{
+  width:100%!important;
+  justify-content:center!important;
+  text-align:center!important;
+}
+body.mexican-mode .mt-chain{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x!important;
+  overscroll-behavior-x:contain!important;
+  box-sizing:border-box!important;
+}
+body.mexican-mode .mt-chain:not(.has-pieces){
+  justify-content:center!important;
+}
+body.mexican-mode .mt-empty{
+  text-align:center!important;
+}
+
+/* El tirador Jugadas/Chat debe verse también en iPhone landscape (>700px). */
+@media (max-width:950px){
+  body.mexican-mode.in-room .social-panel{
+    display:flex!important;
+    position:fixed!important;
+    right:0!important;
+    left:auto!important;
+    top:50%!important;
+    bottom:auto!important;
+    width:min(82vw,340px)!important;
+    height:min(56dvh,390px)!important;
+    z-index:2500!important;
+    transform:translate(100%,-50%)!important;
+    transition:transform .22s ease!important;
+    overflow:visible!important;
+  }
+  body.mexican-mode.in-room .social-panel.mobile-open{
+    transform:translate(0,-50%)!important;
+  }
+  body.mexican-mode .social-drawer-toggle{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:.82!important;
+    position:absolute!important;
+    left:-28px!important;
+    right:auto!important;
+    top:50%!important;
+    width:28px!important;
+    height:62px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    z-index:2600!important;
+    transform:translateY(-50%)!important;
+    pointer-events:auto!important;
+  }
+}
+
+/* iPhone vertical: dos columnas compactas. Así la mesa completa usa el ancho
+   disponible y no queda una segunda mitad fuera de pantalla. */
+@media (max-width:700px) and (orientation:portrait){
+  body.mexican-mode .board{
+    left:0!important;
+    right:0!important;
+    width:100%!important;
+    max-width:100vw!important;
+    padding:0 4px!important;
+    overflow-x:hidden!important;
+    box-sizing:border-box!important;
+  }
+  body.mexican-mode .mt-board{
+    width:100%!important;
+    padding:3px 4px!important;
+    gap:3px!important;
+  }
+  body.mexican-mode .mt-player-info{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:2px!important;
+  }
+  body.mexican-mode .mt-player-chip{
+    min-height:20px!important;
+    padding:2px 4px!important;
+    gap:3px!important;
+  }
+  body.mexican-mode .mt-player-chip strong{font-size:8px!important}
+  body.mexican-mode .mt-player-chip span{font-size:7px!important}
+  body.mexican-mode .mt-trains{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:3px!important;
+    width:100%!important;
+  }
+  body.mexican-mode .mt-train{
+    min-height:55px!important;
+    height:55px!important;
+    padding:3px!important;
+    border-radius:8px!important;
+  }
+  body.mexican-mode .mt-train-title{
+    min-height:13px!important;
+    margin:0 0 2px!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  body.mexican-mode .mt-chain{
+    min-height:31px!important;
+    height:31px!important;
+    gap:1px!important;
+    padding:1px!important;
+  }
+  body.mexican-mode .mt-mini{height:28px!important}
+  body.mexican-mode .mt-mini span{width:20px!important}
+  body.mexican-mode .mt-mini .mt-high-number>b{font-size:9px!important}
+  body.mexican-mode .mt-empty{
+    font-size:7px!important;
+    padding:3px!important;
+    white-space:nowrap!important;
+  }
+}
+
+/* Landscape: el menú izquierdo se repliega y el botón ☰ siempre puede abrirlo.
+   Esto corrige una regla antigua al final del archivo que lo forzaba oculto. */
+@media (max-width:950px) and (orientation:landscape) and (max-height:500px){
+  body.mexican-mode.in-room .app,
+  body.mexican-mode.in-room .app.sidebar-collapsed{
+    grid-template-columns:0 minmax(0,1fr)!important;
+  }
+  body.mexican-mode.in-room .side{
+    display:block!important;
+    position:fixed!important;
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    width:min(330px,78vw)!important;
+    min-width:min(330px,78vw)!important;
+    max-width:78vw!important;
+    height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    z-index:2400!important;
+    transform:translateX(0)!important;
+    pointer-events:auto!important;
+    transition:transform .22s ease!important;
+    box-shadow:8px 0 24px #0008!important;
+  }
+  body.mexican-mode.in-room .side.closed{
+    display:block!important;
+    width:min(330px,78vw)!important;
+    min-width:min(330px,78vw)!important;
+    transform:translateX(-105%)!important;
+    pointer-events:none!important;
+    box-shadow:none!important;
+  }
+  body.mexican-mode.in-room .main .toggle{
+    display:flex!important;
+    position:fixed!important;
+    left:8px!important;
+    top:max(8px,env(safe-area-inset-top))!important;
+    z-index:2450!important;
+  }
+  body.mexican-mode .mt-trains{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4px!important;
+  }
+  body.mexican-mode .mt-train{
+    min-height:54px!important;
+    height:54px!important;
+    padding:3px 5px!important;
+  }
+  body.mexican-mode .mt-train-title{
+    justify-content:center!important;
+    text-align:center!important;
+    font-size:9px!important;
+    min-height:12px!important;
+    margin-bottom:1px!important;
+  }
+  body.mexican-mode .mt-chain{
+    min-height:32px!important;
+    height:32px!important;
+  }
+}
+</style>
+
+
+<style id="mexican-train-v6-desktop-polish">
+/* SOLO Tren Mexicano: cabecera sin solapamientos, cámaras en esquinas y sin puntos/scrollbars extraños. */
+body.mexican-mode.in-room .main{
+  grid-template-rows:72px minmax(0,1fr) 88px 92px!important;
+}
+body.mexican-mode.in-room .top{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+  gap:4px!important;
+  min-height:72px!important;
+  height:72px!important;
+  padding:5px 58px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+body.mexican-mode.in-room #status{
+  display:block!important;
+  max-width:100%!important;
+  font-size:14px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+body.mexican-mode.in-room #subStatus{
+  display:block!important;
+  margin:0!important;
+  font-size:10px!important;
+  line-height:1!important;
+}
+body.mexican-mode.in-room .score-bar{
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0 2px!important;
+  justify-content:center!important;
+  gap:4px!important;
+  flex-wrap:nowrap!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scrollbar-width:none!important;
+  font-size:9px!important;
+  box-sizing:border-box!important;
+}
+body.mexican-mode.in-room .score-bar::-webkit-scrollbar{display:none!important}
+body.mexican-mode.in-room .score-player{padding:3px 7px!important;flex:0 0 auto!important}
+body.mexican-mode.in-room .score-target{flex:0 0 auto!important;font-size:9px!important}
+
+/* Esos puntos negros eran artefactos de los scrollbars horizontales compactos. */
+body.mexican-mode .mt-chain{scrollbar-width:none!important}
+body.mexican-mode .mt-chain::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+body.mexican-mode .mt-player-chip::before,
+body.mexican-mode .mt-player-chip::after,
+body.mexican-mode .mt-train::before,
+body.mexican-mode .mt-train::after{box-shadow:none!important}
+
+/* Las cámaras del Tren Mexicano viven en el perímetro, no encima de los trenes. */
+body.mexican-mode .player-video,
+body.mexican-mode .remote-video-wrap{
+  position:absolute!important;
+  width:86px!important;
+  height:58px!important;
+  z-index:80!important;
+  transform:none!important;
+}
+body.mexican-mode .player-video.local{left:8px!important;right:auto!important;bottom:8px!important;top:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-0{left:8px!important;right:auto!important;top:8px!important;bottom:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-1{right:8px!important;left:auto!important;top:8px!important;bottom:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-2{right:8px!important;left:auto!important;bottom:8px!important;top:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-3{left:102px!important;right:auto!important;top:8px!important;bottom:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-4{right:102px!important;left:auto!important;top:8px!important;bottom:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-5{left:102px!important;right:auto!important;bottom:8px!important;top:auto!important}
+body.mexican-mode .remote-video-wrap.mexican-camera-6{right:102px!important;left:auto!important;bottom:8px!important;top:auto!important}
+body.mexican-mode .remote-video-name{font-size:8px!important;top:calc(100% + 2px)!important;bottom:auto!important}
+body.mexican-mode .media-controls{bottom:8px!important;z-index:90!important}
+
+@media(max-width:950px){
+  body.mexican-mode.in-room .main{grid-template-rows:78px minmax(0,1fr) 82px 56px!important}
+  body.mexican-mode.in-room .top{height:78px!important;min-height:78px!important;padding:max(7px,env(safe-area-inset-top)) 48px 4px!important;gap:3px!important}
+  body.mexican-mode.in-room #status{font-size:13px!important}
+  body.mexican-mode.in-room #subStatus{font-size:9px!important}
+  body.mexican-mode.in-room .score-bar{font-size:8px!important;justify-content:flex-start!important;padding:0 4px!important}
+  body.mexican-mode.in-room .score-player{padding:3px 5px!important}
+  body.mexican-mode .player-video,body.mexican-mode .remote-video-wrap{width:58px!important;height:42px!important}
+  body.mexican-mode .player-video.local{left:5px!important;bottom:38px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-0{left:5px!important;top:5px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-1{right:5px!important;top:5px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-2{right:5px!important;bottom:38px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-3{left:68px!important;top:5px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-4{right:68px!important;top:5px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-5{left:68px!important;bottom:38px!important}
+  body.mexican-mode .remote-video-wrap.mexican-camera-6{right:68px!important;bottom:38px!important}
+}
+@media(max-width:950px) and (orientation:landscape) and (max-height:500px){
+  body.mexican-mode.in-room .main{grid-template-rows:58px minmax(0,1fr) 64px 50px!important}
+  body.mexican-mode.in-room .top{height:58px!important;min-height:58px!important;padding:3px 50px!important;gap:2px!important}
+  body.mexican-mode.in-room #status{font-size:11px!important}
+  body.mexican-mode.in-room #subStatus{font-size:8px!important}
+  body.mexican-mode.in-room .score-bar{font-size:7px!important}
+  body.mexican-mode.in-room .score-player{padding:2px 4px!important}
 }
 </style>
