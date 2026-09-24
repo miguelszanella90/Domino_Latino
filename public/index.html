@@ -5376,6 +5376,33 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 
 
 <style id="domino-music-style">
+  #musicChoiceWrap{
+    position:fixed;
+    left:10px;
+    bottom:48px;
+    z-index:1200;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    border:1px solid rgba(255,255,255,.24);
+    border-radius:999px;
+    padding:6px 9px;
+    background:rgba(8,35,23,.82);
+    color:#fff;
+    font:700 11px/1 system-ui,sans-serif;
+    box-shadow:0 4px 14px rgba(0,0,0,.2);
+    backdrop-filter:blur(6px);
+  }
+  #musicChoice{
+    border:0;
+    border-radius:999px;
+    padding:3px 5px;
+    background:#fff;
+    color:#163629;
+    font-weight:800;
+    cursor:pointer;
+  }
+  body:not(.in-room) #musicChoiceWrap{display:none}
   #musicToggle{
     position:fixed;
     left:10px;
@@ -5393,13 +5420,27 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
   }
   body:not(.in-room) #musicToggle{display:none}
   @media (max-width:700px){
+    #musicChoiceWrap{left:6px;bottom:38px;padding:5px 7px;font-size:9px}
+    #musicChoice{font-size:9px;padding:2px 4px}
     #musicToggle{left:6px;bottom:5px;padding:6px 8px;font-size:9px}
   }
   @media (max-width:950px) and (orientation:landscape) and (max-height:500px){
+    #musicChoiceWrap{left:42px;bottom:34px;padding:4px 6px;font-size:8px}
+    #musicChoice{font-size:8px;padding:2px 3px}
     #musicToggle{left:42px;bottom:4px;padding:5px 7px;font-size:8px}
   }
 </style>
 
+<div id="musicChoiceWrap">
+  <label for="musicChoice">🎶 Música</label>
+  <select id="musicChoice" title="Escoger música">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+  </select>
+</div>
 <button id="musicToggle" type="button" aria-pressed="true" title="Activar o desactivar música">🎵 Música ON</button>
 
 <script id="domino-background-music">
@@ -5412,8 +5453,35 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 
   // Short original Latin/caribbean-inspired loop synthesized in the browser.
   // No external audio file or copyrighted recording is used.
-  const bass = [110,110,146.83,110,164.81,146.83,130.81,98];
-  const lead = [440,523.25,587.33,523.25,659.25,587.33,523.25,440];
+  let musicChoice = 1;
+
+  const songs = {
+    1:{
+      bass:[110,110,146.83,110,164.81,146.83,130.81,98],
+      lead:[440,523.25,587.33,523.25,659.25,587.33,523.25,440],
+      beat:360, wave:'sine'
+    },
+    2:{
+      bass:[130.81,164.81,196,164.81,146.83,174.61,196,130.81],
+      lead:[523.25,659.25,783.99,659.25,587.33,698.46,783.99,523.25],
+      beat:315, wave:'triangle'
+    },
+    3:{
+      bass:[98,123.47,146.83,123.47,110,130.81,164.81,110],
+      lead:[392,493.88,587.33,493.88,440,523.25,659.25,440],
+      beat:405, wave:'sine'
+    },
+    4:{
+      bass:[146.83,146.83,174.61,196,174.61,164.81,146.83,123.47],
+      lead:[587.33,698.46,783.99,880,783.99,659.25,587.33,493.88],
+      beat:285, wave:'square'
+    },
+    5:{
+      bass:[110,164.81,146.83,196,174.61,146.83,130.81,98],
+      lead:[659.25,587.33,523.25,783.99,698.46,587.33,523.25,440],
+      beat:340, wave:'triangle'
+    }
+  };
 
   function tone(freq, start, duration, volume, type='sine'){
     if(!ctx || !master) return;
@@ -5446,11 +5514,12 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
 
   function tick(){
     if(!musicOn || !ctx || ctx.state!=='running') return;
+    const song=songs[musicChoice] || songs[1];
     const now=ctx.currentTime+.03;
-    const i=step%bass.length;
+    const i=step%song.bass.length;
 
-    tone(bass[i],now,.28,.026,'triangle');
-    if(step%2===0) tone(lead[i],now+.04,.16,.012,'sine');
+    tone(song.bass[i],now,.28,.026,'triangle');
+    if(step%2===0) tone(song.lead[i],now+.04,.16,.012,song.wave);
     percussion(now);
 
     step++;
@@ -5459,7 +5528,8 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
   function startLoop(){
     if(timer) return;
     tick();
-    timer=setInterval(tick,360);
+    const song=songs[musicChoice] || songs[1];
+    timer=setInterval(tick,song.beat);
   }
 
   async function ensureMusic(){
@@ -5502,6 +5572,13 @@ body.my-turn-now .hand-zone{animation:myTurnPulse 1s ease-in-out 2}
   };
 
   document.getElementById('musicToggle')?.addEventListener('click',window.toggleDominoMusic);
+
+  document.getElementById('musicChoice')?.addEventListener('change',async function(){
+    musicChoice=Number(this.value)||1;
+    step=0;
+    stopLoop();
+    if(musicOn) await ensureMusic();
+  });
 
   // Browsers require a user gesture before sound can begin.
   const unlock=()=>{
