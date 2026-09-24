@@ -3374,7 +3374,41 @@ async function ensureLocalMedia(){
   video.hidden = false;
 
   updateMediaButtons();
+
+  // If a WebRTC connection was created before this player enabled
+  // camera/microphone, attach the new tracks and renegotiate it.
+  // This is especially important when one player enables camera first
+  // and the second player enables it later on another device.
+  for(const player of humanPeers()){
+    const pc = createPeerConnection(player.id);
+    const existingTrackIds = new Set(
+      pc.getSenders()
+        .map(sender => sender.track?.id)
+        .filter(Boolean)
+    );
+
+    localStream.getTracks().forEach(track=>{
+      if(!existingTrackIds.has(track.id)){
+        pc.addTrack(track, localStream);
+      }
+    });
+  }
+
   await connectToHumanPlayers();
+
+  // Existing peer connections are skipped by connectToHumanPlayers(),
+  // so explicitly renegotiate them after adding local media.
+  for(const player of humanPeers()){
+    const pc = peerConnections.get(player.id);
+    if(!pc) continue;
+    try{
+      if(pc.signalingState === 'stable'){
+        await makeOffer(player.id);
+      }
+    }catch(e){
+      console.error('WebRTC renegotiation error', e);
+    }
+  }
 
   return localStream;
 }
@@ -3473,7 +3507,11 @@ function renderRemoteVideos(){
     const video = document.createElement('video');
     video.autoplay = true;
     video.playsInline = true;
+    video.muted = false;
     video.srcObject = stream;
+    video.addEventListener('loadedmetadata', ()=>{
+      video.play().catch(()=>{});
+    }, {once:true});
 
     const label = document.createElement('div');
     label.className = 'remote-video-name';
@@ -5228,15 +5266,37 @@ function toggleMusic(on){
     const index=Number(tile.dataset.serverIndex);
     if(!Number.isInteger(index) || index<0) return;
     const t=e.touches[0];
-    const ghost=tile.cloneNode(true); ghost.classList.add('drag-ghost');
-    ghost.style.left=t.clientX+'px'; ghost.style.top=t.clientY+'px';
-    document.body.appendChild(ghost);
-    drag={index,ghost,startX:t.clientX,startY:t.clientY};
-    document.body.classList.add('dragging-domino');
+
+    // A simple tap only selects the domino. Do not create the floating
+    // drag copy until the finger actually moves far enough.
+    drag={
+      index,
+      ghost:null,
+      sourceTile:tile,
+      startX:t.clientX,
+      startY:t.clientY
+    };
   },{passive:true});
+
   document.addEventListener('touchmove',function(e){
     if(!drag || e.touches.length!==1) return;
-    const t=e.touches[0]; drag.ghost.style.left=t.clientX+'px'; drag.ghost.style.top=t.clientY+'px';
+    const t=e.touches[0];
+    const moved=Math.hypot(t.clientX-drag.startX,t.clientY-drag.startY);
+
+    if(!drag.ghost && moved>14){
+      const ghost=drag.sourceTile.cloneNode(true);
+      ghost.classList.add('drag-ghost');
+      ghost.style.left=t.clientX+'px';
+      ghost.style.top=t.clientY+'px';
+      document.body.appendChild(ghost);
+      drag.ghost=ghost;
+      document.body.classList.add('dragging-domino');
+    }
+
+    if(drag.ghost){
+      drag.ghost.style.left=t.clientX+'px';
+      drag.ghost.style.top=t.clientY+'px';
+    }
   },{passive:true});
   document.addEventListener('touchend',function(e){
     if(!drag) return;
