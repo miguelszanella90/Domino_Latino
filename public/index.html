@@ -3635,6 +3635,11 @@ function pipHTML(
   };
 
 
+  if(number >= 8 && number <= 12 && game?.gameMode === 'mexican'){
+    const icons={8:'★',9:'●',10:'◆',11:'✦',12:'♛'};
+    return `<span class="mt-high-pips mt-value-${number}" aria-label="${number}">${'<i></i>'.repeat(number)}<em>${icons[number]||'•'}</em></span>`;
+  }
+
   if(number > 6){ return `<b class="pip-number">${number}</b>`; }
 
   return (
@@ -3762,18 +3767,62 @@ async function mtPlay(train){
   catch(e){alert(e.message);}
 }
 function renderMexicanBoard(){
-  const board=document.getElementById('board'); const mt=game.mexicanTrain||{}; board.innerHTML='';
-  const wrap=document.createElement('div');wrap.className='mt-board';
-  wrap.innerHTML=`<div class="mt-station"><span>ESTACIÓN</span><strong>${mt.engine}|${mt.engine}</strong><small>Ronda ${(mt.roundIndex??0)+1}/13</small></div>`;
-  const trains=document.createElement('div');trains.className='mt-trains';
-  const keys=['mexican',...(game.players||[]).map((_,i)=>`p${i}`)];
-  keys.forEach(key=>{const owner=key==='mexican'?-1:Number(key.slice(1));const arr=mt.trains?.[key]||[];const el=document.createElement('div');el.className='mt-train'+(owner>=0&&mt.open?.[owner]?' open':'')+(mt.pendingDouble===key?' mt-pending':'')+(mtCanTarget(key)?' allowed':'');
-    el.onclick=()=>{if(mtCanTarget(key))mtPlay(key)};
-    const chain=arr.length?arr.map(t=>`<div class="mt-mini"><span>${t[0]}</span><span>${t[1]}</span></div>`).join(''):'<span class="mt-empty">Toca aquí para iniciar este tren</span>';
-    el.innerHTML=`<div class="mt-train-title">${mtTrainLabel(key)}</div><div class="mt-chain"><div class="mt-mini mt-engine"><span>${mt.engine}</span><span>${mt.engine}</span></div>${chain}</div>`;trains.appendChild(el);});
-  wrap.appendChild(trains);board.appendChild(wrap);
-}
+  const board=document.getElementById('board');
+  const mt=game.mexicanTrain||{};
+  board.innerHTML='';
 
+  const wrap=document.createElement('div');
+  wrap.className='mt-board';
+  wrap.innerHTML=`<div class="mt-station"><span>ESTACIÓN</span><strong>${mt.engine ?? 12}|${mt.engine ?? 12}</strong><small>Ronda ${Math.max(1,(mt.roundIndex??-1)+1)}/13</small></div>`;
+
+  const info=document.createElement('div');
+  info.className='mt-player-info';
+  const realPlayers=(game.players||[]);
+  let displayPlayers=realPlayers.map((p,i)=>({name:p.name,isMe:p.isMe,index:i,handCount:p.handCount,score:p.score,isBot:p.isBot,placeholder:false}));
+
+  // En el lobby mostramos también los bots que entrarán al pulsar Iniciar partida.
+  if(game.status==='lobby'){
+    const existingBots=displayPlayers.filter(p=>p.isBot).length;
+    const configuredBots=Math.max(0,Number(game.botCount||0));
+    for(let n=existingBots+1;n<=configuredBots;n++){
+      displayPlayers.push({name:`Bot ${n}`,isMe:false,index:null,handCount:null,score:0,isBot:true,placeholder:true});
+    }
+  }
+
+  info.innerHTML=displayPlayers.map(p=>`<div class="mt-player-chip${p.isMe?' me':''}${p.placeholder?' waiting':''}"><strong>${p.name}${p.isMe?' (Tú)':''}</strong><span>${p.placeholder?'🤖 listo al iniciar':`🁣 ${p.handCount ?? 0} fichas · ${Number(p.score||0)} pts`}</span></div>`).join('');
+  wrap.appendChild(info);
+
+  const trains=document.createElement('div');
+  trains.className='mt-trains';
+  const keys=['mexican',...realPlayers.map((_,i)=>`p${i}`)];
+  keys.forEach(key=>{
+    const owner=key==='mexican'?-1:Number(key.slice(1));
+    const arr=mt.trains?.[key]||[];
+    const player=owner>=0?realPlayers[owner]:null;
+    const el=document.createElement('div');
+    el.className='mt-train'+(owner>=0&&mt.open?.[owner]?' open':'')+(mt.pendingDouble===key?' mt-pending':'')+(mtCanTarget(key)?' allowed':'');
+    if(mtCanTarget(key)) el.onclick=()=>mtPlay(key);
+    const title=key==='mexican'?'🚂 Tren Mexicano':`${player?.name||`Jugador ${owner+1}`}${player?.isMe?' (Tú)':''} · ${player?.handCount ?? 0} fichas`;
+    const chain=arr.length?arr.map(t=>`<div class="mt-mini"><span>${pipHTML(t[0])}</span><span>${pipHTML(t[1])}</span></div>`).join(''):'<span class="mt-empty">Toca aquí para iniciar este tren</span>';
+    el.innerHTML=`<div class="mt-train-title">${title}</div><div class="mt-chain"><div class="mt-mini mt-engine"><span>${pipHTML(mt.engine ?? 12)}</span><span>${pipHTML(mt.engine ?? 12)}</span></div>${chain}</div>`;
+    trains.appendChild(el);
+  });
+
+  // Vista previa de los trenes de bots antes de iniciar.
+  if(game.status==='lobby'){
+    const configuredBots=Math.max(0,Number(game.botCount||0));
+    const existingBots=realPlayers.filter(p=>p.isBot).length;
+    for(let n=existingBots+1;n<=configuredBots;n++){
+      const el=document.createElement('div');
+      el.className='mt-train mt-preview';
+      el.innerHTML=`<div class="mt-train-title">Bot ${n} · fichas al iniciar</div><div class="mt-chain"><span class="mt-empty">🤖 Se añadirá al iniciar la partida</span></div>`;
+      trains.appendChild(el);
+    }
+  }
+
+  wrap.appendChild(trains);
+  board.appendChild(wrap);
+}
 function renderBoard(){
 
   if(game?.gameMode==='mexican'){ renderMexicanBoard(); return; }
@@ -5850,4 +5899,39 @@ body.mexican-mode .board{left:2%!important;right:2%!important;top:3%!important;b
 body.mexican-mode .tile{transform:scale(.82);margin:-3px}
 body.mexican-mode .back-tile{transform:scale(.72);margin:-5px}
 @media(max-width:700px){.mt-trains{grid-template-columns:1fr}.mt-board{padding:4px;gap:5px}.mt-station{width:58px;height:58px}.mt-station strong{font-size:16px}.mt-train{padding:4px;min-height:45px}.mt-mini{height:25px}.mt-mini span{width:19px;font-size:9px}body.mexican-mode .hand{gap:0!important}body.mexican-mode .tile{transform:scale(.70);margin:-8px}}
+
+
+/* Mexican Train UX v2: 2-8 jugadores, fichas 8-12 por puntos */
+body.mexican-mode #start{
+  position:fixed!important;
+  left:50%!important;
+  bottom:78px!important;
+  transform:translateX(-50%)!important;
+  z-index:1200!important;
+  min-width:220px!important;
+  padding:13px 22px!important;
+  border:3px solid rgba(255,255,255,.7)!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.38)!important;
+}
+.mt-player-info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:100%}
+.mt-player-chip{background:rgba(0,45,35,.78);border:1px solid rgba(255,255,255,.18);border-radius:9px;padding:5px 7px;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px;color:#fff}
+.mt-player-chip strong{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mt-player-chip span{font-size:9px;white-space:nowrap;opacity:.9}.mt-player-chip.me{outline:2px solid #ffd166}.mt-player-chip.waiting{opacity:.72}
+.mt-high-pips{position:relative!important;width:100%!important;height:100%!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;grid-auto-rows:1fr!important;align-items:center!important;justify-items:center!important;padding:2px!important;box-sizing:border-box!important}
+.mt-high-pips>i{display:block!important;width:4px!important;height:4px!important;border-radius:50%!important;background:currentColor!important;position:static!important}
+.mt-high-pips>em{position:absolute!important;right:1px!important;bottom:-1px!important;font-style:normal!important;font-size:6px!important;line-height:1!important;color:currentColor!important;background:#fff!important;border-radius:50%!important;padding:1px!important}
+.mt-value-8{color:#e4572e!important}.mt-value-9{color:#7b2cbf!important}.mt-value-10{color:#0077b6!important}.mt-value-11{color:#2a9d8f!important}.mt-value-12{color:#c1121f!important}
+.mt-mini .mt-high-pips>i{width:3px!important;height:3px!important}.mt-mini .mt-high-pips>em{font-size:5px!important}
+body.mexican-mode .mt-train-title{display:flex;align-items:center;min-height:18px}
+body.mexican-mode .mt-preview{opacity:.6;cursor:default!important}
+@media(max-width:700px){
+  body.mexican-mode #start{bottom:72px!important;min-width:190px!important;font-size:14px!important;padding:11px 16px!important}
+  .mt-player-info{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
+  .mt-player-chip{padding:3px 5px;border-radius:7px}.mt-player-chip strong{font-size:9px}.mt-player-chip span{font-size:8px}
+  body.mexican-mode .mt-board{gap:4px!important}
+  body.mexican-mode .mt-trains{gap:4px!important}
+  body.mexican-mode .mt-train{min-height:40px!important;border-radius:9px!important}
+  body.mexican-mode .mt-train-title{font-size:10px!important;margin-bottom:2px!important}
+  body.mexican-mode .mt-chain{min-height:28px!important}
+  .mt-high-pips>i{width:3px!important;height:3px!important}.mt-high-pips>em{font-size:5px!important}
+}
 </style>
